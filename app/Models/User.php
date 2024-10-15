@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_admin'
     ];
 
     /**
@@ -42,4 +43,16 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function getPurchaseCartOrCreate(){
+        $purchase_cart = $this->purchase_cart;
+        if(!$purchase_cart){
+            $purchase_cart = Cart::create([
+                'user_id' => $this->id,
+                'cart_type' => Cart::typeIndex(Cart::PURCHASE)
+            ]);
+        }
+
+        return $purchase_cart;
+    }
 }

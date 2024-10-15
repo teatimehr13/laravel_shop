@@ -4,15 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\Log;
 
 class Product extends Model
 {
     use HasFactory;
     protected $fillable = ['name', 'image', 'description', 'published_status', 'subcategory_id'];
 
-    const DISABLED = 'disabled';
-    const ENABLED = 'enabled';
+    const DISABLED = 'disable';
+    const ENABLED = 'enable';
     const DRAFT = 'draft';
 
     const published_statuses = [

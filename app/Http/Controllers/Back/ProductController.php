@@ -11,6 +11,7 @@ use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -107,7 +108,7 @@ class ProductController extends Controller
             }
 
             //更新product和product_options
-            if($product->update($validate_data)){
+            if ($product->update($validate_data)) {
                 $this->updateProductOptions($product, $validate_data);
             }
             return response()->json($product, 201); // 回傳成功創建的產品資料
@@ -136,17 +137,21 @@ class ProductController extends Controller
 
     private function updateProductOptions($product, $validate_data)
     {
+        // Log::info($product);
         //拿到該product所關聯的所有product_options的id
         //將collection轉成php array
         $productOptionsIdsShouldBeRemove = $product->product_options->map(function ($product_option) {
             return $product_option->id;
-        })->toArray(); 
+        })->toArray();
         // return $productOptionsIds;
+        // Log::info($productOptionsIdsShouldBeRemove);
 
         //$validate_data['product_options']會拿到 product_options[1][name]...等 
+        // Log::info($validate_data['product_options']);
         if (isset($validate_data['product_options'])) {
             $product_options_data = $validate_data['product_options'];
             $new_product_options = [];
+            // Log::info('151', $product_options_data);
 
             foreach ($product_options_data as $id => $product_option_data) {
                 $validator = Validator::make($product_option_data, [
@@ -158,7 +163,9 @@ class ProductController extends Controller
                     'published_status' => 'integer'
                 ]);
 
+
                 if (!$validator->fails()) {
+
                     //驗證沒問題時先檢查圖片
                     if (isset($product_option_data['image'])) {
                         //隨機數字
@@ -174,16 +181,20 @@ class ProductController extends Controller
                     }
 
                     //新的dom走if，原本存在的走else
+                    //product_options[new_1][name]
                     if (strpos($id, 'new_') !== false) {
+                        // Log::info(123);
+                        // Log::info($product_option_data);
                         //必需將$product_option_data實例化才能使用eloquent模型的功能
                         array_push($new_product_options, new ProductOption($product_option_data));
                     } else {
-                        $currentProductOption = ProductOption::where(
-                            [
-                                ['id', $id],
-                                ['product_id', $product->id],
-                            ]
-                        )->first();
+                        // $currentProductOption = ProductOption::where(
+                        //     [
+                        //         ['id', $id],
+                        //         ['product_id', $product->id],
+                        //     ]
+                        // )->first();
+                        $currentProductOption = ProductOption::where('id', $id)->where('product_id', $product->id)->first();
 
                         if ($currentProductOption) {
                             //更新圖片
@@ -209,9 +220,11 @@ class ProductController extends Controller
             }
 
             //新增新的product_options
+            Log::info($new_product_options);
+            // Log::info($product->product_options()->saveMany($new_product_options));
+            // Log::info('123',$product->product_options()->saveMany($new_product_options));
             $product->product_options()->saveMany($new_product_options);
         }
         DB::table('product_options')->whereIn('id', $productOptionsIdsShouldBeRemove)->delete();
     }
-
 }
