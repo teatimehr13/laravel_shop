@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\Front\CartItemResource;
+use App\Models\CartItem;
 use App\Models\ProductOption;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
@@ -9,6 +11,28 @@ use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
+    public function index(Request $request)
+    {
+        $cartItems = $this->getCartItems($request);
+
+        // $filteredCartItems = array_map(function ($item) {
+        //     return [
+        //         'productOption' => [
+        //             'id' => $item['productOption']['id'],
+        //             'name' => $item['productOption']['name'],
+        //             'price' => $item['productOption']['price'],
+        //             'image' => $item['productOption']['image'],
+        //             'description' => $item['productOption']['description'],
+        //         ],
+        //         'quantity' => $item['quantity'],
+        //     ];
+        // }, $cartItems);
+        // return response()->json($filteredCartItems);
+
+        return response()->json(CartItemResource::collection($cartItems));
+    }
+
+
     //加入購物車
     public function addToCart(Request $request)
     {
@@ -57,7 +81,7 @@ class CartController extends Controller
         // }
     }
 
-    //登入前存cookie
+    //登入前存cookie (加入購物車的頁面)
     public function addToCookieCart(Request $request)
     {
         $cookieCart = $this->getCartFromCookie();
@@ -87,6 +111,7 @@ class CartController extends Controller
     public function getCartFromCookie()
     {
         $jsonCart = Cookie::get('cart');
+        // Log::info($jsonCart);
         return (!is_null($jsonCart)) ? json_decode($jsonCart, true) : [];
     }
 
@@ -97,7 +122,7 @@ class CartController extends Controller
         Cookie::queue(
             Cookie::make('cart', $cartToJson, 60 * 24 * 7, null, null, false, false)
         );
-
+        // $this->getCartFromCookie();
         Log::info(json_encode($cookieCart));
     }
 
@@ -151,5 +176,81 @@ class CartController extends Controller
             }
         }
         return false;
+    }
+
+    //更新購物車
+    public function updateCartItem(Request $request)
+    {
+        $user_status = $request->user();
+
+        if ($user_status) {
+            $this->updateToDBCart($request);
+        } else {
+            $this->updateToCookieCart($request);
+        }
+        // if (empty($request->header('referer'))) {
+        //     return redirect()->route('cart.index');
+        // } else {
+        //     return redirect()->back();
+        // }
+    }
+
+    //購物車結帳頁面(登入前)
+    private function updateToCookieCart(Request $request)
+    {
+        // Log::info($request->input('data.productOptions'));
+
+        if ($request->input('data.productOptions')) {
+            $productOptions = $request->input('data.productOptions');
+
+            if (is_array($productOptions)) {
+                $cookieCart = [];
+                foreach ($productOptions as $productOptionId => $value) {
+                    if (isset($value['quantity'])) {
+                        $quantity = intval($value['quantity']);
+                        if ($quantity > 0) {
+                            $productOption = ProductOption::findIfEnable($productOptionId);
+
+                            if ($productOption) {
+                                $cookieCart[$productOptionId] = $quantity;
+                            }
+                        }
+                    }
+                }
+                // Log::info($cookieCart);
+                $this->saveCookieCart($cookieCart);
+            }
+        }
+    }
+
+    //拿到購物車資料
+    private function getCartItems(Request $request)
+    {
+        $user_status = $request->user();
+        if ($user_status) {
+        } else {
+            $cookieCart = $this->getCartFromCookie();
+            $cartItemsArray = [];
+            foreach ($cookieCart as $productOptionId => $quantity) {
+                $productOption = ProductOption::findIfEnable($productOptionId);
+
+                // if ($productOption instanceof \App\Models\ProductOption) {
+                //     Log::info('This is a valid Eloquent model object');
+                // } else {
+                //     Log::error('The productOption is not an Eloquent model');
+                // }
+
+                if ($productOption) {
+                         $cartItem = [
+                        "productOption" => $productOption,
+                        "quantity" => $quantity
+                    ];
+                    array_push($cartItemsArray, $cartItem);
+                }
+            }
+
+            // Log::info($cartItemsArray);
+            return $cartItemsArray;
+        }
     }
 }

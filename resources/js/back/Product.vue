@@ -36,13 +36,7 @@ async function addToCart() {
         const response = await api.post('/cart/addToCart', {
             data: {
                 productOptions: productOptions.value,
-                '_token': document.querySelector("meta[name='csrf-token']").content,
-            },
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',  //標識 AJAX 請求
-            },
-            withCredentials: true, // 確保能攜帶 Cookie
-            
+            },            
         });
         console.log(response);
     } catch (error) {
@@ -55,13 +49,8 @@ async function deleteCartItem(params) {
     try {
         const response = await api.delete('/cart/deleteCartItem', {
             data: {
-                '_token': document.querySelector("meta[name='csrf-token']").content,
                 product_option_id: 28
             },
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',  //標識 AJAX 請求
-            },
-            withCredentials: true, // 確保能攜帶 Cookie
         });
 
         if (response.status === 200 && response.data == 'success') {

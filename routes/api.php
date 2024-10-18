@@ -34,10 +34,13 @@ Route::resource('categories.subcategories', BackSubcategoryController::class)->e
 
 //cart
 Route::prefix('cart')->name('cart.')->group(function(){
-    Route::get('/', [CartController::class, 'index'])->name('index');
+    // Route::get('/', [CartController::class, 'index'])->name('index');
     // Route::post('/addToCart', [CartController::class, 'addToCart'])->name('addToCart');
+    Route::middleware('web')->get('/', [CartController::class, 'index']);
     Route::middleware('web')->post('/addToCart', [CartController::class, 'addToCart']);
     Route::middleware('web')->delete('/deleteCartItem', [CartController::class, 'deleteCartItem']);
+    Route::middleware('web')->post('/updateCartItem', [CartController::class, 'updateCartItem']);
+    Route::middleware('web')->get('/getCartFromCookie', [CartController::class, 'getCartFromCookie']);
     // Route::delete('/deleteCartItem', [CartController::class, 'deleteCartItem'])->name('deleteCartItem');
     // Route::patch('/updateCartItems', [CartController::class, 'updateCartItems'])->name('updateCartItems');
     // Route::middleware(['auth'])->get('/checkout', [CartController::class, 'checkout'])->name('checkout');
