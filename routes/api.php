@@ -8,7 +8,9 @@ use App\Http\Controllers\Back\SubcategoryController as BackSubcategoryController
 use App\Http\Controllers\CartController;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 
 /*
@@ -22,9 +24,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+Route::middleware('auth')->get('/user', function (Request $request) {
+    return response()->json($request->user());
 });
+
+
 
 
 //back admin
@@ -41,7 +49,5 @@ Route::prefix('cart')->name('cart.')->group(function(){
     Route::middleware('web')->delete('/deleteCartItem', [CartController::class, 'deleteCartItem']);
     Route::middleware('web')->post('/updateCartItem', [CartController::class, 'updateCartItem']);
     Route::middleware('web')->get('/getCartFromCookie', [CartController::class, 'getCartFromCookie']);
-    // Route::delete('/deleteCartItem', [CartController::class, 'deleteCartItem'])->name('deleteCartItem');
-    // Route::patch('/updateCartItems', [CartController::class, 'updateCartItems'])->name('updateCartItems');
     // Route::middleware(['auth'])->get('/checkout', [CartController::class, 'checkout'])->name('checkout');
 });

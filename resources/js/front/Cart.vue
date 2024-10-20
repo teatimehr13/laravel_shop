@@ -1,21 +1,4 @@
 <template>
-    <!-- <div>
-        <div>
-            <label for="product_option_1">Product Option 1:</label>
-            <button type="button" data-value="1" @click="changeValue('28', -1)">-</button>
-            <input type="text" v-model="productOptions['28']" />
-            <button type="button" data-value="-1" @click="changeValue('28', 1)">+</button>
-            <button type="button" @click="deleteCartItem(28)">Del</button>
-        </div>
-        <div>
-            <label for="product_option_2">Product Option 2:</label>
-            <button type="button" data-value="1" @click="changeValue('29', -1)">-</button>
-            <input type="text" v-model="productOptions['29']" />
-            <button type="button" data-value="-1" @click="changeValue('29', 1)">+</button>
-            <button type="button" @click="deleteCartItem(29)">Del</button>
-        </div>
-    </div> -->
-
     <div>
         <div v-for="(item, index) in cartItems">
             <label>名稱: {{ item.productOption.name }}</label>
@@ -25,10 +8,18 @@
             <button type="button" @click="deleteCartItem(item.productOption.id)">Del</button>
         </div>
     </div>
+
+    <div>
+        <form @submit.prevent="logout">
+            <button type="submit">logout</button>
+        </form>
+    </div>
+
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue';
+import web from '@/web/web';
 import api from '@/api/api';
 
 // let productOptions = ref({
@@ -45,8 +36,6 @@ let changeValue = (optionKey, value, index) => {
     // console.log(cartItems.value[index]['quantity']);
 
     cartItems.value[index]['quantity'] += value;
-    // console.log(cartItems.value);
-
     if (cartItems.value[index]['quantity'] < 1) {
         //或詢問是否刪除該項目
         cartItems.value[index]['quantity'] = 1;
@@ -97,9 +86,17 @@ async function updateCartItem() {
     }
 }
 
+async function logout(){
+    try {
+        await web.post('logout'); //登出請求
+        console.log('Logged out successfully');
+    }catch(error){
+        console.error('Logout failed:', error);
+    }
+}
+
 
 let cartItems = ref();
-
 onMounted(
     async () => {
         try {

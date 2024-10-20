@@ -36,7 +36,7 @@ async function addToCart() {
         const response = await api.post('/cart/addToCart', {
             data: {
                 productOptions: productOptions.value,
-            },            
+            },
         });
         console.log(response);
     } catch (error) {
@@ -61,6 +61,19 @@ async function deleteCartItem(params) {
 
     }
 }
+
+// const token = '1|Vu96QIXL4BdC2KlqtvNfeKLV85iZ2fST5x7vyE5uce3dc6e8';
+// axios.get('/api/user', {
+//     headers: {
+//         Authorization: `Bearer ${token}`
+//     }
+// })
+//     .then(response => {
+//         console.log(response.data);
+//     })
+//     .catch(error => {
+//         console.error(error);
+//     });
 
 // let test = ref('');
 // let products = ref();

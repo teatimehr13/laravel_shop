@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,4 +30,38 @@ Route::get('/brands', function () {
 
 Route::get('/cart', function () {
     return view('/front/cart');
+});
+
+// Route::get('/login-test', function () {
+//     Auth::loginUsingId(1); // 使用 ID 為 1 的使用者登入
+//     return 'Logged in!';
+// });
+
+Route::get('/login', function () {
+    return view('/front/login');
+});
+
+// Route::post('/logout', function () {
+//     Auth::logout();
+//     return redirect('/login');
+// });
+
+Route::post('/login_access', function (Request $request) {
+    $credentials = $request->only('email', 'password');
+    Log::info($credentials);
+
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate(); // 重新生成 session ID
+        return response()->json(['message' => 'Logged in!'], 200);
+    }
+    return response()->json(['message' => 'Invalid credentials'], 401);
+});
+
+
+Route::post('/logout', function (Request $request) {
+    Auth::logout(); // 登出使用者
+
+    $request->session()->invalidate(); // 使當前的 session 無效
+    $request->session()->regenerateToken(); // 重新生成 CSRF token
+    return response()->json(['message' => 'Logged out!'], 200);
 });

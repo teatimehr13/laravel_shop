@@ -44,6 +44,15 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public function carts(){
+        return $this->hasMany(Cart::class);
+    }
+
+    //一個使用者一個購物車
+    public function purchase_cart(){
+        return $this->hasOne(Cart::class)->where('cart_type', Cart::typeIndex(Cart::PURCHASE));
+    }
+
     public function getPurchaseCartOrCreate(){
         $purchase_cart = $this->purchase_cart;
         if(!$purchase_cart){
