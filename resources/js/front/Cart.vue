@@ -7,9 +7,16 @@
             <button type="button" @click="changeValue(item.productOption.id, 1, index)">+</button>
             <button type="button" @click="deleteCartItem(item.productOption.id)">Del</button>
         </div>
+
+        <div>
+            <label for="">Total Price : <span>{{ endPrice }}</span></label>
+        </div>
     </div>
 
     <div>
+        <div>
+            <button type="button">結帳</button>
+        </div>
         <form @submit.prevent="logout">
             <button type="submit">logout</button>
         </form>
@@ -32,6 +39,12 @@ import api from '@/api/api';
 //     '29': {'quantity':6}
 // });
 
+const updateCartTotal = (cartItems) => {
+    const total = cartItems.value.reduce((sum,item) =>
+    sum + item.productOption.price * item.quantity, 0);
+    endPrice = total;
+}
+
 let changeValue = (optionKey, value, index) => {
     // console.log(cartItems.value[index]['quantity']);
 
@@ -42,7 +55,7 @@ let changeValue = (optionKey, value, index) => {
         return
     }
     // console.log(optionKey);
-
+    updateCartTotal(cartItems);
     updateCartItem(index);
 }
 
@@ -59,7 +72,6 @@ async function deleteCartItem(id) {
         }
     } catch (error) {
         console.error('fail to delete this cartItem');
-
     }
 }
 
@@ -97,12 +109,14 @@ async function logout(){
 
 
 let cartItems = ref();
+let endPrice = ref();
 onMounted(
     async () => {
         try {
             const response = await api.get('/cart'); // 使用 api 發送請求
-            cartItems.value = response.data; // 獲取產品數據
-            console.log(cartItems.value);
+            cartItems.value = response.data.cartItems; // 獲取產品數據
+            endPrice.value = response.data.endPrice;
+            console.log(response.data);
 
         } catch (error) {
             console.error('Failed to fetch products:', error);

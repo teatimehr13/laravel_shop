@@ -8,14 +8,22 @@ use App\Models\ProductOption;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
     public function index(Request $request)
     {
-        // Log::info('16' .$request->user());
         $cartItems = $this->getCartItems($request);
+        $endPrice = $this->getEndPrice($request);
+        return response()->json(
+            [
+                'cartItems' => CartItemResource::collection($cartItems),
+                'endPrice' => $endPrice
+            ]
+        );
+
         // $filteredCartItems = array_map(function ($item) {
         //     return [
         //         'productOption' => [
@@ -29,8 +37,6 @@ class CartController extends Controller
         //     ];
         // }, $cartItems);
         // return response()->json($filteredCartItems);
-
-        return response()->json(CartItemResource::collection($cartItems));
     }
 
 
@@ -38,13 +44,10 @@ class CartController extends Controller
     public function addToCart(Request $request)
     {
         $user_status = $request->user();
-        // Log::info('addToCart' . $user_status);
         if ($user_status) {
             $this->addToDBCart($request);
-            Log::info('DBCart');
         } else {
             $this->addToCookieCart($request);
-            Log::info('CookieCart');
         }
     }
 
@@ -54,7 +57,6 @@ class CartController extends Controller
         //來自app > Models > User.php裡面
         $cart = $request->user()->getPurchaseCartOrCreate();
         $productOptions = $request->input('data.productOptions');
-        // Log::info($productOptions);
 
         foreach ($productOptions as $key => $value) {
             //如果驗證 $key和product_option有關，加進購物車
@@ -64,7 +66,6 @@ class CartController extends Controller
                 if ($quantity && $productOptionId) {
                     //驗證商品的狀態是什麼? 草稿? enabled?
                     $product_option = ProductOption::findIfEnable($productOptionId);
-                    // Log::info($product_option);
                     if ($product_option) {
                         //eloquent模型方法
                         $cartItem = $cart->cartItems()->where('product_option_id', $productOptionId)->first();
@@ -128,8 +129,6 @@ class CartController extends Controller
         Cookie::queue(
             Cookie::make('cart', $cartToJson, 60 * 24 * 7, null, null, false, false)
         );
-        // $this->getCartFromCookie();
-        Log::info(json_encode($cookieCart));
     }
 
     //刪除購物車資料
@@ -229,13 +228,37 @@ class CartController extends Controller
         }
     }
 
+    //更新購物車(登入後)
+    private function updateToDBCart(Request $request)
+    {
+        if ($request->has('data.productOptions')) {
+            $product_options = $request->input('data.productOptions');
+
+            if (is_array($product_options)) {
+                $cart = $request->user()->getPurchaseCartOrCreate();
+                foreach ($product_options as $productOptionId => $value) {
+                    if (isset($value['quantity'])) {
+                        $quantity = intval($value['quantity']);
+                        $product_option = ProductOption::findIfEnable($productOptionId);
+                        if ($product_option) {
+                            $cartItem = $cart->cartItems()->where('product_option_id', $productOptionId)->first();
+                            if ($cartItem) {
+                                $cartItem->quantity = $quantity;
+                                $cartItem->save();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     //拿到購物車資料
     private function getCartItems(Request $request)
     {
         $user_status = $request->user();
-
         if ($user_status) {
-            // $this->syncCookieCartToDBCart($user_status);
+            $this->syncCookieCartToDBCart($user_status);
 
             //經由user找到cart再找到cartItem的carItems
             $cartItems = $user_status->getPurchaseCartOrCreate()->cartItems;
@@ -258,13 +281,6 @@ class CartController extends Controller
             $cartItemsArray = [];
             foreach ($cookieCart as $productOptionId => $quantity) {
                 $productOption = ProductOption::findIfEnable($productOptionId);
-
-                // if ($productOption instanceof \App\Models\ProductOption) {
-                //     Log::info('This is a valid Eloquent model object');
-                // } else {
-                //     Log::error('The productOption is not an Eloquent model');
-                // }
-
                 if ($productOption) {
                     $cartItem = [
                         "productOption" => $productOption,
@@ -273,16 +289,28 @@ class CartController extends Controller
                     array_push($cartItemsArray, $cartItem);
                 }
             }
-
-            // Log::info($cartItemsArray);
             return $cartItemsArray;
         }
     }
 
+    //拿到購物車全部的金額
+    private function getEndPrice(Request $request)
+    {
+        return array_reduce(
+            $this->getCartItems($request),
+            function ($currentValue, $cartItemObj) {
+                $productOption = $cartItemObj["productOption"];
+                $quantity = $cartItemObj["quantity"];
+                return $currentValue = intval($quantity) * $productOption->price;
+            },
+            0
+        );
+    }
 
-       //登入後將cookie清空，將資料移到資料庫 (cart_items)
-       private function syncCookieCartToDBCart(User $user){
-        if($user){
+    //登入後將cookie清空，將資料移到資料庫 (cart_items)
+    private function syncCookieCartToDBCart(User $user)
+    {
+        if ($user) {
             $cookieCart = $this->getCartFromCookie();
             $cart = $user->getPurchaseCartOrCreate();
             foreach ($cookieCart as $productOptionId => $quantity) {
@@ -306,4 +334,6 @@ class CartController extends Controller
             $this->saveCookieCart([]);
         }
     }
+
+    
 }

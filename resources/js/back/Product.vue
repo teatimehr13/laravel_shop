@@ -31,7 +31,7 @@ let productOptions = ref({
 });
 
 async function addToCart() {
-    // console.log(productOptions.value);
+    console.log(productOptions.value);
     try {
         const response = await api.post('/cart/addToCart', {
             data: {
