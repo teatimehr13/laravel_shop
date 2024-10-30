@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\Front\CartItemResource;
 use App\Models\CartItem;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\ProductOption;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -15,6 +17,7 @@ class CartController extends Controller
 {
     public function index(Request $request)
     {
+        // Log::info($request->user());
         $cartItems = $this->getCartItems($request);
         $endPrice = $this->getEndPrice($request);
         return response()->json(
@@ -150,6 +153,29 @@ class CartController extends Controller
         }
     }
 
+    //更新購物車
+    public function updateCartItem(Request $request)
+    {
+        $user_status = $request->user();
+
+        if ($user_status) {
+            $this->updateToDBCart($request);
+        } else {
+            $this->updateToCookieCart($request);
+        }
+        // if (empty($request->header('referer'))) {
+        //     return redirect()->route('cart.index');
+        // } else {
+        //     return redirect()->back();
+        // }
+    }
+
+    //結帳
+    public function checkout(Request $request)
+    {
+        return $this->createOrderByCart($request);
+    }
+
     //刪除cookie
     private function deleteFromCookieCart(Request $request)
     {
@@ -181,23 +207,6 @@ class CartController extends Controller
             }
         }
         return false;
-    }
-
-    //更新購物車
-    public function updateCartItem(Request $request)
-    {
-        $user_status = $request->user();
-
-        if ($user_status) {
-            $this->updateToDBCart($request);
-        } else {
-            $this->updateToCookieCart($request);
-        }
-        // if (empty($request->header('referer'))) {
-        //     return redirect()->route('cart.index');
-        // } else {
-        //     return redirect()->back();
-        // }
     }
 
     //購物車結帳頁面(登入前)
@@ -335,5 +344,30 @@ class CartController extends Controller
         }
     }
 
-    
+    //生成訂單
+    private function createOrderByCart(Request $request){
+        $user_status = $request->user();
+        // Log::info($user_status);
+        $cart = $user_status->getPurchaseCartOrCreate();
+        $amount = $this->getEndPrice($request);
+
+        $order = Order::create([
+            'amount' => $amount,
+            'address' => 'testing...address',
+            'user_id' => $user_status->id
+        ]);
+
+        //利用order找到order items去存儲資料
+        $order->orderItems()->saveMany($cart->cartItems->map(function($cartItem){
+            return new OrderItem([
+                'name' => $cartItem->productOption->name,
+                'price' => $cartItem->productOption->price,
+                'quantity' => $cartItem->quantity,
+                'product_option_id' => $cartItem->product_option_id
+            ]);
+        }));
+
+        //購物車變成訂單後，刪除
+        // $cart->cartItems()->delete();
+    }
 }

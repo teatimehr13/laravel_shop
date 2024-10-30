@@ -49,5 +49,5 @@ Route::prefix('cart')->name('cart.')->group(function(){
     Route::middleware('web')->delete('/deleteCartItem', [CartController::class, 'deleteCartItem']);
     Route::middleware('web')->post('/updateCartItem', [CartController::class, 'updateCartItem']);
     Route::middleware('web')->get('/getCartFromCookie', [CartController::class, 'getCartFromCookie']);
-    // Route::middleware(['auth'])->get('/checkout', [CartController::class, 'checkout'])->name('checkout');
+    Route::middleware('web')->get('/checkout', [CartController::class, 'checkout'])->name('checkout');
 });

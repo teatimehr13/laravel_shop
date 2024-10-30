@@ -15,7 +15,7 @@
 
     <div>
         <div>
-            <button type="button">結帳</button>
+            <button type="button" @click="checkout">結帳</button>
         </div>
         <form @submit.prevent="logout">
             <button type="submit">logout</button>
@@ -107,6 +107,16 @@ async function logout(){
     }
 }
 
+async function checkout(){
+    try {
+        // http://127.0.0.1:8000/api
+        await api.get('/cart/checkout', {
+            
+        });
+    } catch(error){
+        console.error('fail to checkout')
+    }
+}
 
 let cartItems = ref();
 let endPrice = ref();
