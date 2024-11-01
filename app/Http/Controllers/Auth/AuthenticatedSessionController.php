@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Libraries\UserAuth;
+
 
 class AuthenticatedSessionController extends Controller
 {
@@ -47,7 +49,9 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
+        // return redirect('/');
 
-        return redirect('/');
+        // return redirect('/login');
+        return redirect()->intended(RouteServiceProvider::LOGOUT);
     }
 }

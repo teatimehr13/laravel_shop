@@ -6,6 +6,7 @@ use App\Http\Controllers\Back\CategoryController as BackCategoryController;
 use App\Http\Controllers\Back\SubcategoryController as BackSubcategoryController;
 
 use App\Http\Controllers\CartController;
+use App\Libraries\UserAuth;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -50,4 +51,15 @@ Route::prefix('cart')->name('cart.')->group(function(){
     Route::middleware('web')->post('/updateCartItem', [CartController::class, 'updateCartItem']);
     Route::middleware('web')->get('/getCartFromCookie', [CartController::class, 'getCartFromCookie']);
     Route::middleware('web')->get('/checkout', [CartController::class, 'checkout'])->name('checkout');
+});
+
+//auth
+Route::middleware(['web'])->group(function () {
+    Route::post('/login_access', function (Request $request) {
+        return UserAuth::login($request);
+    });
+
+    Route::post('/logout', function (Request $request) {
+        return UserAuth::logout($request);
+    });
 });
