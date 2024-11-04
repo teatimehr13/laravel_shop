@@ -6,20 +6,20 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
-import Product from './back/Product.vue';
-import Brand from './back/Brand.vue';
-import Cart from './front/Cart.vue';
-import Login from './front/Login.vue';
+// import Product from './back/Product.vue';
+// import Brand from './back/Brand.vue';
+// import Cart from './front/Cart.vue';
+// import Login from './front/Login.vue';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const app = createApp({});
 
-const components = {
-    'back-product': Product,
-    'back-brand': Brand,
-    'front-cart': Cart,
-    'front-login': Login,
-};
+// const components = {
+//     'back-product': Product,
+//     'back-brand': Brand,
+//     'front-cart': Cart,
+//     'front-login': Login,
+// };
 
 
 createInertiaApp({
@@ -31,6 +31,10 @@ createInertiaApp({
         const app = createApp({ render: () => h(App, props) });
 
         app.use(plugin);
+
+        // 使用 Ziggy 路由插件
+        app.use(ZiggyVue);
+
         app.mount(el);
     },
 });
@@ -38,32 +42,4 @@ createInertiaApp({
 // Object.entries(components).forEach(([name, component]) => {
 //     app.component(name, component);
 // });
-// app.mount('#app');
-
-
-// import './bootstrap';
-
-// import { createApp } from 'vue';
-// import { createRouter, createWebHistory } from 'vue-router';
-// import Product from './back/Product.vue';
-// import Brand from './back/Brand.vue';
-// import Cart from './front/Cart.vue';
-// import Login from './front/Login.vue';
-// import Register from './front/Register.vue';
-
-// const app = createApp({});
-
-// // app.component([{'back-product': Product}, {'back-brand':Brand}]);
-// const components = {
-//     'back-product': Product,
-//     'back-brand': Brand,
-//     'front-cart': Cart,
-//     'front-login': Login,
-//     'register' : Register
-// };
-
-// Object.entries(components).forEach(([name, component]) => {
-//     app.component(name, component);
-// });
-
 // app.mount('#app');

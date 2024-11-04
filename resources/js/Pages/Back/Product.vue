@@ -1,10 +1,5 @@
-<!-- <template>
-    <div>
-        <h2>Product</h2>
-        <input type="text" v-model="test">
-    </div>
-</template> -->
 <template>
+    <BackendLayout />    
     <div>
         <!-- <form @submit.prevent="addToCart"> -->
         <div>
@@ -24,6 +19,8 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import api from '@/api/api';
+import BackendLayout from '@/Layouts/BackendLayout.vue';
+
 
 let productOptions = ref({
     product_option_28: 10,
