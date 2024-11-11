@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import Header from '@/Components/Back/Header.vue';
+import Header from '@/Components/Front/Header.vue';
 // import Sidebar from '@/Components/Sidebar.vue';
 </script>
 

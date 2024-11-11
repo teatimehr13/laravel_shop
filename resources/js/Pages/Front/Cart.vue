@@ -4,6 +4,7 @@ import web from '@/web/web';
 import api from '@/api/api';
 import { useForm } from '@inertiajs/vue3';
 import { Link } from '@inertiajs/vue3'
+import FrontendLayout from '@/Layouts/FrontendLayout.vue';
 
 // let productOptions = ref({
 //     '28': 1,
@@ -121,6 +122,7 @@ onMounted(
 
 
 <template>
+    <FrontendLayout />
     <div>
         <div v-for="(item, index) in cartItems">
             <label>名稱: {{ item.productOption.name }}</label>
