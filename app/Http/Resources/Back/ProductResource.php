@@ -23,7 +23,8 @@ class ProductResource extends JsonResource
             'published_status_name' => $this->published_status_name(),
             'subcategory_id' => $this->subcategory_id,
             'subcategory_name' => $this->subcategory->name,
-            'product_options' => 'nullable|array'
+            // 'color_code' => $this->product_options->color_code
+            'product_options' => ProductOptionResource::collection($this->whenLoaded('product_options'))
         ];
     }
 }

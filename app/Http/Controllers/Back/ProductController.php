@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
 
 class ProductController extends Controller
 {
@@ -22,9 +23,28 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with('subcategory:id,name')->get();
+        $products = Product::with(['subcategory:id,name', 'product_options'])->get();
         // $subcategory = $products->subcategory();
-        return ProductResource::collection($products);
+        // $products = Product::with(['subcategory:id,name'])->get();
+        $formateProducts = $products->map(function ($product) {
+            $productArray = $product->toArray();
+            // $productArray['product_options'] = $product->product_options->pluck('color_code', 'id');
+            $productArray['color_codes'] = $product->product_options->map(function ($option) {
+                // return [
+                //     'id' => $option->id,
+                //     'color_code' => $option->color_code,
+                // ];
+                return $option->color_code;
+            });
+            unset($productArray['product_options']);
+            return $productArray;
+        });
+        
+        // return response()->json(['data' => $formateProducts]);
+
+        return Inertia::render('Back/Product', [
+            'products' => $formateProducts
+        ]);
     }
 
     /**
@@ -63,7 +83,13 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
+
+        // $product = Product::with(['product_options'])->find($id);
+        // Product::with(['subcategory:id,name', 'product_options'])->get();
         $product = Product::find($id);
+        if (!$product) {
+            return response()->json(['error' => 'Product not found'], 404);
+        }
         return new ProductResource($product);
         // return response()->json($this->updateProductOptions($product));
     }

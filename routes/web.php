@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Back\ProductController as BackProductController;
+use App\Http\Controllers\Back\ProductOptionController as BackProductOptionController;
 use Illuminate\Foundation\Application;
 use Inertia\Inertia;
 
@@ -39,9 +41,19 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Front/Cart');
     })->name('cart');
 
-    Route::get('/back/products', function () {
-        return Inertia::render('Back/Product');
-    })->name('products');
+
+    Route::prefix('back')->group(function () {
+        Route::resource('products.productOptions', BackProductOptionController::class)
+            ->only(['index'])
+            ->names([
+                'index' => 'back.products.productOptions.index'
+            ]);
+        // Route::get('/products', function () {
+        //     return Inertia::render('Back/Product');
+        // })->name('products');
+
+        Route::resource('products', BackProductController::class);
+    });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -49,7 +61,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 
 // Route::get('/products', function () {

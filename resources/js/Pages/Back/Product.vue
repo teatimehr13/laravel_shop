@@ -1,90 +1,100 @@
 <template>
-    <BackendLayout />    
+    <BackendLayout />
     <div>
-        <!-- <form @submit.prevent="addToCart"> -->
-        <div>
-            <label for="product_option_1">Product Option 1:</label>
-            <input type="number" v-model="productOptions['product_option_28']" />
-        </div>
-        <div>
-            <label for="product_option_2">Product Option 2:</label>
-            <input type="number" v-model="productOptions['product_option_29']" />
-        </div>
-        <button type="button" @click="addToCart">Add to Cart</button>
-        <button type="button" @click="deleteCartItem">Del to CartItem</button>
-        <!-- </form> -->
+        <h1>Product</h1>
+        <!-- <pre>{{ products }}</pre> -->
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>產品名稱</th>
+                    <th>描述</th>
+                    <th>圖片</th>
+                    <th>類別</th>
+                    <th>狀態</th>
+                    <th>顏色</th>
+                    <th>編輯</th>
+                    <th>刪除</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="product in products" :key="products.id">
+                    <td>{{ product.title }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.image }}</td>
+                    <td>{{ product.subcategory.name }}</td>
+                    <td>{{ product.published_status }}</td>
+                    <td>
+                        <ul style="display: flex; column-gap: 7px;">
+                            <li v-for="(color, index) in product.color_codes" :key="index">
+                                {{ color }}
+                            </li>
+                        </ul>
+                        <ul>
+                            <li>
+                                <!-- <Link :href="`/back/products/${product.id}/productOptions`">顏色管理</Link> -->
+                                <Link :href="route('back.products.productOptions.index', { id: product.id })">顏色管理</Link>
+                            </li>
+                        </ul>
+                    </td>
+                    <!-- <td><img :src="option.image" alt="Product Image" width="50"></td>
+                        <td>{{ option.price }}</td>
+                        <td>{{ option.enable ? '是' : '否' }}</td> -->
+                        <td>
+                            <button @click="editProduct(product)">編輯</button>
+                        </td>
+                        <td>
+                            <button @click="deleteProduct(product.id)">刪除</button>
+                        </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, defineProps } from 'vue';
 import api from '@/api/api';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 
-
-let productOptions = ref({
-    product_option_28: 10,
-    product_option_29: 20
+const props = defineProps({
+    products: {
+        type: Array,
+        required: true
+    }
 });
 
-async function addToCart() {
-    console.log(productOptions.value);
-    try {
-        const response = await api.post('/cart/addToCart', {
-            data: {
-                productOptions: productOptions.value,
-            },
-        });
-        console.log(response);
-    } catch (error) {
-        console.error('Error adding to cart:', error);
-    }
+console.log(props);
+
+// 編輯選項的方法
+const editProduct = (product) => {
+  console.log('Editing product:', product);
 };
 
+// 刪除選項的方法
+const deleteProduct = (id) => {
+  console.log('Deleting product with id:', id);
+};
 
-async function deleteCartItem(params) {
-    try {
-        const response = await api.delete('/cart/deleteCartItem', {
-            data: {
-                product_option_id: 28
-            },
-        });
+</script>
 
-        if (response.status === 200 && response.data == 'success') {
-            console.log(123);
-        }
-    } catch (error) {
-        console.error('fail to delete this cartItem');
-
-    }
+<style scoped>
+table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-// const token = '1|Vu96QIXL4BdC2KlqtvNfeKLV85iZ2fST5x7vyE5uce3dc6e8';
-// axios.get('/api/user', {
-//     headers: {
-//         Authorization: `Bearer ${token}`
-//     }
-// })
-//     .then(response => {
-//         console.log(response.data);
-//     })
-//     .catch(error => {
-//         console.error(error);
-//     });
+th,
+td {
+    padding: 10px;
+    text-align: left;
+}
 
-// let test = ref('');
-// let products = ref();
+th {
+    background-color: #f2f2f2;
+}
 
-// onMounted(
-//     async () => {
-//         try {
-//             const response = await api.get('/products'); // 使用 api 發送請求
-//             products.value = response.data; // 獲取產品數據
-//             console.log(products.value);
-
-//         } catch (error) {
-//             console.error('Failed to fetch products:', error);
-//         }
-
-//     })
-</script>
+td img {
+    display: block;
+}
+</style>

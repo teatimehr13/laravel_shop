@@ -1,0 +1,12 @@
+1. remove掉products，重新建一個，把image拿掉 (OK)
+2. remove掉product_options，重建一個，新增color_coode 
+   及primary_image_path 
+3. 新增ProductImages表，建立product_id、image_path、alt_text欄位
+4. order_items也要有image
+
+
+* 用爬蟲把1~3項的表的資料插入後，再處理4，且4的部份用python完成
+* 1~3的部份需要將現行的爬蟲程式碼稍作修改，且需要能夠連接、插入資料表
+* enable的名稱改掉會影響部份程式碼，要注意 (把enable改成is_enabled) -先不改-
+
+幻燈片: 下面的圖點一下顯示在上面，右邊的圖點一下顯示在左邊(由右邊的img src顯示左邊)

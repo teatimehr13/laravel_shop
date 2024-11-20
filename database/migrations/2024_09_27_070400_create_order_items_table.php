@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->unsignedInteger('price');
             $table->unsignedInteger('quantity');
+            $table->string('image')->nullable();
             $table->foreignId('order_id');
             $table->foreignId('product_option_id');
             $table->timestamps();

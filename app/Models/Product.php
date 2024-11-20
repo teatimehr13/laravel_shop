@@ -29,6 +29,14 @@ class Product extends Model
         return $this->hasMany(ProductOption::class);
     }
 
+    public function product_descriptions(){
+        return $this->hasMany(ProductDescription::class);
+    }
+
+    public function product_images(){
+        return $this->hasMany(ProductImage::class);
+    }
+
     public function published_status_name(){
         if(isset(self::published_statuses[$this->published_status])){
             return ucfirst(self::published_statuses[$this->published_status]);
