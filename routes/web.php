@@ -1,42 +1,10 @@
 <?php
 
-// use App\Http\Controllers\ProfileController;
-// use Illuminate\Foundation\Application;
-// use Illuminate\Support\Facades\Route;
-// use Inertia\Inertia;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
-// Route::get('/', function () {
-//     return Inertia::render('Welcome', [
-//         'canLogin' => Route::has('login'),
-//         'canRegister' => Route::has('register'),
-//         'laravelVersion' => Application::VERSION,
-//         'phpVersion' => PHP_VERSION,
-//     ]);
-// });
-
-// Route::get('/dashboard', function () {
-//     return Inertia::render('Dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
-
-// Route::middleware('auth')->group(function () {
-//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-// });
-
-// require __DIR__.'/auth.php';
-
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Back\ProductController as BackProductController;
+use App\Http\Controllers\Back\ProductOptionController as BackProductOptionController;
+use Illuminate\Foundation\Application;
+use Inertia\Inertia;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -66,40 +34,37 @@ Route::get('/brands', function () {
     return view('/back/brand');
 });
 
-Route::get('/cart', function () {
-    return view('/front/cart');
-});
+Route::middleware('auth')->group(function () {
+    Route::get('/cart', function () {
+        return Inertia::render('Front/Cart');
+    })->name('cart');
 
-// Route::get('/login-test', function () {
-//     Auth::loginUsingId(1); // 使用 ID 為 1 的使用者登入
-//     return 'Logged in!';
-// });
 
-Route::get('/login', function () {
-    return view('/front/login');
-});
+    Route::prefix('back')->group(function () {
+        Route::resource('products.productOptions', BackProductOptionController::class)
+            ->only(['index'])
+            ->names([
+                'index' => 'back.products.productOptions.index'
+            ]);
+        // Route::get('/products', function () {
+        //     return Inertia::render('Back/Product');
+        // })->name('products');
 
-// Route::post('/logout', function () {
-//     Auth::logout();
-//     return redirect('/login');
-// });
+        Route::resource('products', BackProductController::class);
+    });
 
-Route::post('/login_access', function (Request $request) {
-    $credentials = $request->only('email', 'password');
-    Log::info($credentials);
-
-    if (Auth::attempt($credentials)) {
-        $request->session()->regenerate(); // 重新生成 session ID
-        return response()->json(['message' => 'Logged in!'], 200);
-    }
-    return response()->json(['message' => 'Invalid credentials'], 401);
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 
-Route::post('/logout', function (Request $request) {
-    Auth::logout(); // 登出使用者
+require __DIR__ . '/auth.php';
 
-    $request->session()->invalidate(); // 使當前的 session 無效
-    $request->session()->regenerateToken(); // 重新生成 CSRF token
-    return response()->json(['message' => 'Logged out!'], 200);
-});
+
+// Route::get('/products', function () {
+//     return Inertia::render('Products', [
+//         'isLoggedIn' => Auth::check(),
+//         'user' => Auth::user(),
+//     ]);
+// })->middleware('auth')->name('products');

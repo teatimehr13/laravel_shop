@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_options', function (Blueprint $table) {
+        Schema::create('product_descriptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id');
-            $table->string('color_name');
-            $table->string('color_code');
-            $table->string('image')->nullable();
-            $table->unsignedInteger('price');
             $table->text('description')->nullable();
-            $table->boolean('enable')->default(0);
-            $table->unsignedTinyInteger('published_status');
+            $table->unsignedTinyInteger('type');
+            $table->unsignedInteger('order');
+            $table->string('link_text')->nullable();
+            $table->string('link_url')->nullable();
+            $table->date('promo_start_date')->nullable();
+            $table->date('promo_end_date')->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_options');
+        Schema::dropIfExists('product_descriptions');
     }
 };

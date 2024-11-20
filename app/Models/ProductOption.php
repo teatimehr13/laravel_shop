@@ -43,4 +43,9 @@ class ProductOption extends Model
     public function cartItems(){
         return $this->hasMany(CartItem::class);
     }
+
+    //多對多關聯
+    public function productImages(){
+        return $this->belongsToMany(ProductImage::class, 'product_option_images', 'product_option_id', 'product_image_id');
+    }
 }

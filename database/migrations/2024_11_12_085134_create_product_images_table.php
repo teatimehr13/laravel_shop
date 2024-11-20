@@ -11,15 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stores', function (Blueprint $table) {
+        Schema::create('product_images', function (Blueprint $table) {
             $table->id();
-            $table->string('store_name');
-            $table->string('address')->nullable();
-            $table->string('opening_hours')->nullable();
-            $table->string('contact_number')->nullable();
+            $table->foreignId('product_id');
             $table->string('image')->nullable();
-            $table->boolean('is_enabled')->default(true);
-            $table->unsignedTinyInteger('store_type');
+            $table->string('alt_text')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stores');
+        Schema::dropIfExists('product_images');
     }
 };

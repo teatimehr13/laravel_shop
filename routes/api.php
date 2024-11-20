@@ -33,10 +33,10 @@ Route::middleware('auth')->get('/user', function (Request $request) {
 });
 
 
-
-
 //back admin
-Route::resource('products', BackProductController::class)->except(['create', 'edit']);
+// Route::resource('products', BackProductController::class)->except(['create', 'edit']);
+// Route::resource('products.productOptions', BackProductController::class)->except(['create', 'edit']);
+
 Route::resource('categories', BackCategoryController::class)->except(['create', 'edit']);
 Route::resource('categories.subcategories', BackSubcategoryController::class)->except(['show','create', 'edit']);
 

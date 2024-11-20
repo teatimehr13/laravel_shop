@@ -11,7 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::dropIfExists('stores');
+        Schema::table('product_images', function (Blueprint $table) {
+            $table->unsignedInteger('order');
+            $table->boolean("is_combination");
+        });
     }
 
     /**
@@ -19,13 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::create('stores', function (Blueprint $table) {
-            $table->id();
-            $table->string('store_name');
-            $table->string('address');
-            $table->string('opening_hours');
-            $table->string('contact_number');
-            $table->timestamps();
+        Schema::table('product_images', function (Blueprint $table) {
+            $table->dropColumn('order');  
+            $table->dropColumn('is_combination'); 
         });
     }
 };

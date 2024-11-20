@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('stores', function (Blueprint $table) {
             $table->id();
             $table->string('store_name');
-            $table->string('address');
-            $table->string('opening_hours');
-            $table->string('contact_number');
+            $table->string('address')->nullable();
+            $table->string('opening_hours')->nullable();
+            $table->string('contact_number')->nullable();
+            $table->string('image')->nullable();
+            $table->boolean('is_enabled')->default(true);
+            $table->unsignedTinyInteger('store_type');
             $table->timestamps();
         });
     }
