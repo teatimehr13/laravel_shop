@@ -26,5 +26,9 @@
     },
     "keywords": [],
     "author": "",
-    "license": "ISC"
+    "license": "ISC",
+    "dependencies": {
+        "vue-router": "^4.4.5",
+        "ziggy-js": "^2.3.1"
+    }
 }
