@@ -60,6 +60,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Route::post('/back/products/{product_id}/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
+
+// Route::post('/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
 
 require __DIR__ . '/auth.php';
 

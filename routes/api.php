@@ -4,6 +4,7 @@
 use App\Http\Controllers\Back\ProductController as BackProductController;
 use App\Http\Controllers\Back\CategoryController as BackCategoryController;
 use App\Http\Controllers\Back\SubcategoryController as BackSubcategoryController;
+use App\Http\Controllers\Back\ProductOptionController as BackProductOptionController;
 
 use App\Http\Controllers\CartController;
 use App\Libraries\UserAuth;
@@ -37,12 +38,22 @@ Route::middleware('auth')->get('/user', function (Request $request) {
 //back admin
 // Route::resource('products', BackProductController::class)->except(['create', 'edit']);
 // Route::resource('products.productOptions', BackProductController::class)->except(['create', 'edit']);
+// Route::resource('productOptions', BackProductController::class)->names(
+//     [
+//         'product_images' => 'productImages'
+//     ]
+// );
+
+// Route::post('/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
+Route::prefix('back')->group(function () {
+    Route::post('/products/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
+});
 
 Route::resource('categories', BackCategoryController::class)->except(['create', 'edit']);
-Route::resource('categories.subcategories', BackSubcategoryController::class)->except(['show','create', 'edit']);
+Route::resource('categories.subcategories', BackSubcategoryController::class)->except(['show', 'create', 'edit']);
 
 //cart
-Route::prefix('cart')->name('cart.')->group(function(){
+Route::prefix('cart')->name('cart.')->group(function () {
     // Route::get('/', [CartController::class, 'index'])->name('index');
     // Route::post('/addToCart', [CartController::class, 'addToCart'])->name('addToCart');
     Route::middleware('web')->get('/', [CartController::class, 'index']);

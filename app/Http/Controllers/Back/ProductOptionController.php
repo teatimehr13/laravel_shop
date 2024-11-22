@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
+
 namespace App\Http\Controllers\Back;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Back\ProductRequest;
 use App\Http\Resources\Back\ProductResource;
@@ -34,18 +36,12 @@ class ProductOptionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ProductRequest $request)
-    {
-      
-    }
+    public function store(ProductRequest $request) {}
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
@@ -58,16 +54,41 @@ class ProductOptionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update($id, ProductRequest $request)
-    {
-
-    }
+    public function update($id, ProductRequest $request) {}
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
+    public function destroy(string $id) {}
 
+
+    public function product_images(Request $request)
+    {
+        // Log::info(json_encode($request->all()));
+        // Log::info($product_id);
+        // if($request->input('po_id') && $request->input('pr_id')){
+        //     $productOption_id = $request->input('po_id');
+        //     $product_id = $request->input('pr_id');
+        //     $productOption = ProductOption::where('product_id',$product_id)->where('id',$productOption_id)->first();
+        //     Log::info($productOption->productImages);
+        // }
+        if($request->input('po_id')){
+            $productOptionId = $request->input('po_id');
+    
+            // 根據 productOptionId 獲取相應的產品選項數據
+            $productImages = ProductOption::find($productOptionId)->productImages()->get();
+    
+            $formattedProductImages = $productImages->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'alt_text' => $image->alt_text,
+                    'image' => $image->image,
+                    'order' => $image->order,
+                ];
+            });
+    
+            // 返回數據給前端
+            return response()->json($formattedProductImages);
+        }
     }
 }

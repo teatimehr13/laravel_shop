@@ -25,8 +25,11 @@
                         <td>
                             <button @click="editOption(option)">編輯</button>
                         </td>
-                        <td>
+                        <!-- <td>
                             <button @click="deleteOption(option.id)">刪除</button>
+                        </td> -->
+                        <td>
+                            <button @click="submit(option.id)">刪除</button>
                         </td>
                     </tr>
                 </tbody>
@@ -38,7 +41,7 @@
 import { onMounted, ref, defineProps } from 'vue';
 import api from '@/api/api';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
-
+import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
     // product: {
@@ -53,15 +56,58 @@ const props = defineProps({
 
 console.log(props);
 
+// const form = useForm({
+//     po_id: null,
+//     pr_id: null
+// });
+
+// const submit = (option) => {
+//     form.po_id = option.id;
+//     form.pr_id = option.product_id
+//     form.post(route('product_images'), {
+//         onSuccess:()=>{
+//             console.log(123);
+//         }
+//     });
+// };
+
+const submit = (productOptionId) => {
+    const url = '/back/products/product_images';  // 簡化的 API 路徑，專注於功能性而非語義化的 RESTful URL
+
+    const formData = {
+        po_id: productOptionId, // 只傳 product_option 的 id
+    };
+
+    // 使用 axios 發送 POST 請求
+    api.post(url, formData)
+        .then(response => {
+            // 假設後端返回了需要渲染到模態框的數據
+            const data = response.data;
+            console.log(data);
+            
+            // 這裡可以直接將返回的數據渲染到模態框中
+            // renderModal(data);
+        })
+        .catch(error => {
+            console.error('表單提交失敗', error);
+        });
+};
+
 // 編輯選項的方法
 const editOption = (option) => {
   console.log('Editing option:', option);
 };
 
 // 刪除選項的方法
-const deleteOption = (id) => {
-  console.log('Deleting option with id:', id);
+const deleteOption = (option) => {
+//   console.log('Deleting option with id:', id);
+form.po_id = id;
+// submit();
+// console.log(form);
+
 };
+
+
 
 </script>
 
