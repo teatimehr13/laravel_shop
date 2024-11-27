@@ -52,7 +52,7 @@ Route::middleware('auth')->group(function () {
         //     return Inertia::render('Back/Product');
         // })->name('products');
 
-        Route::resource('products', BackProductController::class);
+        Route::resource('products', BackProductController::class)->only(['index']);
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

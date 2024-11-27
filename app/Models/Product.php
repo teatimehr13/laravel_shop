@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 class Product extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'image', 'description', 'published_status', 'subcategory_id'];
+    protected $fillable = ['name', 'image', 'title', 'price', 'published_status', 'subcategory_id'];
 
     const DISABLED = 'disable';
     const ENABLED = 'enable';

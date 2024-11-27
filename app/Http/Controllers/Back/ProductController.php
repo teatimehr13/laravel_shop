@@ -57,8 +57,10 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
+
         try {
             $validate_data = $request->validated();
+            // return response()->json($validate_data);
 
             if ($request->hasFile('image')) {
                 // unset($validate_data['image']); //刪除驗證的image字段
@@ -75,6 +77,7 @@ class ProductController extends Controller
             $product = Product::create($validate_data);
             return response()->json($product, 201); // 回傳成功創建的產品資料
         } catch (QueryException $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         };
     }
 
@@ -133,10 +136,12 @@ class ProductController extends Controller
                 $validate_data["image"] = $path;
             }
 
+            $product->update($validate_data);
+
             //更新product和product_options
-            if ($product->update($validate_data)) {
-                $this->updateProductOptions($product, $validate_data);
-            }
+            // if ($product->update($validate_data)) {
+            //     $this->updateProductOptions($product, $validate_data);
+            // }
             return response()->json($product, 201); // 回傳成功創建的產品資料
         } catch (QueryException $e) {
         };
@@ -145,7 +150,7 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
         $product = Product::find($id);
 

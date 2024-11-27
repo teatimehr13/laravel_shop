@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Log;
 class ProductOption extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'image', 'price', 'description', 'enable', 'published_status'];
+    // protected $fillable = ['name', 'image', 'price', 'description', 'enable', 'published_status'];
+    protected $fillable = ['color_name','color_code','image', 'price', 'description', 'enable', 'published_status', 'product_id'];
 
     static public function findIfEnable($id){
         // $option = self::where([

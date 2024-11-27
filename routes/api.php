@@ -45,9 +45,13 @@ Route::middleware('auth')->get('/user', function (Request $request) {
 // );
 
 // Route::post('/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
-Route::prefix('back')->group(function () {
+Route::prefix('back')->name('back.')->group(function () {
     Route::post('/products/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
+    Route::resource('products', BackProductController::class)->except(['create', 'edit']);
+
+    Route::resource('products.productOptions', BackProductOptionController::class)->except(['create', 'edit', 'index']);
 });
+
 
 Route::resource('categories', BackCategoryController::class)->except(['create', 'edit']);
 Route::resource('categories.subcategories', BackSubcategoryController::class)->except(['show', 'create', 'edit']);

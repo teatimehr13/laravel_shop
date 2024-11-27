@@ -2,17 +2,19 @@
 
 namespace App\Http\Requests\Back;
 
-use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Models\ProductOption;
 
-class ProductRequest extends FormRequest
+class ProductOptionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
+        // return $this->authorize('store', ProductOption::class);
+        // return auth()->user()->hasRole('admin');
         return true;
     }
 
@@ -24,15 +26,17 @@ class ProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'color_name' => 'required|string',
+            'color_code' => 'required|string',
             'image' => 'image|nullable',
-            'title' => 'string|nullable',
+            'description' => 'string|nullable',
             'price' => 'string',
             'published_status' => [
                 'required',
-                Rule::in(array_keys(Product::published_statuses)) //限定值在自定義範圍內
+                // Rule::in(array_keys(Product::published_statuses)) //限定值在自定義範圍內
             ],
-            'subcategory_id' => 'required|integer|exists:subcategories,id',
+            'product_id' => 'required|integer|exists:products,id',
+            'enable' => 'required|integer'
             // 'product_options' => 'nullable|array' //放productOptionsRequest那
         ];
     }
