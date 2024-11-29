@@ -47,6 +47,7 @@ Route::middleware('auth')->get('/user', function (Request $request) {
 // Route::post('/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
 Route::prefix('back')->name('back.')->group(function () {
     Route::post('/products/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
+    Route::post('/products/updateProductImages', [BackProductOptionController::class, 'updateProductImages'])->name('updateProductImages');
     Route::resource('products', BackProductController::class)->except(['create', 'edit']);
 
     Route::resource('products.productOptions', BackProductOptionController::class)->except(['create', 'edit', 'index']);
