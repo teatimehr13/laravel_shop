@@ -1,8 +1,19 @@
-product和product_options之間的關聯
+*category + subcategory
 
-name|image|image|subcateogry|published_status|product_options|edit/delete
+| 名稱 | 索引        |  子類別 | 顯示 | 排序 | 操作    |   |   |   |   |
+|----|-----------|------|----|----|-------|---|---|---|---|
+| 耳機 | headphone | 耳機類型 | 是  | 1  | 編輯 刪除 |   |   |   |   |
+| 相機 | camera    | 相機類型 | 是  | 1  | 編輯 刪除 |   |   |   |   |
+|    |           |      |    |    |       |   |   |   |   |
+|    |           |      |    |    |       |   |   |   |   |
+|    |           |      |    |    |       |   |   |   |   |
+|    |           |      |    |    |       |   |   |   |   |
+|    |           |      |    |    |       |   |   |   |   |
+|    |           |      |    |    |       |   |   |   |   |
+|    |           |      |    |    |       |   |   |   |   |
 
-其中的product_options用來
+按下類型後跳出彈跳視窗
+
 
 
 *products

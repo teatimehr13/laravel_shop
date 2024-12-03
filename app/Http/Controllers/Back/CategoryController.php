@@ -38,9 +38,14 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request)
     {
-        $category = Category::create($request->validated());
-        // return response()->json($category);
-        return new CategoryResource($category);
+        $validated = $request->validated();
+
+        $maxOrderIndex = Category::max('order_index');
+        $validated['order_index'] = ($maxOrderIndex ?? 0) + 1;
+
+        $category = Category::create($validated);
+        return response()->json(['msg' => 'create successful', 'data' => $category]);
+        // return new CategoryResource($category);
     }
 
     /**

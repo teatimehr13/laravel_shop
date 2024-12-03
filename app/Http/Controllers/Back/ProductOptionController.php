@@ -218,7 +218,7 @@ class ProductOptionController extends Controller
                     $currentMaxOrder++;
                     $product_image['order'] = $currentMaxOrder;
                     $product_image['is_combination'] = 0;
-                    Log::info($currentMaxOrder);
+                    // Log::info($currentMaxOrder);
                     array_push($new_product_images, new ProductImage($product_image));
                 } else {
                     $currentProductImage = ProductImage::where('id', $id)->first();

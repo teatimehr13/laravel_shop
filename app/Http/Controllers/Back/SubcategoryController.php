@@ -29,8 +29,14 @@ class SubcategoryController extends Controller
      * Store a newly created resource in storage.
      */
     public function store($category_id, SubcategoryRequest $request) {
+        $validated = $request->validated();
         $category = Category::find($category_id);
-        $subcategory = $category->subcategories()->create($request->validated());
+
+        //找到該類別的子類別的排序最大數值
+        $maxOrderIndex = $category->subcategories()->max('order_index');
+        $validated['order_index'] = ($maxOrderIndex ?? 0) + 1;
+
+        $subcategory = $category->subcategories()->create($validated);
         return new SubcategoryResource($subcategory);
     }
 

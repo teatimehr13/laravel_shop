@@ -27,7 +27,7 @@ class CategoryRequest extends FormRequest
             'name' => 'required|string|max:255',
             'search_key' => 'required|string|regex:/^[a-zA-Z0-9_]+$/i|unique:categories,search_key,'.$this->category,
             // 'search_key' => 'required|string|regex:/^[a-zA-Z0-9_]+$/i|unique:categories',
-            'order_index' => 'required|integer|min:1|max:9999',
+            // 'order_index' => 'required|integer|min:1|max:9999',
             'show_in_list' => 'required|boolean',
         ];
     }
