@@ -54,7 +54,7 @@ class User extends Authenticatable
     }
 
     public function getPurchaseCartOrCreate(){
-        $purchase_cart = $this->purchase_cart;
+        $purchase_cart = $this->purchase_cart()->first();
         if(!$purchase_cart){
             $purchase_cart = Cart::create([
                 'user_id' => $this->id,

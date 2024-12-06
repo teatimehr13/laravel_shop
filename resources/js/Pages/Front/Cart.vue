@@ -1,3 +1,32 @@
+<template>
+    <!-- <FrontendLayout /> -->
+    <div>
+        <div v-for="(item, index) in cartItems">
+            <label>名稱: {{ item.productOption.name }}</label>
+            <button type="button" @click="changeValue(item.productOption.id, -1, index)">-</button>
+            <input type="text" v-model="item.quantity" />
+            <button type="button" @click="changeValue(item.productOption.id, 1, index)">+</button>
+            <button type="button" @click="deleteCartItem(item.productOption.id)">Del</button>
+        </div>
+
+        <div>
+            <label for="">Total Price : <span>{{ endPrice }}</span></label>
+        </div>
+    </div>
+
+    <div>
+        <div>
+            <button type="button" @click="checkout">結帳</button>
+        </div>
+        <!-- <form @submit.prevent="logout">
+            <button type="submit">logout</button>
+        </form> -->
+        <!-- <button @click="logout">Logout</button> -->
+        <Link href="/logout" method="post" as="button" type="button">Logout</Link>
+    </div>
+
+</template>
+
 <script setup>
 import { onMounted, ref } from 'vue';
 import web from '@/web/web';
@@ -17,8 +46,8 @@ import FrontendLayout from '@/Layouts/FrontendLayout.vue';
 // });
 
 const updateCartTotal = (cartItems) => {
-    const total = cartItems.value.reduce((sum,item) =>
-    sum + item.productOption.price * item.quantity, 0);
+    const total = cartItems.value.reduce((sum, item) =>
+        sum + item.productOption.price * item.quantity, 0);
     endPrice = total;
 }
 
@@ -92,13 +121,13 @@ const logout = () => {
     useForm().post(route('logout'));
 };
 
-async function checkout(){
+async function checkout() {
     try {
         // http://127.0.0.1:8000/api
         await api.get('/cart/checkout', {
-            
+
         });
-    } catch(error){
+    } catch (error) {
         console.error('fail to checkout')
     }
 }
@@ -119,34 +148,3 @@ onMounted(
 
     })
 </script>
-
-
-<template>
-    <FrontendLayout />
-    <div>
-        <div v-for="(item, index) in cartItems">
-            <label>名稱: {{ item.productOption.name }}</label>
-            <button type="button" @click="changeValue(item.productOption.id, -1, index)">-</button>
-            <input type="text" v-model="item.quantity" />
-            <button type="button" @click="changeValue(item.productOption.id, 1, index)">+</button>
-            <button type="button" @click="deleteCartItem(item.productOption.id)">Del</button>
-        </div>
-
-        <div>
-            <label for="">Total Price : <span>{{ endPrice }}</span></label>
-        </div>
-    </div>
-
-    <div>
-        <div>
-            <button type="button" @click="checkout">結帳</button>
-        </div>
-        <!-- <form @submit.prevent="logout">
-            <button type="submit">logout</button>
-        </form> -->
-        <!-- <button @click="logout">Logout</button> -->
-        <Link href="/logout" method="post" as="button" type="button">Logout</Link>
-    </div>
-
-</template>
-

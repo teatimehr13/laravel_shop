@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Back\ProductController as BackProductController;
 use App\Http\Controllers\Back\ProductOptionController as BackProductOptionController;
+use App\Http\Controllers\Back\StoreController as BackStoreController;
 use Illuminate\Foundation\Application;
 use Inertia\Inertia;
 
@@ -36,12 +37,16 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->name('dashboard');
 
+Route::get('/cart', function () {
+    return Inertia::render('Front/Cart');
+})->name('cart');
+
+Route::get('/product_show', function () {
+    return Inertia::render('Front/Product_show');
+})->name('product_show');
+
+
 Route::middleware('auth')->group(function () {
-    Route::get('/cart', function () {
-        return Inertia::render('Front/Cart');
-    })->name('cart');
-
-
     Route::prefix('back')->group(function () {
         Route::resource('products.productOptions', BackProductOptionController::class)
             ->only(['index'])
@@ -53,6 +58,7 @@ Route::middleware('auth')->group(function () {
         // })->name('products');
 
         Route::resource('products', BackProductController::class)->only(['index']);
+        Route::resource('stores', BackStoreController::class);
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -1,14 +1,14 @@
 <template>
-    <BackendLayout />    
+    <!-- <FrontendLayout />     -->
     <div>
         <!-- <form @submit.prevent="addToCart"> -->
         <div>
             <label for="product_option_1">Product Option 1:</label>
-            <input type="number" v-model="productOptions['product_option_28']" />
+            <input type="number" v-model="productOptions['product_option_1']" />
         </div>
         <div>
             <label for="product_option_2">Product Option 2:</label>
-            <input type="number" v-model="productOptions['product_option_29']" />
+            <input type="number" v-model="productOptions['product_option_3']" />
         </div>
         <button type="button" @click="addToCart">Add to Cart</button>
         <button type="button" @click="deleteCartItem">Del to CartItem</button>
@@ -19,12 +19,12 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import api from '@/api/api';
-import BackendLayout from '@/Layouts/BackendLayout.vue';
+import FrontendLayout from '@/Layouts/FrontendLayout.vue';
 
 
 let productOptions = ref({
-    product_option_28: 10,
-    product_option_29: 20
+    product_option_1: 10,
+    product_option_3: 20
 });
 
 async function addToCart() {

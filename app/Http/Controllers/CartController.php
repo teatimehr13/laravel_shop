@@ -18,6 +18,7 @@ class CartController extends Controller
     public function index(Request $request)
     {
         // Log::info($request->user());
+        Log::info($request);
         $cartItems = $this->getCartItems($request);
         $endPrice = $this->getEndPrice($request);
         return response()->json(
