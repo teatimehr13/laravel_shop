@@ -1,16 +1,38 @@
 <?php
 
 namespace App\Http\Controllers\Back;
+
 use App\Http\Controllers\Controller;
 use App\Models\Store;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class StoreController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $stores = Store::where('is_enabled', 1)->paginate(20);
+        $storeType = $request->input('store_type');
+        $address = $request->input('address');
+
+        // 構建查詢
+        // $query = Store::query();
+        $query = Store::where('is_enabled', 1);
+
+        if (!is_null($storeType)) {
+            $query->where('store_type', $storeType);
+        }
+
+        if (!is_null($address)) {
+            $query->where('address', 'LIKE', "%$address%");
+        }
+
+        $stores = $query->paginate(10);
+        // $stores = Store::where('is_enabled', 1)->paginate(10);
+
+        Log::info('SQL: ' . $query->toSql());
+        Log::info('Bindings: ' . json_encode($query->getBindings()));
+
         $storesArr = $stores->toArray();
 
         $data = [
@@ -19,8 +41,14 @@ class StoreController extends Controller
             'next_page' => $stores->nextPageUrl(),
         ];
 
+        // 判斷是否為 API 請求
+        if ($request->wantsJson()) {
+            return response()->json($stores);
+        }
+
         return Inertia::render('Back/Store', [
-            'data' => $data
+            // 'data' => $data
+            'stores' => $stores
         ]);
     }
 
