@@ -15,19 +15,50 @@
         <table>
             <thead>
                 <tr>
-                    <th>店鋪名稱</th>
+                    <th>門市名稱</th>
+                    <th>圖片</th>
+                    <th>類型</th>
                     <th>地址</th>
                     <th>聯絡電話</th>
+                    <th>營業時間</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="store in stores.data" :key="store.id">
                     <td>{{ store.store_name }}</td>
+                    <td>
+                        <img :src=" store.image" alt="" style="max-width: 75px;">
+                    </td>
+                    <td>{{ store.store_type_name }}</td>
                     <td>{{ store.address }}</td>
                     <td>{{ store.contact_number }}</td>
+                    <td>{{ store.opening_hours }}</td>
                 </tr>
             </tbody>
         </table>
+
+        <!-- <div class="table">
+            <div class="table-header">
+                <div class="table-row">
+                    <div class="table-cell">門市名稱</div>
+                    <div class="table-cell">圖片</div>
+                    <div class="table-cell">地址</div>
+                    <div class="table-cell">聯絡電話</div>
+                    <div class="table-cell">營業時間</div>
+                </div>
+            </div>
+            <div class="table-body">
+                <div class="table-row" v-for="store in stores.data" :key="store.id">
+                    <div class="table-cell">{{ store.store_name }}</div>
+                    <div class="table-cell">{{ store.image }}</div>
+                    <div class="table-cell">{{ store.address }}</div>
+                    <div class="table-cell">{{ store.contact_number }}</div>
+                    <div class="table-cell">{{ store.opening_hours }}</div>
+                </div>
+            </div>
+        </div> -->
+
+
         <div class="pagination">
             <!-- <Link :href="stores.prev_page_url">上一頁</Link>
             <Link :href="stores.next_page_url">下一頁</Link> -->
@@ -136,7 +167,7 @@ const pageNumbers = computed(() => {
 
     // 動態計算 start 和 end，確保顯示範圍合理
     let start = Math.max(1, currentPage - 1); //傳回最小值
-    let end = Math.min(totalPages , currentPage + 1);  //傳回最大值
+    let end = Math.min(totalPages, currentPage + 1);  //傳回最大值
 
     // 當前頁為第一頁時，顯示前 5 頁
     if (currentPage === 1) {
@@ -204,5 +235,72 @@ function updateStoresData(response) {
 .pagination button:disabled {
     cursor: not-allowed;
     opacity: 0.6;
+}
+
+
+/* 整個表格容器 */
+.table {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ccc;
+    width: 100%;
+    /* 或者其他適合的寬度 */
+    border-collapse: collapse;
+}
+
+/* 表頭 */
+.table-header {
+    background-color: #f8f8f8;
+    font-weight: bold;
+}
+
+/* 每行 */
+.table-row {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+
+/* 單元格 */
+.table-cell {
+    flex: 1;
+    /* 平均分配空間 */
+    padding: 8px;
+    text-align: left;
+    /* 根據需要調整對齊 */
+    border-right: 1px solid #ccc;
+}
+
+/* 移除最後一列的右邊框 */
+.table-row .table-cell:last-child {
+    border-right: none;
+}
+
+.table-row:hover {
+    background-color: #f0f0f0;
+}
+
+.table-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.table-body .table-row:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+
+/* 響應式：窄屏時變成垂直堆疊 */
+@media (max-width: 600px) {
+    .table-row {
+        flex-direction: column;
+        align-items: flex-start;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .table-cell {
+        flex: none;
+        width: 100%;
+    }
 }
 </style>

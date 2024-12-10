@@ -46,7 +46,7 @@ Route::get('/product_show', function () {
 })->name('product_show');
 
 
-Route::middleware('auth')->group(function () {
+// Route::middleware('auth')->group(function () {
     Route::prefix('back')->group(function () {
         Route::resource('products.productOptions', BackProductOptionController::class)
             ->only(['index'])
@@ -59,12 +59,15 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('products', BackProductController::class)->only(['index']);
         Route::resource('stores', BackStoreController::class);
+
+        Route::post('/stores/update_stores', [BackStoreController::class, 'update_stores'])->name('stores.update_stores');
+        Route::post('/stores/delete_stores', [BackStoreController::class, 'delete_stores'])->name('stores.delete_stores');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+// });
 
 // Route::post('/back/products/{product_id}/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
 
