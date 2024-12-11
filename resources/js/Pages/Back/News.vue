@@ -1,0 +1,127 @@
+<template>
+    <BackendLayout />
+
+    <div>
+        <div class="filters">
+            <select v-model="storeType" @change="applyFilters">
+                <option value="">全部類型</option>
+                <option value="0">促銷優惠</option>
+                <option value="1">公告</option>
+            </select>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>標題</th>
+                    <th>日期</th>
+                    <th>內文</th>
+                    <th>圖片</th>
+                    <th>顯示</th>
+                    <th>類型</th>
+                    <th>營業時間</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="store in stores.data" :key="store.id">
+                    <td>{{ store.store_name }}</td>
+                    <td>
+                        <img :src=" store.image" alt="" style="max-width: 75px;">
+                    </td>
+                    <td>{{ store.store_type_name }}</td>
+                    <td>{{ store.address }}</td>
+                    <td>{{ store.contact_number }}</td>
+                    <td>{{ store.opening_hours }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        <div class="pagination">
+            <button :disabled="stores.current_page === 1" @click="fetchPage(stores.prev_page_url)">
+                上一頁
+            </button>
+
+            <button v-for="page in pageNumbers" :key="page" :class="{ active: page === stores.current_page }"
+                @click="goToPage(page)" :disabled="page === stores.current_page || page === '...'">
+                {{ page }}
+            </button>
+
+            <button v-if="stores.next_page_url" @click="fetchPage(stores.next_page_url)">
+                下一頁
+            </button>
+        </div>
+    </div>
+</template>
+
+
+<script setup>
+import { onMounted, ref, defineProps, reactive, computed } from 'vue';
+import api from '@/api/api';
+import BackendLayout from '@/Layouts/BackendLayout.vue';
+import axios from 'axios';
+
+//初始資料
+const props = defineProps({
+    stores: {
+        required: true
+    },
+});
+
+const stores = reactive(props.stores);
+console.log(stores);
+
+
+const storeType = ref("");
+const addressFilter = ref("");
+
+const getParams = () => {
+    return {
+        store_type: storeType.value || null,
+        address: addressFilter.value || null,
+    };
+}
+
+function applyFilters() {
+    axios.get('/back/stores', { params: getParams() })
+        .then(response => {
+            // 更新 stores 的內容
+            console.log(response.data);
+            updateStoresData(response)
+        })
+        .catch(error => {
+            console.error("Error fetching filtered stores:", error);
+        });
+}
+// console.log(props.stores);
+function fetchPage(url) {
+    axios.get(url, { params: getParams() })
+        .then(response => {
+            console.log(response.data);
+            // 更新 stores 的內容
+            updateStoresData(response)
+        })
+        .catch(error => {
+            console.error("Error fetching page:", error);
+        });
+}
+
+function goToPage(page) {
+    const url = `/back/stores?page=${page}`;
+    fetchPage(url);
+}
+
+
+function updateStoresData(response) {
+    const data = response.data;
+    stores.data = data.data;
+    stores.links = data.links;
+    stores.total = data.total;
+    stores.per_page = data.per_page;
+    stores.current_page = data.current_page;
+    stores.next_page_url = data.next_page_url;
+    stores.prev_page_url = data.prev_page_url;
+    stores.last_page = data.last_page;
+}
+
+</script>

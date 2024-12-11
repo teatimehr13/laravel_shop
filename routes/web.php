@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Back\ProductController as BackProductController;
 use App\Http\Controllers\Back\ProductOptionController as BackProductOptionController;
 use App\Http\Controllers\Back\StoreController as BackStoreController;
+use App\Http\Controllers\Back\NewsController as BackNewsController;
 use Illuminate\Foundation\Application;
 use Inertia\Inertia;
 
@@ -46,13 +47,14 @@ Route::get('/product_show', function () {
 })->name('product_show');
 
 
-// Route::middleware('auth')->group(function () {
+Route::middleware('auth')->group(function () {
     Route::prefix('back')->group(function () {
         Route::resource('products.productOptions', BackProductOptionController::class)
             ->only(['index'])
             ->names([
                 'index' => 'back.products.productOptions.index'
             ]);
+
         // Route::get('/products', function () {
         //     return Inertia::render('Back/Product');
         // })->name('products');
@@ -62,12 +64,16 @@ Route::get('/product_show', function () {
 
         Route::post('/stores/update_stores', [BackStoreController::class, 'update_stores'])->name('stores.update_stores');
         Route::post('/stores/delete_stores', [BackStoreController::class, 'delete_stores'])->name('stores.delete_stores');
+
+        Route::resource('news', BackNewsController::class);
+        Route::post('/news/update_news', [BackNewsController::class, 'update_news'])->name('news.update_news');
+        Route::post('/news/delete_news', [BackNewsController::class, 'delete_news'])->name('news.delete_news');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-// });
+});
 
 // Route::post('/back/products/{product_id}/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
 
