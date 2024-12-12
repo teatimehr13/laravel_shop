@@ -1,81 +1,83 @@
-<template>
-    <BackendLayout />
-
-    <div>
-        <div class="filters">
-            <select v-model="storeType" @change="applyFilters">
-                <option value="">全部類型</option>
-                <option value="0">直營</option>
-                <option value="1">特約</option>
-                <option value="2">授權</option>
-            </select>
-            <input v-model="addressFilter" type="text" placeholder="輸入地址篩選" @keyup.enter="applyFilters" />
-        </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>門市名稱</th>
-                    <th>圖片</th>
-                    <th>類型</th>
-                    <th>地址</th>
-                    <th>聯絡電話</th>
-                    <th>營業時間</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="store in stores.data" :key="store.id">
-                    <td>{{ store.store_name }}</td>
-                    <td>
-                        <img :src=" store.image" alt="" style="max-width: 75px;">
-                    </td>
-                    <td>{{ store.store_type_name }}</td>
-                    <td>{{ store.address }}</td>
-                    <td>{{ store.contact_number }}</td>
-                    <td>{{ store.opening_hours }}</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- <div class="table">
-            <div class="table-header">
-                <div class="table-row">
-                    <div class="table-cell">門市名稱</div>
-                    <div class="table-cell">圖片</div>
-                    <div class="table-cell">地址</div>
-                    <div class="table-cell">聯絡電話</div>
-                    <div class="table-cell">營業時間</div>
+<template> 
+    <BackendLayout>
+        <template #switch>
+            <div>
+                <div class="filters">
+                    <select v-model="storeType" @change="applyFilters">
+                        <option value="">全部類型</option>
+                        <option value="0">直營</option>
+                        <option value="1">特約</option>
+                        <option value="2">授權</option>
+                    </select>
+                    <input v-model="addressFilter" type="text" placeholder="輸入地址篩選" @keyup.enter="applyFilters" />
+                </div>
+    
+                <table>
+                    <thead>
+                        <tr>
+                            <th>門市名稱</th>
+                            <th>圖片</th>
+                            <th>類型</th>
+                            <th>地址</th>
+                            <th>聯絡電話</th>
+                            <th>營業時間</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="store in stores.data" :key="store.id">
+                            <td>{{ store.store_name }}</td>
+                            <td>
+                                <img :src="store.image" alt="" style="max-width: 75px;">
+                            </td>
+                            <td>{{ store.store_type_name }}</td>
+                            <td>{{ store.address }}</td>
+                            <td>{{ store.contact_number }}</td>
+                            <td>{{ store.opening_hours }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+    
+                <!-- <div class="table">
+                <div class="table-header">
+                    <div class="table-row">
+                        <div class="table-cell">門市名稱</div>
+                        <div class="table-cell">圖片</div>
+                        <div class="table-cell">地址</div>
+                        <div class="table-cell">聯絡電話</div>
+                        <div class="table-cell">營業時間</div>
+                    </div>
+                </div>
+                <div class="table-body">
+                    <div class="table-row" v-for="store in stores.data" :key="store.id">
+                        <div class="table-cell">{{ store.store_name }}</div>
+                        <div class="table-cell">{{ store.image }}</div>
+                        <div class="table-cell">{{ store.address }}</div>
+                        <div class="table-cell">{{ store.contact_number }}</div>
+                        <div class="table-cell">{{ store.opening_hours }}</div>
+                    </div>
+                </div>
+            </div> -->
+    
+    
+                <div class="pagination">
+                    <!-- <Link :href="stores.prev_page_url">上一頁</Link>
+                <Link :href="stores.next_page_url">下一頁</Link> -->
+                    <button :disabled="stores.current_page === 1" @click="fetchPage(stores.prev_page_url)">
+                        上一頁
+                    </button>
+    
+                    <button v-for="page in pageNumbers" :key="page" :class="{ active: page === stores.current_page }"
+                        @click="goToPage(page)" :disabled="page === stores.current_page || page === '...'">
+                        {{ page }}
+                    </button>
+    
+                    <button v-if="stores.next_page_url" @click="fetchPage(stores.next_page_url)">
+                        下一頁
+                    </button>
                 </div>
             </div>
-            <div class="table-body">
-                <div class="table-row" v-for="store in stores.data" :key="store.id">
-                    <div class="table-cell">{{ store.store_name }}</div>
-                    <div class="table-cell">{{ store.image }}</div>
-                    <div class="table-cell">{{ store.address }}</div>
-                    <div class="table-cell">{{ store.contact_number }}</div>
-                    <div class="table-cell">{{ store.opening_hours }}</div>
-                </div>
-            </div>
-        </div> -->
-
-
-        <div class="pagination">
-            <!-- <Link :href="stores.prev_page_url">上一頁</Link>
-            <Link :href="stores.next_page_url">下一頁</Link> -->
-            <button :disabled="stores.current_page === 1" @click="fetchPage(stores.prev_page_url)">
-                上一頁
-            </button>
-
-            <button v-for="page in pageNumbers" :key="page" :class="{ active: page === stores.current_page }"
-                @click="goToPage(page)" :disabled="page === stores.current_page || page === '...'">
-                {{ page }}
-            </button>
-
-            <button v-if="stores.next_page_url" @click="fetchPage(stores.next_page_url)">
-                下一頁
-            </button>
-        </div>
-    </div>
+        </template>
+    </BackendLayout>
 </template>
 
 

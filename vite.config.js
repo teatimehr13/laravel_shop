@@ -2,6 +2,10 @@ import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue'; // 引入 Vue 插件
 
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+
 export default defineConfig({
     plugins: [
         laravel({
@@ -9,6 +13,12 @@ export default defineConfig({
             refresh: true,
         }),
         vue(), // 添加 Vue 插件
+        AutoImport({
+            resolvers: [ElementPlusResolver()],
+          }),
+          Components({
+            resolvers: [ElementPlusResolver()],
+          }),
     ],
     resolve: {
         alias: {

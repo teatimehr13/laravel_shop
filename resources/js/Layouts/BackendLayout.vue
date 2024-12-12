@@ -1,51 +1,85 @@
 <template>
-    <div class="layout">
-        <header>
+    <el-container>
+        <!-- Header 固定 -->
+        <el-header>
             <Header />
-        </header>
+        </el-header>
 
-        <!-- <aside> -->
-            <!-- <Sidebar /> -->
-        <!-- </aside> -->
+        <!-- 主內容 -->
+        <el-container>
+            <!-- Aside 固定 -->
+            <el-aside width="200px">
+                <Aside />
+            </el-aside>
 
-        <!-- <main>
-            <slot />
-        </main> -->
-    </div>
+            <!-- Main 動態插槽 -->
+            <el-main>
+                <slot name="switch" />
+                <!-- <slot /> -->
+            </el-main>
+        </el-container>
+    </el-container>
 </template>
 
 <script setup>
 import Header from '@/Components/Back/Header.vue';
-// import Sidebar from '@/Components/Sidebar.vue';
+import Aside from '@/Components/Back/Aside.vue';
+
 </script>
 
-<style scoped>
-.layout {
+<style>
+/* .layout {
     display: flex;
     flex-direction: row;
 }
+
 header {
     width: 100%;
     height: 60px;
     background-color: #333;
     color: white;
-    /* 可以根據設計需求自定義樣式 */
 }
+
 aside {
     width: 250px;
     background-color: #f8f9fa;
-    /* 可以根據設計需求自定義樣式 */
 }
+
 main {
     flex-grow: 1;
     padding: 20px;
+} */
+.el-header {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+}
+
+.el-aside {
+    background-color: #D3DCE6;
+    color: #333;
+    text-align: center;
+    line-height: 200px;
+}
+
+.el-main {
+    background-color: #E9EEF3;
+    color: #333;
+    /* text-align: center;
+    line-height: 160px; */
+}
+
+body>.el-container {
+    margin-bottom: 40px;
+}
+
+.el-container:nth-child(5) .el-aside,
+.el-container:nth-child(6) .el-aside {
+    line-height: 260px;
+}
+
+.el-container:nth-child(7) .el-aside {
+    line-height: 320px;
 }
 </style>
-
-
-<!-- 在子頁面引入以下 -->
-<!-- import BackendLayout from '@/Layouts/BackendLayout.vue';
-
-defineProps({
-    layout: BackendLayout,
-}); -->
