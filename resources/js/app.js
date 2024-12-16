@@ -1,6 +1,6 @@
+import 'element-plus/dist/index.css';
 import './bootstrap';
 import '../css/app.css';
-import 'element-plus/dist/index.css';
 
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';

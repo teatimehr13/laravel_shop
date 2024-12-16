@@ -5,7 +5,6 @@
             <Header />
         </el-header>
 
-        <!-- 主內容 -->
         <el-container>
             <!-- Aside 固定 -->
             <el-aside width="200px">
@@ -49,37 +48,46 @@ main {
     flex-grow: 1;
     padding: 20px;
 } */
+ 
 .el-header {
-    background-color: #B3C0D1;
+    background-color: #ffffff;
     color: #333;
     text-align: center;
     line-height: 60px;
 }
 
-.el-aside {
-    background-color: #D3DCE6;
+/* .el-aside {
+    background-color: #ffffff;
     color: #333;
     text-align: center;
     line-height: 200px;
-}
+    border-top: 1px solid #f3f3f3;
+} */
 
 .el-main {
-    background-color: #E9EEF3;
+    background-color: rgb(238, 241, 248);
     color: #333;
-    /* text-align: center;
-    line-height: 160px; */
+    border-top: 1px solid rgb(237, 240, 247);
+    padding: 20px;
+}
+
+.el-main>div {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px 0 rgba(74, 91, 109, .1);
+    padding: 16px 24px 24px;
 }
 
 body>.el-container {
     margin-bottom: 40px;
 }
 
-.el-container:nth-child(5) .el-aside,
+/* .el-container:nth-child(5) .el-aside,
 .el-container:nth-child(6) .el-aside {
     line-height: 260px;
 }
 
 .el-container:nth-child(7) .el-aside {
     line-height: 320px;
-}
+} */
 </style>

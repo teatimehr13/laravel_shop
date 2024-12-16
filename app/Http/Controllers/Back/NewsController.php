@@ -37,7 +37,7 @@ class NewsController extends Controller
             return response()->json($newArr);
         }
 
-        return Inertia::render('Back/Store', [
+        return Inertia::render('Back/News', [
             'news' => $news
         ]);
     }

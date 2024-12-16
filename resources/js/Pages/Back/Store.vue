@@ -1,18 +1,21 @@
-<template> 
+<template>
     <BackendLayout>
         <template #switch>
             <div>
                 <div class="filters">
-                    <select v-model="storeType" @change="applyFilters">
-                        <option value="">全部類型</option>
-                        <option value="0">直營</option>
-                        <option value="1">特約</option>
-                        <option value="2">授權</option>
-                    </select>
-                    <input v-model="addressFilter" type="text" placeholder="輸入地址篩選" @keyup.enter="applyFilters" />
+                    <el-select v-model="storeType" placeholder="全部類型" style="width: 150px" @change="applyFilters">
+                        <el-option v-for="item in storeTypeArr" :key="item.value" :label="item.name"
+                            :value="item.value" />
+                            <!-- <el-option label="全部類型" value=""></el-option>
+                            <el-option label="直營" value="0"></el-option>
+                            <el-option label="特約" value="1"></el-option>
+                            <el-option label="授權" value="2"></el-option> -->
+                    </el-select>
+                    
+                    <el-input v-model="addressFilter" type="text" style="width: 240px" placeholder="輸入地址篩選" @keyup.enter="applyFilters"/>
                 </div>
-    
-                <table>
+
+                <!-- <table>
                     <thead>
                         <tr>
                             <th>門市名稱</th>
@@ -35,8 +38,59 @@
                             <td>{{ store.opening_hours }}</td>
                         </tr>
                     </tbody>
-                </table>
-    
+                </table> -->
+
+                <div>
+                    <el-table :data="stores.data" style="width: 100%" :max-height="600" border>
+                        <!-- 門市名稱 -->
+                        <el-table-column prop="store_name" label="門市名稱" width="200" fixed>
+                        </el-table-column>
+
+                        <!-- 圖片 -->
+                        <el-table-column label="圖片" width="120">
+                            <template #default="scope">
+                                <img :src="scope.row.image" alt="店面圖片" style="max-width: 75px; border-radius: 4px;" />
+                            </template>
+                        </el-table-column>
+
+
+                        <el-table-column prop="store_type_name" label="類型" width="120">
+                        </el-table-column>
+
+                        <el-table-column prop="address" label="地址" width="300">
+                            <template #default="scope">
+                                <div class="ellipsis" :title="scope.row.address">{{ scope.row.address }}</div>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column prop="contact_number" label="聯絡電話" width="150">
+                        </el-table-column>
+
+                        <el-table-column prop="opening_hours" label="營業時間" width="250">
+                            <template #default="scope">
+                                <!-- 使用 computed 返回的 formattedOpeningHours 渲染對應行 -->
+                                <div v-html="formattedOpeningHours[scope.$index]"></div>
+                            </template>
+                        </el-table-column>
+
+                        <!-- 操作 -->
+                        <el-table-column width="140" :fixed="isFixed ? 'right' : false">
+                            <template #header>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span>操作</span>
+                                    <el-tooltip content="固定/取消固定操作列">
+                                        <el-checkbox v-model="isFixed"></el-checkbox>
+                                    </el-tooltip>
+                                </div>
+                            </template>
+
+                            <el-button size="small">編輯</el-button>
+                            <el-button size="small" type="danger">移除</el-button>
+                        </el-table-column>
+                    </el-table>
+                </div>
+
+
                 <!-- <div class="table">
                 <div class="table-header">
                     <div class="table-row">
@@ -57,20 +111,20 @@
                     </div>
                 </div>
             </div> -->
-    
-    
+
+
                 <div class="pagination">
                     <!-- <Link :href="stores.prev_page_url">上一頁</Link>
                 <Link :href="stores.next_page_url">下一頁</Link> -->
                     <button :disabled="stores.current_page === 1" @click="fetchPage(stores.prev_page_url)">
                         上一頁
                     </button>
-    
+
                     <button v-for="page in pageNumbers" :key="page" :class="{ active: page === stores.current_page }"
                         @click="goToPage(page)" :disabled="page === stores.current_page || page === '...'">
                         {{ page }}
                     </button>
-    
+
                     <button v-if="stores.next_page_url" @click="fetchPage(stores.next_page_url)">
                         下一頁
                     </button>
@@ -86,6 +140,7 @@ import { onMounted, ref, defineProps, reactive, computed } from 'vue';
 import api from '@/api/api';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import axios from 'axios';
+import debounce from "lodash.debounce";
 
 //初始資料
 const props = defineProps({
@@ -95,15 +150,14 @@ const props = defineProps({
 });
 
 const stores = reactive(props.stores);
-// const stores = ref({
-//     current_page: 1,
-//     per_page: 10,
-//     total: 100, // 總筆數
-//     next_page_url: "/back/stores?page=2",
-//     prev_page_url: null,
-//     data: [], // 當前頁的資料
-// });
 console.log(stores);
+
+let storeTypeArr = ref([
+    { name: "全部類型", value: "" },
+    { name: "直營", value: "0" },
+    { name: "特約", value: "1" },
+    { name: "授權", value: "2" },
+]);
 
 
 const storeType = ref("");
@@ -116,17 +170,20 @@ const getParams = () => {
     };
 }
 
-function applyFilters() {
-    axios.get('/back/stores', { params: getParams() })
-        .then(response => {
-            // 更新 stores 的內容
-            console.log(response.data);
-            updateStoresData(response)
-        })
-        .catch(error => {
-            console.error("Error fetching filtered stores:", error);
-        });
-}
+const applyFilters = debounce(() => {
+  console.log("storeType:", storeType.value);
+  axios
+    .get("/back/stores", { params: getParams() })
+    .then((response) => {
+      console.log("Filtered data:", response.data);
+      updateStoresData(response);
+    })
+    .catch((error) => {
+      console.error("Error fetching filtered stores:", error);
+    });
+}, 500); 
+
+
 // console.log(props.stores);
 function fetchPage(url) {
     axios.get(url, { params: getParams() })
@@ -142,9 +199,6 @@ function fetchPage(url) {
 
 function goToPage(page) {
     const url = `/back/stores?page=${page}`;
-    // if (typeof page !== 'number' || page === stores.current_page) {
-    //     return; // 不執行任何操作
-    // }
     fetchPage(url);
 }
 
@@ -199,21 +253,34 @@ const pageNumbers = computed(() => {
 });
 
 function updateStoresData(response) {
-    const data = response.data;
-    stores.data = data.data;
-    stores.links = data.links;
-    stores.total = data.total;
-    stores.per_page = data.per_page;
-    stores.current_page = data.current_page;
-    stores.next_page_url = data.next_page_url;
-    stores.prev_page_url = data.prev_page_url;
-    stores.last_page = data.last_page;
+    // const data = response.data;
+    // stores.data = data.data;
+    // stores.links = data.links;
+    // stores.total = data.total;
+    // stores.per_page = data.per_page;
+    // stores.current_page = data.current_page;
+    // stores.next_page_url = data.next_page_url;
+    // stores.prev_page_url = data.prev_page_url;
+    // stores.last_page = data.last_page;
+    Object.assign(stores, response.data);
 }
+
+const formattedOpeningHours = computed(() => {
+    return stores.data.map((store) =>
+        store.opening_hours
+            .split("\n") // 按 \n 分割
+            .map((line) => line.trim()) // 去除多餘空白
+            .filter((line) => line !== "") // 過濾空行
+            .join("<br>") // 拼接成 HTML 的換行
+    );
+});
+
+const isFixed = ref(false); // 默認不固定
 
 </script>
 
 
-<style>
+<style scoped> 
 .pagination {
     display: flex;
     gap: 8px;
@@ -240,69 +307,65 @@ function updateStoresData(response) {
 }
 
 
-/* 整個表格容器 */
-.table {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid #ccc;
-    width: 100%;
-    /* 或者其他適合的寬度 */
-    border-collapse: collapse;
+th,
+td {
+    word-wrap: break-word;
+    white-space: normal;
 }
 
-/* 表頭 */
-.table-header {
-    background-color: #f8f8f8;
-    font-weight: bold;
+td img {
+    max-width: 75px;
+    border-radius: 4px;
+    display: block;
 }
 
-/* 每行 */
-.table-row {
-    display: flex;
-    border-bottom: 1px solid #ccc;
-}
 
-/* 單元格 */
-.table-cell {
-    flex: 1;
-    /* 平均分配空間 */
-    padding: 8px;
-    text-align: left;
-    /* 根據需要調整對齊 */
-    border-right: 1px solid #ccc;
-}
-
-/* 移除最後一列的右邊框 */
-.table-row .table-cell:last-child {
-    border-right: none;
-}
-
-.table-row:hover {
-    background-color: #f0f0f0;
-}
-
-.table-header {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.table-body .table-row:nth-child(odd) {
+/* 行間隔樣式 */
+tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-
-/* 響應式：窄屏時變成垂直堆疊 */
-@media (max-width: 600px) {
-    .table-row {
-        flex-direction: column;
-        align-items: flex-start;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .table-cell {
-        flex: none;
-        width: 100%;
-    }
+tr:hover {
+    background-color: #f1f1f1;
 }
+
+/* 滾動條美化 */
+.table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+
+.table-container {
+    width: 100%;
+}
+
+.ellipsis {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.el-table__header,
+.el-table__body {
+    width: 100% !important;
+    max-width: none;
+}
+
+.el-checkbox__label {
+    padding-left: 3px;
+}
+
+.filters {
+    margin: 10px 0 15px;
+
+}
+
+.el-select {
+    margin-right: 10px;
+}
+
 </style>
