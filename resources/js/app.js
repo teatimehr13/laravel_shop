@@ -1,4 +1,6 @@
 import 'element-plus/dist/index.css';
+// import 'element-plus/es/components/infinite-scroll/style/css';
+
 import './bootstrap';
 import '../css/app.css';
 
@@ -6,6 +8,7 @@ import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import ElTableInfiniteScroll from "el-table-infinite-scroll";
 
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -23,6 +26,7 @@ createInertiaApp({
 
         // 使用 Ziggy 路由插件
         app.use(ZiggyVue);
+        app.use(ElTableInfiniteScroll);
         app.mount(el);
     },
 });

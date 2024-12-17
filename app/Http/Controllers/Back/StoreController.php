@@ -18,9 +18,10 @@ class StoreController extends Controller
     public function index(Request $request)
     {
         $stores = $this->fetchStores($request);
-
+        
         // 判斷是否為 API 請求
         if ($request->wantsJson()) {
+            // sleep(.5); 
             return response()->json($stores);
         }
 
@@ -172,7 +173,7 @@ class StoreController extends Controller
             $query->where('address', 'LIKE', "%$address%");
         }
 
-        return $query->paginate(10)->through(fn($store) => [
+        return $query->paginate(20)->through(fn($store) => [
             'id' => $store->id,
             'store_name' => $store->store_name,
             'address' => $store->address,
