@@ -57,7 +57,30 @@
                                 </div>
                             </template>
 
-                            <el-button size="small">編輯</el-button>
+                            <!-- <el-button size="small">編輯</el-button> -->
+                            <el-popover placement="bottom-start" :width="300" trigger="click" >
+                                <template #reference>
+                                    <el-button size="small">編輯</el-button>
+                                </template>
+
+                                <el-form style="max-width: 600px" :model="popForm" label-width="auto"
+                                    :label-position="labelPosition" :size="size">
+                                    <el-form-item label="Activity name">
+                                        <el-input v-model="popForm.name"/>
+                                    </el-form-item>
+                                    <el-form-item label="Activity zone">
+                                        <el-select  placeholder="please select your zone" el-select :teleported="false" v-model="popForm.type">
+                                            <el-option label="Zone one" value="shanghai" />
+                                            <el-option label="Zone two" value="beijing" />
+                                        </el-select>
+                                    </el-form-item>
+      
+                                    <el-form-item>
+                                        <el-button type="primary" @click="onSubmit">Create</el-button>
+                                        <el-button>Cancel</el-button>
+                                    </el-form-item>
+                                </el-form>
+                            </el-popover>
                             <el-button size="small" type="danger">移除</el-button>
                         </el-table-column>
                     </el-table>
@@ -77,12 +100,32 @@ import axios from "axios";
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import debounce from "lodash.debounce";
 
+const size = ref('default');
+const labelPosition = ref('top');
+
+// 表單數據
+const popForm = reactive({
+  name: '',       // 活動名稱
+  region: '',     // 活動區域
+  date1: '',      // 日期選擇器
+  date2: '',      // 時間選擇器
+  delivery: false,
+  type: [],       // 活動類型
+  resource: '',   // 資源選擇
+  desc: '',       // 描述
+})
+
+function onSubmit() {
+  console.log('表單提交', sizeForm)
+}
+
 // 初始數據
 const stores = reactive({
     data: [],
     current_page: 1,
     last_page: null,
 });
+
 const loading = ref(false);
 const noMoreData = ref(false);
 const storeType = ref("");
@@ -178,5 +221,15 @@ const formattedOpeningHours = computed(() => {
 
 .el-select {
     margin-right: 10px;
+}
+
+::v-deep(.el-form-item__label) {
+    margin-bottom: 4px;
+    color: #172b4d;
+}
+
+::v-deep(.el-input__inner:focus) {
+    outline: none;
+    box-shadow: none;
 }
 </style>
