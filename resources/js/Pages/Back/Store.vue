@@ -62,25 +62,37 @@
                                 <el-popover placement="bottom-start" :width="300" trigger="click"
                                     v-model:visible="popoverVisible[scope.row.id]">
                                     <template #reference>
-                                        <el-button size="small">編輯</el-button>
+                                        <el-button size="small" @click="openEditPopover(scope.row)">編輯</el-button>
                                     </template>
 
                                     <el-form style="max-width: 600px" :model="popForm" label-width="auto"
                                         :label-position="labelPosition" :size="size">
-                                        <el-form-item label="Activity name">
-                                            <el-input v-model="popForm.name" />
+                                        <el-form-item label="門市名稱">
+                                            <el-input v-model="popForm.store_name" />
                                         </el-form-item>
-                                        <el-form-item label="Activity zone">
+                                        <el-form-item label="類型">
                                             <el-select placeholder="please select your zone" el-select
-                                                :teleported="false" v-model="popForm.type">
-                                                <el-option label="Zone one" value="shanghai" />
-                                                <el-option label="Zone two" value="beijing" />
+                                                :teleported="false" v-model="popForm.store_type">
+                                                <el-option label="直營" :value="0" />
+                                                <el-option label="特約展售" :value="1" />
+                                                <el-option label="授權經銷商" :value="2" />
                                             </el-select>
+                                        </el-form-item>
+                                        <el-form-item label="地址">
+                                            <el-input v-model="popForm.address" />
+                                        </el-form-item>
+
+                                        <el-form-item label="聯絡電話">
+                                            <el-input v-model="popForm.contact_number" />
+                                        </el-form-item>
+
+                                        <el-form-item label="營業時間">
+                                            <el-input v-model="popForm.opening_hours" />
                                         </el-form-item>
 
                                         <el-form-item>
-                                            <el-button type="primary" @click="onSubmit">Create</el-button>
-                                            <el-button @click="closePopover(scope.row.id)">Cancel</el-button>
+                                            <el-button type="primary" @click="onSubmit">儲存</el-button>
+                                            <el-button @click="closePopover(scope.row.id)">關閉</el-button>
                                         </el-form-item>
                                     </el-form>
                                 </el-popover>
@@ -107,24 +119,19 @@ import debounce from "lodash.debounce";
 const size = ref('default');
 const labelPosition = ref('top');
 
-
-
 // 表單數據
 const popForm = reactive({
-    name: '',       // 活動名稱
-    region: '',     // 活動區域
-    date1: '',      // 日期選擇器
-    date2: '',      // 時間選擇器
-    delivery: false,
-    type: [],       // 活動類型
-    resource: '',   // 資源選擇
-    desc: '',       // 描述
+    store_name: '',       // 名稱
+    store_type: '',       // 類型
+    address:'',
+    contact_number:'',
+    opening_hours:'',
+
 })
 
 function onSubmit() {
     console.log('表單提交', sizeForm)
 }
-
 
 
 // 初始數據
@@ -146,8 +153,8 @@ const isFixedStore = ref(false); // 默認不固定
 const storeTypeArr = [
     { name: "全部類型", value: "" },
     { name: "直營", value: "0" },
-    { name: "特約", value: "1" },
-    { name: "授權", value: "2" },
+    { name: "特約展售", value: "1" },
+    { name: "授權經銷商", value: "2" },
 ];
 
 const popoverVisible = reactive({});
@@ -157,6 +164,16 @@ const popoverVisible = reactive({});
 // });
 const closePopover = (id) => {
   popoverVisible[id] = false; // 關閉popover
+};
+
+// 打开编辑的 Popover
+const openEditPopover = (row) => {
+  // 将选中行的数据加载到 popForm
+  popForm.store_name = row.store_name;
+  popForm.store_type = row.store_type;
+  popForm.address = row.address;
+  popForm.contact_number = row.contact_number;
+  popForm.opening_hours = row.opening_hours;
 };
 
 onMounted(() => {
@@ -181,7 +198,7 @@ const loadMore = debounce(async () => {
             },
         });
 
-        // console.log(response.data);        
+        console.log(response.data);        
 
         const newData = response.data.data; // 新數據 
         const lastPage = response.data.last_page; // 總頁數 ex:11
