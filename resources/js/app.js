@@ -9,6 +9,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import ElTableInfiniteScroll from "el-table-infinite-scroll";
+import vClickOutside from "click-outside-vue3"
 
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -27,6 +28,7 @@ createInertiaApp({
         // 使用 Ziggy 路由插件
         app.use(ZiggyVue);
         app.use(ElTableInfiniteScroll);
+        app.use(vClickOutside)
         app.mount(el);
     },
 });

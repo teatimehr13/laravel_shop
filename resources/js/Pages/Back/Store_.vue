@@ -58,34 +58,33 @@
                             </template>
 
                             <!-- <el-button size="small">編輯</el-button> -->
-                            <template #default="scope">
-                                <el-popover placement="bottom-start" :width="300" trigger="click"
-                                    v-model:visible="popoverVisible[scope.row.id]">
-                                    <template #reference>
-                                        <el-button size="small">編輯</el-button>
-                                    </template>
+                            <el-popover placement="bottom-start" :width="300"  trigger="click" ref="popoverRef" >
+                                <template #reference>
+                                    <el-button size="small">編輯</el-button>
+                                </template>
 
-                                    <el-form style="max-width: 600px" :model="popForm" label-width="auto"
-                                        :label-position="labelPosition" :size="size">
-                                        <el-form-item label="Activity name">
-                                            <el-input v-model="popForm.name" />
-                                        </el-form-item>
-                                        <el-form-item label="Activity zone">
-                                            <el-select placeholder="please select your zone" el-select
-                                                :teleported="false" v-model="popForm.type">
-                                                <el-option label="Zone one" value="shanghai" />
-                                                <el-option label="Zone two" value="beijing" />
-                                            </el-select>
-                                        </el-form-item>
+                                <el-form style="max-width: 600px" :model="popForm" label-width="auto"
+                                    :label-position="labelPosition" :size="size">
+                                    <el-form-item label="Activity name">
+                                        <el-input v-model="popForm.name" />
+                                    </el-form-item>
+                                    <el-form-item label="Activity zone">
+                                        <el-select placeholder="please select your zone" el-select :teleported="false"
+                                            v-model="popForm.type">
+                                            <el-option label="Zone one" value="shanghai" />
+                                            <el-option label="Zone two" value="beijing" />
+                                        </el-select>
+                                    </el-form-item>
 
-                                        <el-form-item>
-                                            <el-button type="primary" @click="onSubmit">Create</el-button>
-                                            <el-button @click="closePopover(scope.row.id)">Cancel</el-button>
-                                        </el-form-item>
-                                    </el-form>
-                                </el-popover>
-                                <el-button size="small" type="danger">移除</el-button>
-                            </template>
+                                    <el-form-item>
+                                        <el-button type="primary" @click="onSubmit">Create</el-button>
+                                        <!-- <div v-click-outside="handleClickOutside"> -->
+                                            <el-button @click="closePopover">Cancel</el-button>
+                                        <!-- </div> -->
+                                    </el-form-item>
+                                </el-form>
+                            </el-popover>
+                            <el-button size="small" type="danger">移除</el-button>
                         </el-table-column>
                     </el-table>
                 </div>
@@ -103,6 +102,8 @@ import { ref, reactive, onMounted, computed } from "vue";
 import axios from "axios";
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import debounce from "lodash.debounce";
+// import vClickOutside from 'click-outside-vue3'
+import { directive as vClickOutside } from 'click-outside-vue3'; // 导入指令模块
 
 const size = ref('default');
 const labelPosition = ref('top');
@@ -124,6 +125,13 @@ const popForm = reactive({
 function onSubmit() {
     console.log('表單提交', sizeForm)
 }
+
+const popoverVisible = ref(false);
+
+// 关闭 Popover 的方法
+const closePopover = () => {
+  popoverVisible.value = false; // 设置 Popover 的可见状态为 false
+};
 
 
 
@@ -150,14 +158,7 @@ const storeTypeArr = [
     { name: "授權", value: "2" },
 ];
 
-const popoverVisible = reactive({});
-
-// stores.data.forEach((store) => {
-//   popoverVisible[store.id] = true; // 把每個popover顯示為false
-// });
-const closePopover = (id) => {
-  popoverVisible[id] = false; // 關閉popover
-};
+const popoverRef = ref(null);
 
 onMounted(() => {
     // 初始化加載
