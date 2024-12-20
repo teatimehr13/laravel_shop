@@ -59,10 +59,13 @@
 
                             <!-- <el-button size="small">編輯</el-button> -->
                             <template #default="scope">
-                                <el-popover placement="bottom-start" :width="300" trigger="click"
-                                    v-model:visible="popoverVisible[scope.row.id]">
+                                <el-popover :placement="popoverPlacement" :width="350" trigger="click"
+                                    v-model:visible="popoverVisible[scope.row.id]" popper-class=""
+                                    @show="() => handlePopoverShow(scope.row.id)" @before-leave="enableScroll"
+                                    :offset="offSet" ref="popoverRef">
                                     <template #reference>
-                                        <el-button size="small" @click="openEditPopover(scope.row)">編輯</el-button>
+                                        <el-button size="small" @click="openEditPopover(scope.row)"
+                                            :ref="el => (triggerRefs[scope.row.id] = el)">編輯</el-button>
                                     </template>
 
                                     <el-form style="max-width: 600px" :model="popForm" label-width="auto"
@@ -87,8 +90,20 @@
                                         </el-form-item>
 
                                         <el-form-item label="營業時間">
-                                            <el-input v-model="popForm.opening_hours" />
+                                            <el-input v-model="popForm.opening_hours" type="textarea"
+                                                :autosize="{ minRows: 2, maxRows: 6 }" />
                                         </el-form-item>
+
+                                        <div v-if="true">
+                                            <el-form-item label="圖片">
+                                                <el-upload :file-list="fileList" class="upload-demo" action=""
+                                                    :on-preview="handlePreview" :on-remove="handleRemove"
+                                                    list-type="picture" :auto-upload="false" :limit="1"
+                                                    :on-exceed="handleExceed" ref="upload">
+                                                    <el-button type="" style="width: 100% !important;">選擇檔案</el-button>
+                                                </el-upload>
+                                            </el-form-item>
+                                        </div>
 
                                         <el-form-item>
                                             <el-button type="primary" @click="onSubmit">儲存</el-button>
@@ -104,6 +119,10 @@
 
                 <!-- 加載提示 -->
                 <div v-if="noMoreData" style="text-align: center; margin: 10px">沒有更多數據了</div>
+
+                <template>
+
+                </template>
             </div>
         </template>
     </BackendLayout>
@@ -111,21 +130,33 @@
 
 
 <script setup>
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, onMounted, computed, watch } from "vue";
 import axios from "axios";
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import debounce from "lodash.debounce";
+import { genFileId } from 'element-plus'
+
+
+const handleRemove = (uploadFile, uploadFiles) => {
+    console.log(uploadFile, uploadFiles)
+    // fileList.value = [];
+}
+
+const handlePreview = (file) => {
+    console.log(file)
+}
 
 const size = ref('default');
 const labelPosition = ref('top');
+let offSet = ref(8);
 
 // 表單數據
 const popForm = reactive({
     store_name: '',       // 名稱
     store_type: '',       // 類型
-    address:'',
-    contact_number:'',
-    opening_hours:'',
+    address: '',
+    contact_number: '',
+    opening_hours: '',
 
 })
 
@@ -163,24 +194,117 @@ const popoverVisible = reactive({});
 //   popoverVisible[store.id] = true; // 把每個popover顯示為false
 // });
 const closePopover = (id) => {
-  popoverVisible[id] = false; // 關閉popover
+    popoverVisible[id] = false; // 關閉popover
+};
+const openEditPopover = (row) => {
+    console.log(fileList);
+
+    fileList.value = [
+        {
+            name: row.store_name, // 设置文件的名称
+            url: row.image,       // 设置文件的 URL
+            uid: genFileId(),      // 生成一个唯一的 UID
+        },
+    ];
+
+    popForm.store_name = row.store_name;
+    popForm.store_type = row.store_type;
+    popForm.address = row.address;
+    popForm.image = row.image;
+    popForm.contact_number = row.contact_number;
+    popForm.opening_hours = row.opening_hours.split("\n") // 按 \n 分割
+        .map((line) => line.trim()) // 去除多餘空白
+        .filter((line) => line !== "") // 過濾空行
+        .join("\n") // 拼接成 HTML 的換行;
 };
 
-// 打开编辑的 Popover
-const openEditPopover = (row) => {
-  // 将选中行的数据加载到 popForm
-  popForm.store_name = row.store_name;
-  popForm.store_type = row.store_type;
-  popForm.address = row.address;
-  popForm.contact_number = row.contact_number;
-  popForm.opening_hours = row.opening_hours;
+const disableScroll = () => {
+    const scrollbarWrap = document.querySelector('.el-scrollbar__wrap');
+    if (scrollbarWrap) {
+        scrollbarWrap.style.overflowY = 'hidden';
+    }
+};
+
+const enableScroll = () => {
+    const scrollbarWrap = document.querySelector('.el-scrollbar__wrap');
+    if (scrollbarWrap) {
+        scrollbarWrap.style.overflowY = 'auto';
+    }
+};
+
+const handlePopoverShow = (id) => {
+    disableScroll();
+    // adjustPlacement(id); 
+};
+
+const popoverPlacement = ref('left-start');
+
+const popoverRef = ref(null);
+const triggerButton = ref(null);
+const triggerRefs = ref({});
+
+const adjustPlacement = (id) => {
+    const triggerElement = triggerRefs.value[id]; // 获取对应的按钮 DOM
+
+    if (!triggerElement) {
+        console.error(`未找到 trigger-${id} 的元素`);
+        return;
+    }
+
+    // 如果是组件引用，取 $el
+    const domElement = triggerElement.$el || triggerElement;
+
+    // 按鈕位置
+    const triggerRect = domElement.getBoundingClientRect();
+    // popover高度    
+    const popoverHeight = 455;
+
+    //畫面的高度
+    const viewportHeight = window.innerHeight;
+
+    console.log(triggerRect.bottom);
+    console.log(triggerRect.bottom + popoverHeight);
+    console.log(viewportHeight);
+
+    if (triggerRect.bottom + popoverHeight > viewportHeight) {
+        popoverPlacement.value = 'left-start';
+        // 动态调整 placement 或其他逻辑
+    } else {
+        popoverPlacement.value = 'bottom-start';
+    }
+};
+
+const fileList = ref([]);
+
+
+console.log(fileList);
+
+
+const upload = ref();
+const handleExceed = (files) => {
+    console.log(files);
+    // console.log(upload.value);
+
+    if (upload.value) {
+        console.log(upload.value);
+
+        upload.value.clearFiles();
+        const file = files[0];
+        file.uid = genFileId(); // 生成唯一的 UID
+        file.url = URL.createObjectURL(file);
+        fileList.value = [];
+        fileList.value.push({
+            name: file.name,
+            url: file.url,
+            uid: file.uid,
+        });
+    }
 };
 
 onMounted(() => {
     // 初始化加載
     loadMore();
 })
-
 
 // 加載更多數據
 const loadMore = debounce(async () => {
@@ -198,7 +322,7 @@ const loadMore = debounce(async () => {
             },
         });
 
-        console.log(response.data);        
+        console.log(response.data);
 
         const newData = response.data.data; // 新數據 
         const lastPage = response.data.last_page; // 總頁數 ex:11
@@ -265,5 +389,13 @@ const formattedOpeningHours = computed(() => {
 ::v-deep(.el-input__inner:focus) {
     outline: none;
     box-shadow: none;
+}
+
+::v-deep(.el-upload) {
+    width: 100%;
+}
+
+::v-deep(.el-form-item__content) {
+    display: block;
 }
 </style>
