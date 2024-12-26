@@ -13,8 +13,6 @@
                         @keyup.enter="applyFilters" />
                 </div>
 
-                <el-button type="" @click="dialogToggle" style="margin: 10px 0;">新增門市</el-button>
-
                 <!-- Table 與懶加載 -->
                 <div>
                     <el-table :data="stores.data" style="width: 100%; height: calc(100vh - 200px)"
@@ -70,14 +68,53 @@
                                             :ref="el => (triggerRefs[scope.row.id] = el)">編輯</el-button>
                                     </template>
 
-                                    <!-- 子組件 -->
-                                    <StoreForm v-model:file-list="fileList" v-model:form-data="popForm"
-                                        @submit="onSubmitEdit" v-model:uploadList="uploadList"
-                                        @uploadList="emitUploadList" />
+                                    <el-form style="max-width: 600px" :model="popForm" label-width="auto"
+                                        :label-position="labelPosition" :size="size">
+                                        <el-form-item label="門市名稱">
+                                            <el-input v-model="popForm.store_name" />
+                                        </el-form-item>
+                                        <el-form-item label="類型">
+                                            <el-select placeholder="please select your zone" el-select
+                                                :teleported="false" v-model="popForm.store_type">
+                                                <el-option label="直營" :value="0" />
+                                                <el-option label="特約展售" :value="1" />
+                                                <el-option label="授權經銷商" :value="2" />
+                                            </el-select>
+                                        </el-form-item>
+                                        <el-form-item label="地址">
+                                            <el-input v-model="popForm.address" />
+                                        </el-form-item>
+
+                                        <el-form-item label="聯絡電話">
+                                            <el-input v-model="popForm.contact_number" />
+                                        </el-form-item>
+
+                                        <el-form-item label="營業時間">
+                                            <el-input v-model="popForm.opening_hours" type="textarea"
+                                                :autosize="{ minRows: 2, maxRows: 6 }" />
+                                        </el-form-item>
+
+                                        <el-form-item label="圖片">
+                                            <div>
+                                                <el-upload :file-list="fileList" class="upload-demo" action=""
+                                                    :on-preview="handlePreview" :on-remove="handleRemove"
+                                                    list-type="picture" :auto-upload="false" :limit="1"
+                                                    :on-exceed="handleExceed" ref="upload" popper-class="no-transition"
+                                                    :on-change="handleOnChange">
+                                                    <el-button type="" style="width: 100% !important;">選擇檔案</el-button>
+                                                </el-upload>
+                                                <el-dialog v-model="dialogVisible">
+                                                    <img w-full :src="dialogImageUrl" style="margin: auto"
+                                                        alt="Preview Image" />
+                                                </el-dialog>
+                                            </div>
+                                        </el-form-item>
+
                                         <el-form-item>
-                                            <el-button type="primary" @click="onSubmitEdit">儲存</el-button>
+                                            <el-button type="primary" @click="onSubmit">儲存</el-button>
                                             <el-button @click="closePopover(scope.row.id)">關閉</el-button>
                                         </el-form-item>
+                                    </el-form>
                                 </el-popover>
                                 <el-button size="small" type="danger">移除</el-button>
                             </template>
@@ -88,27 +125,15 @@
                 <!-- 加載提示 -->
                 <div v-if="noMoreData" style="text-align: center; margin: 10px">沒有更多數據了</div>
             </div>
-
-            <!-- 對話框 -->
-
-            <el-dialog v-model="dialogFormToggle" title="新增" width="400px">
-                <StoreForm v-model:form-data="popForm" v-model:file-list="fileList" v-model:upload-list="uploadList" @uploadList="emitUploadList" />
-                <template #footer>
-                    <el-button type="primary" @click="onSubmitAdd">提交</el-button>
-                    <el-button @click="dialogToggle">取消</el-button>
-                </template>
-            </el-dialog>
-
         </template>
     </BackendLayout>
 </template>
 
 
 <script setup>
-import { ref, reactive, onMounted, computed, h } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import axios from "axios";
 import BackendLayout from '@/Layouts/BackendLayout.vue';
-import StoreForm from "./FormComponent/StoreForm.vue";
 import debounce from "lodash.debounce";
 import { genFileId } from 'element-plus'
 
@@ -117,10 +142,43 @@ onMounted(() => {
     loadMore();
 })
 
-const emitUploadList = (data) => {
-    uploadList.value = data;
-    console.log(uploadList.value);
-}
+const renderForm = () => {
+  return `
+    <el-form style="max-width: 600px" :model="popForm" label-width="auto" label-position="top" size="default">
+      <el-form-item label="門市名稱">
+        <el-input v-model="popForm.store_name" />
+      </el-form-item>
+      <el-form-item label="類型">
+        <el-select placeholder="please select your zone" teleported="false" v-model="popForm.store_type">
+          <el-option label="直營" :value="0" />
+          <el-option label="特約展售" :value="1" />
+          <el-option label="授權經銷商" :value="2" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="地址">
+        <el-input v-model="popForm.address" />
+      </el-form-item>
+      <el-form-item label="聯絡電話">
+        <el-input v-model="popForm.contact_number" />
+      </el-form-item>
+      <el-form-item label="營業時間">
+        <el-input v-model="popForm.opening_hours" type="textarea" :autosize="{ minRows: 2, maxRows: 6 }" />
+      </el-form-item>
+      <el-form-item label="圖片">
+        <el-upload
+          :file-list="fileList"
+          class="upload-demo"
+          action=""
+          list-type="picture"
+          :auto-upload="false"
+          :limit="1"
+        >
+          <el-button style="width: 100%;">選擇檔案</el-button>
+        </el-upload>
+      </el-form-item>
+    </el-form>
+  `;
+};
 
 // 篩選select
 const storeTypeArr = [
@@ -219,19 +277,14 @@ const popoverRef = ref(null);
 const triggerRefs = ref({});
 
 const size = ref('default');
-
+const labelPosition = ref('top');
 let offSet = ref(8);
 
 const closePopover = (id) => {
     popoverVisible[id] = false; // 關閉popover
-    resetForm();
 };
 
 const openEditPopover = (row) => {
-    // console.log(fileList.value);
-    // console.log(uploadList.value);
-    // console.log(popForm);
-
     setTimeout(() => {
         fileList.value = row.image ? [
             {
@@ -314,70 +367,110 @@ const adjustPlacement = (id) => {
 };
 
 
+
 // 重置表單
 const resetForm = () => {
-    popForm.store_name = '';
-    popForm.store_type = null;
-    popForm.address = '';
-    popForm.contact_number = '';
-    popForm.opening_hours = '';
-    fileList.value = [];
-    uploadList.value = [];
+  popForm.store_name = '';
+  popForm.store_type = null;
+  popForm.address = '';
+  popForm.contact_number = '';
+  popForm.opening_hours = '';
+  fileList.value = [];
 };
-
-//對話框
-const dialogFormToggle = ref(false);
-const dialogToggle = () => {
-    resetForm();
-    dialogFormToggle.value = !dialogFormToggle.value;
-
-    console.log(fileList.value);
-    console.log(uploadList.value);
-    console.log(popForm);
-}
 
 //通知
 const open3 = () => {
-    ElNotification({
-        title: '上傳成功',
-        // message:'上傳成功',
-        type: 'success',
-        position: 'bottom-left',
-    })
+  ElNotification({
+    title: '上傳成功',
+    // message:'上傳成功',
+    type: 'success',
+    position: 'bottom-left',
+  })
 }
 
 const open4 = () => {
-    ElNotification({
-        title: '上傳失敗',
-        type: 'error',
-        position: 'bottom-left',
-    })
+  ElNotification({
+    title: '上傳失敗',
+    type: 'error',
+    position: 'bottom-left',
+  })
 }
 
 //上傳upload
 const fileList = ref([]);
-let uploadList = ref([]);
+const uploadList = ref([]);
 const dialogImageUrl = ref('')
 const dialogVisible = ref(false)
-// const upload = ref();
+const upload = ref();
 
+//刪除待上傳的圖片
+const handleRemove = (uploadFile, uploadFiles) => {
+    console.log(uploadFile, uploadFiles)
+    uploadList.value = [];
+}
+
+//點擊待上傳的圖片
+const handlePreview = (uploadFile) => {
+    console.log(uploadFile)
+    dialogImageUrl.value = uploadFile.url
+    dialogVisible.value = true
+}
+
+//upload變更時
+const handleOnChange = (file) => {
+    console.log(file);
+    uploadList.value = [
+        {
+            name: file.name,
+            url: file.url,
+            uid: file.uid,
+            raw: file.raw
+        },
+    ]
+}
+
+//限制僅上傳一筆
+const handleExceed = (files) => {
+    console.log(files);
+
+
+
+    // console.log(upload.value);
+    // handleRemove(files);
+    // if (upload.value) {
+    //     console.log(upload.value);
+
+    upload.value.clearFiles();
+    const file = files[0];
+
+    file.uid = genFileId(); // 生成唯一的 UID
+    upload.value.handleStart(file)
+    //     file.url = URL.createObjectURL(file);
+    //     fileList.value = [];
+    //     fileList.value.push({
+    //         name: file.name,
+    //         url: file.url,
+    //         uid: file.uid,
+    //     });
+    // }
+};
 
 //提交
-let formData = new FormData();
-
-const formBeforSubmit = () => {
-    formData = new FormData(); // 清空
+const onSubmit = async () => {
     console.log(popForm);
+
+    const formData = new FormData();
     formData.append('store_name', popForm.store_name);
     formData.append('store_type', popForm.store_type);
     formData.append('address', popForm.address);
     formData.append('contact_number', popForm.contact_number);
     formData.append('opening_hours', popForm.opening_hours);
-    formData.append('is_enabled', popForm.is_enabled || 1)
+    formData.append('is_enabled', popForm.is_enabled)
     formData.append('id', popForm.id);
 
     if (uploadList.value.length > 0) {
         const file = uploadList.value[0];
+
         //有傳新圖片時
         if (file.raw) {
             formData.append('image', file.raw);
@@ -393,17 +486,13 @@ const formBeforSubmit = () => {
     }
 
     // console.log(formData);
-    console.log(uploadList.value);
+    // console.log(uploadList.value);
 
-    for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-    }
-}
+    // for (const [key, value] of formData.entries()) {
+    //     console.log(`${key}:`, value);
+    // }
 
-//編輯
-const onSubmitEdit = async () => {    
     try {
-        await formBeforSubmit();
         const response = await axios.post('/back/stores/update_stores', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -415,13 +504,13 @@ const onSubmitEdit = async () => {
 
         // 從後端獲取更新後的數據
         const updatedStore = response.data;
-        if (updatedStore) {
+        if(updatedStore){
             // 更新目標行
             const index = stores.data.findIndex(store => store.id === updatedStore.id);
             if (index !== -1) {
                 stores.data[index] = updatedStore; // 更新數據
             }
-
+    
             closePopover(popForm.id);
             open3();
             return
@@ -434,36 +523,6 @@ const onSubmitEdit = async () => {
         console.error('提交失败:', error);
     }
 };
-
-//新增
-const onSubmitAdd = async () => {
-    console.log(popForm);
-    try {
-        await formBeforSubmit();
-        const response = await axios.post('/back/stores', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-
-        // console.log('stores.data', stores.data);
-        console.log('提交成功:', response.data);
-
-        // 從後端獲取更新後的數據
-        const updatedStore = response.data;
-        if (updatedStore) {
-            dialogFormToggle.value = !dialogFormToggle.value;
-            open3();
-            return
-        }
-
-        //上傳失敗提示
-        open4();
-
-    } catch (error) {
-        console.error('提交失败:', error);
-    }    
-}
 
 </script>
 
@@ -508,9 +567,5 @@ const onSubmitAdd = async () => {
 
 ::v-deep(.el-upload-list__item-info):hover span {
     color: #409eff;
-}
-
-::v-deep(.el-dialog__wrapper) {
-    background-color: rgba(0, 0, 0, 0.5); /* 半透明背景 */
 }
 </style>

@@ -71,7 +71,7 @@ main {
     padding: 20px;
 }
 
-.el-main>div {
+.el-main>div:first-of-type {
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 1px 4px 0 rgba(74, 91, 109, .1);

@@ -182,6 +182,7 @@ class StoreController extends Controller
             'image' => $store->image,
             'opening_hours' => $store->opening_hours,
             'store_type_name' => $store->store_type_name,
+            'is_enabled' => $store->is_enabled
         ]);
     }
 }

@@ -38,4 +38,6 @@ class Store extends Model
         }
     }
 
+    protected $appends = ['store_type_name'];
+
 }
