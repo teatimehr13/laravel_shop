@@ -141,6 +141,7 @@ class StoreController extends Controller
         try {
             $id = $request->input('id');
             $store = Store::find($id);
+            // return response()->json($store);
             if (!$store) {
                 return response()->json(['error' => 'Store not found'], 404);
             }

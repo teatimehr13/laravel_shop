@@ -72,14 +72,27 @@
 
                                     <!-- 子組件 -->
                                     <StoreForm v-model:file-list="fileList" v-model:form-data="popForm"
-                                        @submit="onSubmitEdit" v-model:uploadList="uploadList"
+                                        @submit="onSubmitEdit" v-model:uploadList="uploadList" ref=""
                                         @uploadList="emitUploadList" />
-                                        <el-form-item>
-                                            <el-button type="primary" @click="onSubmitEdit">儲存</el-button>
-                                            <el-button @click="closePopover(scope.row.id)">關閉</el-button>
-                                        </el-form-item>
+                                    <el-form-item>
+                                        <el-button type="primary" @click="onSubmitEdit">儲存</el-button>
+                                        <el-button @click="closePopover(scope.row.id)">關閉</el-button>
+
+                                    </el-form-item>
                                 </el-popover>
-                                <el-button size="small" type="danger">移除</el-button>
+                                <el-popconfirm title="確定移除此筆資料?" @confirm="onSubmitDel(scope.row.id)" :width="170"
+                                    :hide-after="100">
+                                    <template #reference>
+                                        <el-button size="small" type="danger">移除</el-button>
+                                    </template>
+                                    <template #actions="{ confirm, cancel }">
+                                        <el-button size="small" @click="cancel">沒有</el-button>
+                                        <el-button type="danger" size="small" @click="confirm">
+                                            是
+                                        </el-button>
+                                    </template>
+                                </el-popconfirm>
+
                             </template>
                         </el-table-column>
                     </el-table>
@@ -92,10 +105,12 @@
             <!-- 對話框 -->
 
             <el-dialog v-model="dialogFormToggle" title="新增" width="400px">
-                <StoreForm v-model:form-data="popForm" v-model:file-list="fileList" v-model:upload-list="uploadList" @uploadList="emitUploadList" />
+                <StoreForm v-model:form-data="popForm" v-model:file-list="fileList" v-model:upload-list="uploadList"
+                    @uploadList="emitUploadList" ref="formRef" />
                 <template #footer>
                     <el-button type="primary" @click="onSubmitAdd">提交</el-button>
                     <el-button @click="dialogToggle">取消</el-button>
+                    <!-- <el-button @click="dd">測試</el-button> -->
                 </template>
             </el-dialog>
 
@@ -105,7 +120,7 @@
 
 
 <script setup>
-import { ref, reactive, onMounted, computed, h } from "vue";
+import { ref, reactive, onMounted, computed, nextTick } from "vue";
 import axios from "axios";
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import StoreForm from "./FormComponent/StoreForm.vue";
@@ -203,13 +218,20 @@ const applyFilters = debounce(() => {
 
 //格式化營業時間顯示
 const formattedOpeningHours = computed(() => {
-    return stores.data.map((store) =>
-        store.opening_hours
-            .split("\n") // 按 \n 分割
-            .map((line) => line.trim()) // 去除多餘空白
-            .filter((line) => line !== "") // 過濾空行
-            .join("<br>") // 拼接成 HTML 的換行
-    );
+    console.log(stores.data);
+
+    if (stores.data) {
+        return stores.data.map((store) =>
+            store.opening_hours
+                ? store.opening_hours
+                    .split("\n") // 按 \n 分割
+                    .map((line) => line.trim()) // 去除多餘空白
+                    .filter((line) => line !== "") // 過濾空行
+                    .join("<br>") // 拼接成 HTML 的換行
+                : ''
+        );
+    }
+    return '';
 });
 
 //popover 
@@ -224,7 +246,7 @@ let offSet = ref(8);
 
 const closePopover = (id) => {
     popoverVisible[id] = false; // 關閉popover
-    resetForm();
+    // resetForm();
 };
 
 const openEditPopover = (row) => {
@@ -313,33 +335,23 @@ const adjustPlacement = (id) => {
     }
 };
 
-
-// 重置表單
-const resetForm = () => {
-    popForm.store_name = '';
-    popForm.store_type = null;
-    popForm.address = '';
-    popForm.contact_number = '';
-    popForm.opening_hours = '';
-    fileList.value = [];
-    uploadList.value = [];
-};
-
 //對話框
 const dialogFormToggle = ref(false);
 const dialogToggle = () => {
-    resetForm();
+
     dialogFormToggle.value = !dialogFormToggle.value;
 
     console.log(fileList.value);
     console.log(uploadList.value);
     console.log(popForm);
+    resetForm();
+
 }
 
 //通知
 const open3 = () => {
     ElNotification({
-        title: '上傳成功',
+        title: '操作成功',
         // message:'上傳成功',
         type: 'success',
         position: 'bottom-left',
@@ -348,7 +360,7 @@ const open3 = () => {
 
 const open4 = () => {
     ElNotification({
-        title: '上傳失敗',
+        title: '操作失敗',
         type: 'error',
         position: 'bottom-left',
     })
@@ -362,6 +374,28 @@ const dialogVisible = ref(false)
 // const upload = ref();
 
 
+//表單
+const formRef = ref(null);
+
+const formValidated = () => {
+    return formRef.value.formValidate();
+};
+
+// 重置表單
+const resetForm = () => {
+    nextTick(()=>{
+        formRef.value.internalFormRef.resetFields();
+        popForm.store_name = '';
+        popForm.store_type = '';
+        popForm.address = '';
+        popForm.contact_number = '';
+        popForm.opening_hours = '';
+        fileList.value = [];
+        uploadList.value = [];
+    })
+
+
+};
 //提交
 let formData = new FormData();
 
@@ -393,16 +427,17 @@ const formBeforSubmit = () => {
     }
 
     // console.log(formData);
-    console.log(uploadList.value);
+    // console.log(uploadList.value);
 
-    for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-    }
+    // for (const [key, value] of formData.entries()) {
+    //     console.log(`${key}:`, value);
+    // }
 }
 
 //編輯
-const onSubmitEdit = async () => {    
+const onSubmitEdit = async () => {
     try {
+        await formValidated();
         await formBeforSubmit();
         const response = await axios.post('/back/stores/update_stores', formData, {
             headers: {
@@ -437,8 +472,8 @@ const onSubmitEdit = async () => {
 
 //新增
 const onSubmitAdd = async () => {
-    console.log(popForm);
     try {
+        await formValidated();
         await formBeforSubmit();
         const response = await axios.post('/back/stores', formData, {
             headers: {
@@ -462,7 +497,40 @@ const onSubmitAdd = async () => {
 
     } catch (error) {
         console.error('提交失败:', error);
-    }    
+    }
+}
+
+//刪除
+const onSubmitDel = async (id) => {
+    // console.log(id);
+    try {
+        let delForm = {
+            id: id
+        }
+
+        const response = await axios.post('/back/stores/delete_stores', delForm, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        // console.log('stores.data', stores.data);
+        console.log('提交成功:', response.data);
+
+        // 從後端獲取更新後的數據
+        const feedback = response.data;
+        if (feedback.success) {
+            stores.data = stores.data.filter(item => item.id !== id);
+            open3();
+            return
+        }
+
+        //上傳失敗提示
+        open4();
+
+    } catch (error) {
+        console.error('提交失败:', error);
+    }
 }
 
 </script>
@@ -511,6 +579,7 @@ const onSubmitAdd = async () => {
 }
 
 ::v-deep(.el-dialog__wrapper) {
-    background-color: rgba(0, 0, 0, 0.5); /* 半透明背景 */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* 半透明背景 */
 }
 </style>
