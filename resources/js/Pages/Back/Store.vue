@@ -239,9 +239,15 @@ const formattedOpeningHours = computed(() => {
 });
 
 
-const getRowClass = (row) => {
-  return activeRow.value === row.id ? "activeRow" : "";
-};
+// const getRowClass = (row) => {
+//   return activeRow.value === row.id ? "warning-row" : "";
+// };
+
+const getRowClass = ({row}) => {
+    // console.log(row.id);
+    return activeRow.value === row.id ? "activeRowFocus" : "";
+
+}
 
 //popover 
 const popoverVisible = reactive({});
@@ -260,18 +266,18 @@ const popoverStyle = ref({
 });
 
 watch(
-  popoverVisible,
-  (newVal) => {
-    // 遍歷所有的 ID，檢查是否有顯示中的 Popover
-    for (const id in newVal) {
-      if (newVal[id]) {
-        activeRow.value = Number(id); // 將行 ID 設置為高亮
-        return;
-      }
-    }
-    activeRow.value = ""; // 如果沒有任何 Popover 顯示，清除高亮
-  },
-  { deep: true } // 深度監聽，確保監聽對象的嵌套值變化
+    popoverVisible,
+    (newVal) => {
+        // 遍歷所有的 ID，檢查是否有顯示中的 Popover
+        for (const id in newVal) {
+            if (newVal[id]) {
+                activeRow.value = Number(id); // 將行 ID 設置為高亮
+                return;
+            }
+        }
+        activeRow.value = ""; // 如果沒有任何 Popover 顯示，清除高亮
+    },
+    { deep: true } // 深度監聽，確保監聽對象的嵌套值變化
 );
 
 
@@ -288,7 +294,7 @@ const openEditPopover = (row) => {
     // console.log(popForm);
     // activeRow.value = row.id;
     // console.log(activeRow);
-    
+
 
     setTimeout(() => {
         fileList.value = row.image ? [
@@ -658,7 +664,8 @@ const onSubmitDel = async (id) => {
     outline: none;
 }
 
-.activeRow {
-    --el-table-tr-bg-color: var(--el-color-warning-light-9);
+::v-deep(.activeRowFocus) {
+    --el-table-tr-bg-color: var(--el-table-row-hover-bg-color);;
 }
+
 </style>
