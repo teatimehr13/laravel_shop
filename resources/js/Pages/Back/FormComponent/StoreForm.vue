@@ -31,12 +31,12 @@
             </el-upload>
         </el-form-item>
 
-        <el-form-item label="操作">
-            <el-radio-group v-model="formData.isEnabled">
-                <el-radio value="0">隱藏</el-radio>
-                <el-radio value="1">顯示</el-radio>
+        <!-- <el-form-item label="操作">
+            <el-radio-group v-model="formData.is_enabled">
+                <el-radio :value="1">顯示</el-radio>
+                <el-radio :value="0">隱藏</el-radio>
             </el-radio-group>
-        </el-form-item>
+        </el-form-item> -->
 
         <el-form-item>
             <!-- <el-button type="primary" @click="$emit('submit', formData)">提交</el-button> -->
@@ -49,7 +49,7 @@
 <script setup>
 
 import { reactive, watch, ref, toRef } from "vue";
-import { genFileId } from 'element-plus'
+import { genFileId } from 'element-plus';
 
 //拿到父組件的資料
 const props = defineProps({
@@ -67,6 +67,8 @@ const localUploadList = ref();
 const upload = ref([]);
 const labelPosition = ref('top');
 const toggleUpload = ref(false);
+// console.log(toRef(props,'formData'));
+
 
 
 const internalFormRef = ref(null); // 引用 el-form
@@ -78,6 +80,7 @@ const formValidate = () => {
         } else {
             internalFormRef.value.validate((isValid) => {
                 if (isValid) {
+                    console.log('true');
                     resolve(true);
                 } else {
                     console.log('false');

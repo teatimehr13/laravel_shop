@@ -156,6 +156,7 @@ const popForm = reactive({
     address: '',
     contact_number: '',
     opening_hours: '',
+    is_enabeld: ''
 })
 
 // 初始數據
@@ -295,7 +296,8 @@ const openEditPopover = (row) => {
     // activeRow.value = row.id;
     // console.log(activeRow);
 
-
+    console.log(row.is_enabled);
+    
     setTimeout(() => {
         fileList.value = row.image ? [
             {
@@ -311,7 +313,7 @@ const openEditPopover = (row) => {
             },
         ]
 
-        popForm.is_enabled = row.is_enabled;
+        // popForm['is_enabled'] = row.is_enabled;
         popForm.id = row.id;
         popForm.store_name = row.store_name;
         popForm.store_type = row.store_type;
@@ -439,7 +441,6 @@ const dialogVisible = ref(false)
 
 //表單
 const formRef = ref(null);
-
 const formValidated = () => {
     return formRef.value.formValidate();
 };
@@ -453,7 +454,7 @@ const resetForm = () => {
         popForm.address = '';
         popForm.contact_number = '';
         popForm.opening_hours = '';
-        popForm.isEnabled = '1';
+        // popForm['is_enabled'] = '';
         fileList.value = [];
         uploadList.value = [];
     })
@@ -471,7 +472,7 @@ const formBeforSubmit = () => {
     formData.append('address', popForm.address);
     formData.append('contact_number', popForm.contact_number);
     formData.append('opening_hours', popForm.opening_hours);
-    formData.append('is_enabled', popForm.is_enabled || 1)
+    // formData.append('is_enabled', popForm['is_enabled'] || 1)
     formData.append('id', popForm.id);
 
     if (uploadList.value.length > 0) {
@@ -500,38 +501,39 @@ const formBeforSubmit = () => {
 
 //編輯
 const onSubmitEdit = async () => {
-    try {
-        await formValidated();
-        await formBeforSubmit();
-        const response = await axios.post('/back/stores/update_stores', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+    await formValidated();
+    // try {
+    //     await formValidated();
+    //     await formBeforSubmit();
+    //     const response = await axios.post('/back/stores/update_stores', formData, {
+    //         headers: {
+    //             'Content-Type': 'multipart/form-data',
+    //         },
+    //     });
 
-        // console.log('stores.data', stores.data);
-        // console.log('提交成功:', response.data);
+    //     // console.log('stores.data', stores.data);
+    //     // console.log('提交成功:', response.data);
 
-        // 從後端獲取更新後的數據
-        const updatedStore = response.data;
-        if (updatedStore) {
-            // 更新目標行
-            const index = stores.data.findIndex(store => store.id === updatedStore.id);
-            if (index !== -1) {
-                stores.data[index] = updatedStore; // 更新數據
-            }
+    //     // 從後端獲取更新後的數據
+    //     const updatedStore = response.data;
+    //     if (updatedStore) {
+    //         // 更新目標行
+    //         const index = stores.data.findIndex(store => store.id === updatedStore.id);
+    //         if (index !== -1) {
+    //             stores.data[index] = updatedStore; // 更新數據
+    //         }
 
-            closePopover(popForm.id);
-            open3();
-            return
-        }
+    //         closePopover(popForm.id);
+    //         open3();
+    //         return
+    //     }
 
-        //上傳失敗提示
-        open4();
+    //     //上傳失敗提示
+    //     open4();
 
-    } catch (error) {
-        console.error('提交失败:', error);
-    }
+    // } catch (error) {
+    //     console.error('提交失败:', error);
+    // }
 };
 
 //新增

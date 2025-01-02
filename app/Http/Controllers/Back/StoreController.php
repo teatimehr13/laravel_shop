@@ -165,6 +165,7 @@ class StoreController extends Controller
         $address = $request->input('address');
 
         $query = Store::where('is_enabled', 1);
+        // $query = Store::whereIn('is_enabled', [0, 1]);
 
         if (!is_null($storeType)) {
             $query->where('store_type', $storeType);
