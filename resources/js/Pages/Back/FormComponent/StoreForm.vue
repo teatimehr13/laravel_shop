@@ -1,5 +1,5 @@
 <template>
-    <el-form :model="formData" label-width="300px"  class="demo-ruleForm" :rules="formRules" ref="internalFormRef">
+    <el-form :model="formData" label-width="300px" class="demo-ruleForm" :rules="formRules" ref="internalFormRef">
         <el-form-item label="門市名稱" :label-position="labelPosition" prop="store_name">
             <el-input v-model="formData.store_name" />
         </el-form-item>
@@ -19,16 +19,23 @@
             <el-input v-model="formData.contact_number" />
         </el-form-item>
 
-        <el-form-item label="營業時間" :label-position="labelPosition"  prop="opening_hours">
+        <el-form-item label="營業時間" :label-position="labelPosition" prop="opening_hours">
             <el-input v-model="formData.opening_hours" type="textarea" :autosize="{ minRows: 2, maxRows: 6 }" />
         </el-form-item>
 
-        <el-form-item label="圖片" :label-position="labelPosition" >
+        <el-form-item label="圖片" :label-position="labelPosition">
             <el-upload :file-list="fileList" class="upload-demo" action="" :on-preview="handlePreview"
                 :on-remove="handleRemove" list-type="picture" :auto-upload="false" :limit="1" :on-exceed="handleExceed"
                 ref="upload" popper-class="no-transition" :on-change="handleOnChange">
                 <el-button type="" style="width: 100% !important;">選擇檔案</el-button>
             </el-upload>
+        </el-form-item>
+
+        <el-form-item label="操作">
+            <el-radio-group v-model="formData.isEnabled">
+                <el-radio value="0">隱藏</el-radio>
+                <el-radio value="1">顯示</el-radio>
+            </el-radio-group>
         </el-form-item>
 
         <el-form-item>
@@ -41,7 +48,7 @@
 
 <script setup>
 
-import { reactive, watch, ref, toRef, defineExpose } from "vue";
+import { reactive, watch, ref, toRef } from "vue";
 import { genFileId } from 'element-plus'
 
 //拿到父組件的資料
@@ -85,7 +92,7 @@ const handleSelectChange = () => {
     internalFormRef.value.clearValidate(['store_type']); // 清除 store_type 的驗證錯誤
 };
 
-const formRules = reactive ({
+const formRules = reactive({
     store_name: [
         { required: true, message: "門市名稱為必填項", trigger: "blur" },
     ],
@@ -95,6 +102,7 @@ const formRules = reactive ({
     address: [
         { max: 255, message: "地址不能超過 255 個字", trigger: "blur" },
     ],
+
     // image: [
     //     {
     //         validator: (rule, value, callback) => {

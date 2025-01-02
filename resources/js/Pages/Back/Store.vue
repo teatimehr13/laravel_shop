@@ -17,9 +17,9 @@
 
                 <!-- Table 與懶加載 -->
                 <div>
-                    <el-table :data="stores.data" style="width: 100%; height: calc(100vh - 200px)"
+                    <el-table :data="stores.data" style="width: 100%; height: calc(100vh - 250px)"
                         v-el-table-infinite-scroll="loadMore" v-loading="loading" :infinite-scroll-disabled="loading"
-                        element-loading-text="加載中..." border>
+                        element-loading-text="加載中..." :row-class-name="getRowClass" border>
 
                         <!-- <el-table-column prop="store_name" label="門市名稱" width="200"/> -->
 
@@ -61,13 +61,15 @@
 
                             <!-- <el-button size="small">編輯</el-button> -->
                             <template #default="scope">
-                                <el-popover :placement="popoverPlacement" :width="350" trigger="click"
-                                    v-model:visible="popoverVisible[scope.row.id]" popper-class="" :hide-after="0"
-                                    :show-after="100" @show="handlePopoverShow(scope.row.id)"
-                                    @before-leave="enableScroll" :offset="offSet" ref="popoverRef">
+                                <el-popover :placement="popoverPlacement" trigger="click" :width="350"
+                                    v-model:visible="popoverVisible[scope.row.id]" popper-class="custom-scrollbar"
+                                    :hide-after="0" :show-after="100" @show="handlePopoverShow(scope.row.id)"
+                                    :popper-style="popoverStyle" @before-leave="enableScroll" :offset="offSet"
+                                    ref="popoverRef">
                                     <template #reference>
                                         <el-button size="small" @click="openEditPopover(scope.row)"
-                                            :ref="el => (triggerRefs[scope.row.id] = el)">編輯</el-button>
+                                            :ref="el => (triggerRefs[scope.row.id] = el)"
+                                            :class="{ activeButton: activeRow === scope.row.id }">編輯</el-button>
                                     </template>
 
                                     <!-- 子組件 -->
@@ -120,7 +122,7 @@
 
 
 <script setup>
-import { ref, reactive, onMounted, computed, nextTick } from "vue";
+import { ref, reactive, onMounted, computed, nextTick, watch } from "vue";
 import axios from "axios";
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import StoreForm from "./FormComponent/StoreForm.vue";
@@ -130,6 +132,8 @@ import { genFileId } from 'element-plus'
 // 初始化加載
 onMounted(() => {
     loadMore();
+    scrollStyle();
+
 })
 
 const emitUploadList = (data) => {
@@ -234,6 +238,11 @@ const formattedOpeningHours = computed(() => {
     return '';
 });
 
+
+const getRowClass = (row) => {
+  return activeRow.value === row.id ? "activeRow" : "";
+};
+
 //popover 
 const popoverVisible = reactive({});
 const popoverPlacement = ref('left-start');
@@ -244,15 +253,42 @@ const size = ref('default');
 
 let offSet = ref(8);
 
+const popoverStyle = ref({
+    height: "550px",
+    overflowX: "hidden",
+    overflowY: "auto"
+});
+
+watch(
+  popoverVisible,
+  (newVal) => {
+    // 遍歷所有的 ID，檢查是否有顯示中的 Popover
+    for (const id in newVal) {
+      if (newVal[id]) {
+        activeRow.value = Number(id); // 將行 ID 設置為高亮
+        return;
+      }
+    }
+    activeRow.value = ""; // 如果沒有任何 Popover 顯示，清除高亮
+  },
+  { deep: true } // 深度監聽，確保監聽對象的嵌套值變化
+);
+
+
 const closePopover = (id) => {
     popoverVisible[id] = false; // 關閉popover
+    // activeRow.value = '';
     // resetForm();
 };
 
+const activeRow = ref(null);
 const openEditPopover = (row) => {
     // console.log(fileList.value);
     // console.log(uploadList.value);
     // console.log(popForm);
+    // activeRow.value = row.id;
+    // console.log(activeRow);
+    
 
     setTimeout(() => {
         fileList.value = row.image ? [
@@ -335,6 +371,27 @@ const adjustPlacement = (id) => {
     }
 };
 
+const scrollStyle = () => {
+    const style = document.createElement("style");
+    style.type = "text/css";
+    style.innerHTML = `
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #d3d3d3;
+      border-radius: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #b3b3b3; /* 滾動條懸停顏色 */
+    }
+  `;
+    document.head.appendChild(style);
+}
+
+const popoverClass = ref("");
 //對話框
 const dialogFormToggle = ref(false);
 const dialogToggle = () => {
@@ -383,13 +440,14 @@ const formValidated = () => {
 
 // 重置表單
 const resetForm = () => {
-    nextTick(()=>{
+    nextTick(() => {
         formRef.value.internalFormRef.resetFields();
         popForm.store_name = '';
         popForm.store_type = '';
         popForm.address = '';
         popForm.contact_number = '';
         popForm.opening_hours = '';
+        popForm.isEnabled = '1';
         fileList.value = [];
         uploadList.value = [];
     })
@@ -533,6 +591,8 @@ const onSubmitDel = async (id) => {
     }
 }
 
+
+
 </script>
 
 <style scoped>
@@ -548,9 +608,17 @@ const onSubmitDel = async (id) => {
     margin-right: 10px;
 }
 
+::v-deep(.el-popover .el-popper) {
+    height: 400px !important;
+    overflow-y: scroll !important;
+    background-color: #409eff;
+}
+
+
 ::v-deep(.el-form-item__label) {
     margin-bottom: 4px;
     color: #172b4d;
+    width: auto !important;
 }
 
 ::v-deep(.el-input__inner:focus) {
@@ -581,5 +649,16 @@ const onSubmitDel = async (id) => {
 ::v-deep(.el-dialog__wrapper) {
     background-color: rgba(0, 0, 0, 0.5);
     /* 半透明背景 */
+}
+
+.activeButton {
+    background-color: var(--el-button-hover-bg-color);
+    border-color: var(--el-button-hover-border-color);
+    color: var(--el-button-hover-text-color);
+    outline: none;
+}
+
+.activeRow {
+    --el-table-tr-bg-color: var(--el-color-warning-light-9);
 }
 </style>
