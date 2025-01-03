@@ -72,18 +72,17 @@
                                             :class="{ activeButton: activeRow === scope.row.id }">編輯</el-button>
                                     </template>
 
-                                    <!-- 子組件 -->
+                                    <!-- 子組件，編輯 -->
                                     <StoreForm v-model:file-list="fileList" v-model:form-data="popForm"
-                                        @submit="onSubmitEdit" v-model:uploadList="uploadList" ref=""
+                                        @submit="onSubmitEdit" v-model:uploadList="uploadList" ref="formRef2"
                                         @uploadList="emitUploadList" />
                                     <el-form-item>
                                         <el-button type="primary" @click="onSubmitEdit">儲存</el-button>
                                         <el-button @click="closePopover(scope.row.id)">關閉</el-button>
-
                                     </el-form-item>
                                 </el-popover>
                                 <el-popconfirm title="確定移除此筆資料?" @confirm="onSubmitDel(scope.row.id)" :width="170"
-                                    :hide-after="100">
+                                    :hide-after="100" v-model:visible="popconfirmVisible[scope.row.id]">
                                     <template #reference>
                                         <el-button size="small" type="danger">移除</el-button>
                                     </template>
@@ -101,11 +100,10 @@
                 </div>
 
                 <!-- 加載提示 -->
-                <div v-if="noMoreData" style="text-align: center; margin: 10px">沒有更多數據了</div>
+                <!-- <div v-if="noMoreData" style="text-align: center; margin: 10px">沒有更多數據了</div> -->
             </div>
 
             <!-- 對話框 -->
-
             <el-dialog v-model="dialogFormToggle" title="新增" width="400px">
                 <StoreForm v-model:form-data="popForm" v-model:file-list="fileList" v-model:upload-list="uploadList"
                     @uploadList="emitUploadList" ref="formRef" />
@@ -156,7 +154,7 @@ const popForm = reactive({
     address: '',
     contact_number: '',
     opening_hours: '',
-    is_enabeld: ''
+    // is_enabeld: ''
 })
 
 // 初始數據
@@ -223,8 +221,6 @@ const applyFilters = debounce(() => {
 
 //格式化營業時間顯示
 const formattedOpeningHours = computed(() => {
-    console.log(stores.data);
-
     if (stores.data) {
         return stores.data.map((store) =>
             store.opening_hours
@@ -240,12 +236,7 @@ const formattedOpeningHours = computed(() => {
 });
 
 
-// const getRowClass = (row) => {
-//   return activeRow.value === row.id ? "warning-row" : "";
-// };
-
-const getRowClass = ({row}) => {
-    // console.log(row.id);
+const getRowClass = ({ row }) => {
     return activeRow.value === row.id ? "activeRowFocus" : "";
 
 }
@@ -266,21 +257,6 @@ const popoverStyle = ref({
     overflowY: "auto"
 });
 
-watch(
-    popoverVisible,
-    (newVal) => {
-        // 遍歷所有的 ID，檢查是否有顯示中的 Popover
-        for (const id in newVal) {
-            if (newVal[id]) {
-                activeRow.value = Number(id); // 將行 ID 設置為高亮
-                return;
-            }
-        }
-        activeRow.value = ""; // 如果沒有任何 Popover 顯示，清除高亮
-    },
-    { deep: true } // 深度監聽，確保監聽對象的嵌套值變化
-);
-
 
 const closePopover = (id) => {
     popoverVisible[id] = false; // 關閉popover
@@ -296,8 +272,6 @@ const openEditPopover = (row) => {
     // activeRow.value = row.id;
     // console.log(activeRow);
 
-    console.log(row.is_enabled);
-    
     setTimeout(() => {
         fileList.value = row.image ? [
             {
@@ -313,18 +287,18 @@ const openEditPopover = (row) => {
             },
         ]
 
-        // popForm['is_enabled'] = row.is_enabled;
+        popForm['is_enabled'] = parseInt(row['is_enabled']);
         popForm.id = row.id;
         popForm.store_name = row.store_name;
-        popForm.store_type = row.store_type;
+        popForm.store_type = parseInt(row.store_type);
         popForm.address = row.address;
         popForm.image = row.image;
         popForm.contact_number = row.contact_number;
-        popForm.opening_hours = row.opening_hours.split("\n") // 按 \n 分割
+        popForm.opening_hours = row.opening_hours ? row.opening_hours.split("\n") // 按 \n 分割
             .map((line) => line.trim()) // 去除多餘空白
             .filter((line) => line !== "") // 過濾空行
             .join("\n") // 拼接成 HTML 的換行;
-
+            : '';
     }, 100)
 };
 
@@ -441,8 +415,14 @@ const dialogVisible = ref(false)
 
 //表單
 const formRef = ref(null);
-const formValidated = () => {
-    return formRef.value.formValidate();
+const formRef2 = ref(null);
+const formValidated = (mode) => {
+    switch (mode) {
+        case "edit":
+            return formRef2.value.formValidate();
+        case "add":
+            return formRef.value.formValidate();
+    }
 };
 
 // 重置表單
@@ -454,7 +434,7 @@ const resetForm = () => {
         popForm.address = '';
         popForm.contact_number = '';
         popForm.opening_hours = '';
-        // popForm['is_enabled'] = '';
+        popForm['is_enabled'] = '';
         fileList.value = [];
         uploadList.value = [];
     })
@@ -472,7 +452,7 @@ const formBeforSubmit = () => {
     formData.append('address', popForm.address);
     formData.append('contact_number', popForm.contact_number);
     formData.append('opening_hours', popForm.opening_hours);
-    // formData.append('is_enabled', popForm['is_enabled'] || 1)
+    formData.append('is_enabled', popForm['is_enabled'])
     formData.append('id', popForm.id);
 
     if (uploadList.value.length > 0) {
@@ -499,47 +479,54 @@ const formBeforSubmit = () => {
     // }
 }
 
+// Popconfirm 的顯示狀態
+const popconfirmVisible = ref({});
+
 //編輯
 const onSubmitEdit = async () => {
-    await formValidated();
-    // try {
-    //     await formValidated();
-    //     await formBeforSubmit();
-    //     const response = await axios.post('/back/stores/update_stores', formData, {
-    //         headers: {
-    //             'Content-Type': 'multipart/form-data',
-    //         },
-    //     });
+    try {
+        await formValidated("edit");
+        await formBeforSubmit();
+        const response = await axios.post('/back/stores/update_stores', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
 
-    //     // console.log('stores.data', stores.data);
-    //     // console.log('提交成功:', response.data);
+        // console.log('stores.data', stores.data);
+        // console.log('提交成功:', response.data);
 
-    //     // 從後端獲取更新後的數據
-    //     const updatedStore = response.data;
-    //     if (updatedStore) {
-    //         // 更新目標行
-    //         const index = stores.data.findIndex(store => store.id === updatedStore.id);
-    //         if (index !== -1) {
-    //             stores.data[index] = updatedStore; // 更新數據
-    //         }
+        // 從後端獲取更新後的數據
+        const updatedStore = response.data;
+        console.log(updatedStore);
 
-    //         closePopover(popForm.id);
-    //         open3();
-    //         return
-    //     }
+        if (updatedStore) {
+            // 更新目標行
+            const index = stores.data.findIndex(store => store.id === updatedStore.id);
+            if (index !== -1) {
+                console.log(stores.data[index]);
+                stores.data[index] = updatedStore; // 更新數據
+            }
+            console.log(stores.data[index]);
 
-    //     //上傳失敗提示
-    //     open4();
 
-    // } catch (error) {
-    //     console.error('提交失败:', error);
-    // }
+            closePopover(popForm.id);
+            open3();
+            return
+        }
+
+        //上傳失敗提示
+        open4();
+
+    } catch (error) {
+        console.error('提交失败:', error);
+    }
 };
 
 //新增
 const onSubmitAdd = async () => {
     try {
-        await formValidated();
+        await formValidated("add");
         await formBeforSubmit();
         const response = await axios.post('/back/stores', formData, {
             headers: {
@@ -569,6 +556,7 @@ const onSubmitAdd = async () => {
 //刪除
 const onSubmitDel = async (id) => {
     // console.log(id);
+
     try {
         let delForm = {
             id: id
@@ -599,7 +587,37 @@ const onSubmitDel = async (id) => {
     }
 }
 
+//監聽編輯高亮狀態
+watch(
+    popoverVisible,
+    (newVal) => {
+        // 遍歷所有的 ID，檢查是否有顯示中的 Popover
+        for (const id in newVal) {
+            if (newVal[id]) {
+                activeRow.value = Number(id); // 將行 ID 設置為高亮
+                return;
+            }
+        }
+        activeRow.value = ""; // 如果沒有任何 Popover 顯示，清除高亮
+    },
+    { deep: true } // 深度監聽，確保監聽對象的嵌套值變化
+);
 
+//監聽移除高亮狀態
+watch(
+    popconfirmVisible,
+    (newVal) => {
+        // 遍歷所有的 ID，檢查是否有顯示中的 Popover
+        for (const id in newVal) {
+            if (newVal[id]) {
+                activeRow.value = Number(id); // 將行 ID 設置為高亮
+                return;
+            }
+        }
+        activeRow.value = ""; // 如果沒有任何 popconfirm 顯示，清除高亮
+    },
+    { deep: true } // 深度監聽，確保監聽對象的嵌套值變化
+);
 
 </script>
 
@@ -667,7 +685,6 @@ const onSubmitDel = async (id) => {
 }
 
 ::v-deep(.activeRowFocus) {
-    --el-table-tr-bg-color: var(--el-table-row-hover-bg-color);;
+    --el-table-tr-bg-color: var(--el-table-row-hover-bg-color);
 }
-
 </style>

@@ -23,7 +23,7 @@
             <el-input v-model="formData.opening_hours" type="textarea" :autosize="{ minRows: 2, maxRows: 6 }" />
         </el-form-item>
 
-        <el-form-item label="圖片" :label-position="labelPosition">
+        <el-form-item label="圖片" :label-position="labelPosition" prop="image">
             <el-upload :file-list="fileList" class="upload-demo" action="" :on-preview="handlePreview"
                 :on-remove="handleRemove" list-type="picture" :auto-upload="false" :limit="1" :on-exceed="handleExceed"
                 ref="upload" popper-class="no-transition" :on-change="handleOnChange">
@@ -31,12 +31,12 @@
             </el-upload>
         </el-form-item>
 
-        <!-- <el-form-item label="操作">
-            <el-radio-group v-model="formData.is_enabled">
+        <el-form-item label="操作" :label-position="labelPosition" prop="is_enabled">
+            <el-radio-group v-model="formData['is_enabled']">
                 <el-radio :value="1">顯示</el-radio>
                 <el-radio :value="0">隱藏</el-radio>
             </el-radio-group>
-        </el-form-item> -->
+        </el-form-item>
 
         <el-form-item>
             <!-- <el-button type="primary" @click="$emit('submit', formData)">提交</el-button> -->
@@ -67,6 +67,8 @@ const localUploadList = ref();
 const upload = ref([]);
 const labelPosition = ref('top');
 const toggleUpload = ref(false);
+
+
 // console.log(toRef(props,'formData'));
 
 
@@ -105,25 +107,29 @@ const formRules = reactive({
     address: [
         { max: 255, message: "地址不能超過 255 個字", trigger: "blur" },
     ],
-
-    // image: [
-    //     {
-    //         validator: (rule, value, callback) => {
-    //             if (fileList.value.length === 0) {
-    //                 callback();
-    //             } else {
-    //                 const file = fileList.value[0];
-    //                 const validTypes = ["image/jpeg", "image/png", "image/gif"];
-    //                 if (!validTypes.includes(file.type)) {
-    //                     callback(new Error("圖片格式僅限 jpg/png/gif"));
-    //                 } else {
-    //                     callback();
-    //                 }
-    //             }
-    //         },
-    //         trigger: "change",
-    //     },
-    // ],
+    'is_enabled': [
+        { required: true, message: "請選擇顯示或隱藏", trigger: "submit"}
+    ],
+    image: [
+        {
+            validator: (rule, value, callback) => {
+                if (localUploadList.value.length === 0) {
+                    console.log(localUploadList.value);
+                    callback();
+                } else {
+                    const file = localUploadList.value[0].raw;
+                    console.log(file);
+                    const validTypes = ["image/jpeg", "image/png", "image/gif"];
+                    if (!validTypes.includes(file.type)) {
+                        callback(new Error("圖片格式僅限 jpg/png/gif"));
+                    } else {
+                        callback();
+                    }
+                }
+            },
+            trigger: "change",
+        },
+    ],
 });
 
 defineExpose({
@@ -155,6 +161,8 @@ const handleOnChange = (file) => {
         uid: file.uid,
         raw: file.raw,
     }];
+    console.log(localUploadList.value[0].raw);
+    
 
     emits("uploadList", localUploadList.value);
 }
