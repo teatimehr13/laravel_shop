@@ -136,7 +136,7 @@ onMounted(() => {
 
 const emitUploadList = (data) => {
     uploadList.value = data;
-    console.log(uploadList.value);
+    // console.log(uploadList.value);
 }
 
 // 篩選select
@@ -185,7 +185,7 @@ const loadMore = debounce(async () => {
             },
         });
 
-        console.log(response.data);
+        // console.log(response.data);
 
         const newData = response.data.data; // 新數據 
         const lastPage = response.data.last_page; // 總頁數 ex:11
@@ -408,8 +408,7 @@ const open4 = () => {
 //上傳upload
 const fileList = ref([]);
 let uploadList = ref([]);
-const dialogImageUrl = ref('')
-const dialogVisible = ref(false)
+
 // const upload = ref();
 
 
@@ -686,5 +685,9 @@ watch(
 
 ::v-deep(.activeRowFocus) {
     --el-table-tr-bg-color: var(--el-table-row-hover-bg-color);
+}
+
+::v-deep(.el-dialog){
+    width: max-content;
 }
 </style>

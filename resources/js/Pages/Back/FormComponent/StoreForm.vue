@@ -29,6 +29,10 @@
                 ref="upload" popper-class="no-transition" :on-change="handleOnChange">
                 <el-button type="" style="width: 100% !important;">選擇檔案</el-button>
             </el-upload>
+
+            <el-dialog v-model="dialogVisible">
+                <img w-full :src="dialogImageUrl" alt="Preview Image" style="margin: auto;" />
+            </el-dialog>
         </el-form-item>
 
         <el-form-item label="操作" :label-position="labelPosition" prop="is_enabled">
@@ -67,7 +71,8 @@ const localUploadList = ref();
 const upload = ref([]);
 const labelPosition = ref('top');
 const toggleUpload = ref(false);
-
+const dialogImageUrl = ref('');
+const dialogVisible = ref(false);
 
 // console.log(toRef(props,'formData'));
 
@@ -108,7 +113,7 @@ const formRules = reactive({
         { max: 255, message: "地址不能超過 255 個字", trigger: "blur" },
     ],
     'is_enabled': [
-        { required: true, message: "請選擇顯示或隱藏", trigger: "submit"}
+        { required: true, message: "請選擇顯示或隱藏", trigger: "submit" }
     ],
     image: [
         {
@@ -139,7 +144,7 @@ defineExpose({
 
 //刪除待上傳的圖片
 const handleRemove = (uploadFile, uploadFiles) => {
-    console.log(uploadFile, uploadFiles)
+    // console.log(uploadFile, uploadFiles)
     localUploadList.value = [];
     emits("uploadList", localUploadList.value);
 }
@@ -153,7 +158,7 @@ const handlePreview = (uploadFile) => {
 
 //upload變更時
 const handleOnChange = (file) => {
-    console.log(file);
+    // console.log(file);
 
     localUploadList.value = [{
         name: file.name,
@@ -161,16 +166,13 @@ const handleOnChange = (file) => {
         uid: file.uid,
         raw: file.raw,
     }];
-    console.log(localUploadList.value[0].raw);
-    
-
+    // console.log(localUploadList.value[0].raw);
     emits("uploadList", localUploadList.value);
 }
 
 //限制僅上傳一筆
 const handleExceed = (files) => {
-    console.log(files);
-
+    // console.log(files);
     upload.value.clearFiles();
     const file = files[0];
     file.uid = genFileId(); // 生成唯一的 UID
