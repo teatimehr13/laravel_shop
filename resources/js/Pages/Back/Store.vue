@@ -21,8 +21,6 @@
                         v-el-table-infinite-scroll="loadMore" v-loading="loading" :infinite-scroll-disabled="loading"
                         element-loading-text="加載中..." :row-class-name="getRowClass" border>
 
-                        <!-- <el-table-column prop="store_name" label="門市名稱" width="200"/> -->
-
                         <el-table-column width="220" :fixed="isFixedStore ? 'left' : false" prop="store_name">
                             <template #header>
                                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -131,7 +129,6 @@ import { genFileId } from 'element-plus'
 onMounted(() => {
     loadMore();
     scrollStyle();
-
 })
 
 const emitUploadList = (data) => {
@@ -238,7 +235,6 @@ const formattedOpeningHours = computed(() => {
 
 const getRowClass = ({ row }) => {
     return activeRow.value === row.id ? "activeRowFocus" : "";
-
 }
 
 //popover 
@@ -549,6 +545,7 @@ const onSubmitAdd = async () => {
 
     } catch (error) {
         console.error('提交失败:', error);
+        open4();
     }
 }
 
@@ -687,7 +684,7 @@ watch(
     --el-table-tr-bg-color: var(--el-table-row-hover-bg-color);
 }
 
-::v-deep(.el-dialog){
+::v-deep(.el-form-item__content .el-dialog){
     width: max-content;
 }
 </style>

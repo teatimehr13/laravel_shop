@@ -7,22 +7,36 @@ use App\Http\Requests\Back\CategoryRequest;
 use App\Http\Resources\Back\CategoryResource;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         //返回多個模型要用collection
-        $categories = Category::with('subcategories')->orderBy('order_index', 'ASC')->get();
-        // $categories = Category::category_asc()->get();
-        // $categories = Category::orderBy('order_index', 'ASC')->get();
-        return CategoryResource::collection($categories);
+        // $categories = Category::with('subcategories')->orderBy('order_index', 'ASC')->get();
+        // // $categories = Category::category_asc()->get();
+        // // $categories = Category::orderBy('order_index', 'ASC')->get();
+        // return CategoryResource::collection($categories);
 
         //只會返回一個模型
         // return new CategoryResource($categories);
+
+        $categories = $this->fetchData($request);
+        
+        // // 判斷是否為 API 請求
+        if ($request->wantsJson()) {
+            return response()->json($categories);
+        }
+        // Log::info($categories);
+
+        return Inertia::render('Back/Category', [
+            'category' => $categories
+        ]);
     }
 
     /**
@@ -94,5 +108,35 @@ class CategoryController extends Controller
         }
 
         return response()->json(null, 403);
+    }
+
+    private function fetchData(Request $request)
+    {
+        $name = $request->input('name');
+
+        // $query = Store::where('is_enabled', 1);
+        // $query = Category::whereIn('show_in_list', [0, 1]);
+        $query = Category::with('subcategories') // 加入 Eager Loading
+        ->whereIn('show_in_list', [0, 1]);
+
+        if (!is_null($name)) {
+            $query->where('name', 'LIKE', "%$name%");
+        }
+
+        return $query->paginate(20)->through(fn($category) => [
+            'id' => $category->id,
+            'name' => $category->name,
+            'search_key' => $category->search_key,
+            'order_index' => $category->order_index,
+            'show_in_list' => $category->show_in_list,
+            'subcategories' => $category->subcategories->map(fn($sub) => [
+                'id' => $sub->id,
+                'name' => $sub->name,
+                'search_key' => $sub->search_key,
+                'order_index' => $sub->order_index,
+                'show_in_list' => $sub->show_in_list,
+                'category_id' => $category->id
+            ]),
+        ]);
     }
 }

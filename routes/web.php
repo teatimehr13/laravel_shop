@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Back\ProductController as BackProductController;
+use App\Http\Controllers\Back\SubcategoryController as BackSubcategoryController;
 use App\Http\Controllers\Back\ProductOptionController as BackProductOptionController;
 use App\Http\Controllers\Back\StoreController as BackStoreController;
 use App\Http\Controllers\Back\NewsController as BackNewsController;
+use App\Http\Controllers\Back\CategoryController as BackCategoryController;
 use Illuminate\Foundation\Application;
 use Inertia\Inertia;
 
@@ -61,6 +63,10 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('products', BackProductController::class)->only(['index']);
         Route::resource('stores', BackStoreController::class);
+        Route::resource('categories', BackCategoryController::class)->only(['index']);
+        // Route::post('/subcategories/update_sub', [BackSubcategoryController::class, 'updateSub'])->name('subcategories.updateSub');
+        Route::resource('subcategories', BackSubcategoryController::class)->only(['destroy']);
+        Route::post('/subcategories/{subcategory}/update_sub', [BackSubcategoryController::class, 'updateSub']);
 
         Route::post('/stores/update_stores', [BackStoreController::class, 'update_stores'])->name('stores.update_stores');
         Route::post('/stores/delete_stores', [BackStoreController::class, 'delete_stores'])->name('stores.delete_stores');

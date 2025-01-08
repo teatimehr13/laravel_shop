@@ -8,8 +8,9 @@ import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import ElTableInfiniteScroll from "el-table-infinite-scroll";
-import vClickOutside from "click-outside-vue3"
+import vClickOutside from "click-outside-vue3";
 
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -29,6 +30,12 @@ createInertiaApp({
         app.use(ZiggyVue);
         app.use(ElTableInfiniteScroll);
         app.use(vClickOutside)
+
+        // 註冊 Element Plus 圖標
+        for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+            app.component(key, component);
+        }
+
         app.mount(el);
     },
 });

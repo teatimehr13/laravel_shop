@@ -11,13 +11,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-use PhpParser\Node\Stmt\TryCatch;
+
 
 class StoreController extends Controller
 {
     public function index(Request $request)
     {
-        $stores = $this->fetchStores($request);
+        $stores = $this->fetchData($request);
         
         // 判斷是否為 API 請求
         if ($request->wantsJson()) {
@@ -159,7 +159,7 @@ class StoreController extends Controller
         }
     }
 
-    private function fetchStores(Request $request)
+    private function fetchData(Request $request)
     {
         $storeType = $request->input('store_type');
         $address = $request->input('address');

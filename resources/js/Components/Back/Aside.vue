@@ -25,11 +25,11 @@
                 </el-icon>
                 <span>news</span>
             </el-menu-item>
-            <el-menu-item index="4">
+            <el-menu-item index="/back/categories" @click="navigateTo('categories.index')">
                 <el-icon>
                     <!-- <setting /> -->
                 </el-icon>
-                <span>category</span>
+                <span>categories</span>
             </el-menu-item>
 
             <el-menu-item index="5">
