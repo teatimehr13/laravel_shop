@@ -16,9 +16,11 @@ class SubcategoryResource extends JsonResource
     {
         return [
             'name' => $this->name,
-            // 'order_index' => $this->order_index,
+            'order_index' => $this->order_index,
             'show_in_list' => $this->show_in_list,
             'category_id' => $this->category_id,
+            'search_key' => $this->search_key,
+            'id' => $this->id
             // 'test' => new CategoryResource($this->category)
         ];
     }

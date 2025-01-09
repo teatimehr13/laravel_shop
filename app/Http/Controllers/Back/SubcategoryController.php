@@ -30,6 +30,10 @@ class SubcategoryController extends Controller
      */
     public function store($category_id, SubcategoryRequest $request)
     {
+        // Log::info($category_id);
+        // Log::info($request->validated());
+        // return
+
         $validated = $request->validated();
         $category = Category::find($category_id);
 

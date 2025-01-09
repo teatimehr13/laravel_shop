@@ -67,6 +67,8 @@ Route::middleware('auth')->group(function () {
         // Route::post('/subcategories/update_sub', [BackSubcategoryController::class, 'updateSub'])->name('subcategories.updateSub');
         Route::resource('subcategories', BackSubcategoryController::class)->only(['destroy']);
         Route::post('/subcategories/{subcategory}/update_sub', [BackSubcategoryController::class, 'updateSub']);
+        Route::post('/categories/{category_id}/subcategories', [BackSubcategoryController::class, 'store']);
+
 
         Route::post('/stores/update_stores', [BackStoreController::class, 'update_stores'])->name('stores.update_stores');
         Route::post('/stores/delete_stores', [BackStoreController::class, 'delete_stores'])->name('stores.delete_stores');

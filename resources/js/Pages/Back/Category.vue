@@ -172,6 +172,38 @@
                         </el-table-column>
                     </el-table>
                 </VueDraggable>
+
+                <div v-if="NewSubRow" style="margin-top: 20px;">
+                    <el-row :gutter="20">
+                        <el-col :span="5">
+                            <el-input v-model="NewSubRow.name" placeholder="輸入子類別" size="small" />
+                        </el-col>
+                        <el-col :span="5">
+                            <el-input v-model="NewSubRow.search_key" placeholder="輸入索引名稱" size="small" />
+                        </el-col>
+                        <el-col :span="5">
+                            <el-radio-group v-model="NewSubRow.show_in_list">
+                                <el-radio :value="1">顯示</el-radio>
+                                <el-radio :value="0">隱藏</el-radio>
+                            </el-radio-group>
+                        </el-col>
+                        <el-col :span="5">
+                            {{ NewSubRow.order_index }}
+                        </el-col>
+                        <el-col :span="4">
+                            <el-button size="small" type="success" @click="insertNewSubRow">
+                                儲存
+                            </el-button>
+                            <el-button size="small" @click="cancelNewSubRow">
+                                取消
+                            </el-button>
+                        </el-col>
+                    </el-row>
+                </div>
+
+
+                <el-button v-if="!NewSubRowButton" style="margin: 10px 0;" @click="addNewSubRow">添加子類別</el-button>
+
             </el-dialog>
 
             <el-dialog v-model="dialogSecondToggle" :show-close="false" width="800px" :close-on-click-modal="false">
@@ -186,6 +218,7 @@
                     </div>
                 </template>
             </el-dialog>
+
         </template>
     </BackendLayout>
 </template>
@@ -262,12 +295,16 @@ const dialogFormToggle = ref(false);
 const dialogSecondToggle = ref(false);
 const dialogTitle = ref();
 const subcategory = ref();
+const category_id = ref(null);
 
 const dialogToggle = (row) => {
     dialogFormToggle.value = !dialogFormToggle.value;
     dialogTitle.value = '類別 : ' + row.name;
-    console.log(row);
+    // console.log(row);
     subcategory.value = row.subcategories;
+    category_id.value = row.id;
+    // console.log(category_id.value);
+
     // console.log(fileList.value);
     // console.log(uploadList.value);
     // console.log(popForm);
@@ -312,6 +349,14 @@ const toggleEdit = async (row) => {
 // 保存行數據
 const saveRow = async (tempRow, originalRow) => {
     try {
+        const hasChanged = Object.keys(tempRow).some(
+            (key) => tempRow[key] !== originalRow[key]
+        );
+
+        if (!hasChanged) {
+            return; // 不發送 AJAX 請求
+        }
+
         let subcategory_id = originalRow.id;
         let formData = {
             category_id: tempRow.category_id,
@@ -343,10 +388,10 @@ const saveRow = async (tempRow, originalRow) => {
 const deleteSubcategory = async (id) => {
     try {
         const response = await axios.delete(`/back/subcategories/${id}`);
-        if(response.data.message == 'success'){
+        if (response.data.message == 'success') {
             subcategory.value = subcategory.value.filter((item) => item.id !== id);
             showMessage("success", "刪除成功");
-        }else{
+        } else {
             showMessage("success", "刪除失敗");
         }
     } catch (error) {
@@ -369,6 +414,61 @@ const showMessage = (type, title) => {
         position: 'bottom-left',
     });
 };
+
+const NewSubRowButton = ref(false);
+const NewSubRow = ref(false);
+const addNewSubRow = () => {
+    if (!NewSubRow.value) {
+        NewSubRow.value = {
+            name: "",
+            search_key: "",
+            show_in_list: 1,
+            order_index: subcategory.value.length + 1,
+        };
+        NewSubRowButton.value = !NewSubRowButton.value;
+    }
+};
+
+const cancelNewSubRow = () => {
+    NewSubRow.value = null;
+    NewSubRowButton.value = !NewSubRowButton.value;
+}
+
+
+const insertNewSubRow = async () => {
+    // console.log(category_id.value);
+    // console.log(NewSubRow.value);
+    try {
+        const formData = {
+            name: NewSubRow.value.name,
+            search_key: NewSubRow.value.search_key,
+            show_in_list: NewSubRow.value.show_in_list,
+            order_index: NewSubRow.value.order_index
+        };
+
+
+        // 發送 POST 請求到後端
+        const response = await axios.post(
+            `/back/categories/${category_id.value}/subcategories`,
+            formData
+        );
+
+        console.log(response.data.data);
+
+        if (response.data.data) {
+            // 如果請求成功，將新數據插入到子類別列表中
+            subcategory.value.push(response.data.data);
+            NewSubRow.value = null;
+            NewSubRowButton.value = !NewSubRowButton.value;
+            showMessage("success", "新增成功");
+        } else {
+            showMessage("error", "新增失敗");
+        }
+    } catch (error) {
+        showMessage("error", "新增失敗");
+    }
+};
+
 </script>
 
 <style scoped>
