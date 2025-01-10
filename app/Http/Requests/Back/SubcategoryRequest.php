@@ -24,7 +24,7 @@ class SubcategoryRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'search_key' => 'required|string|regex:/^[a-zA-Z0-9_]+$/i|unique:subcategories,search_key,'.$this->subcategory,
-            'order_index' => 'required|integer|min:1|max:9999',
+            // 'order_index' => 'required|integer|min:1|max:9999',
             'show_in_list' => 'required|boolean'
         ];
     }

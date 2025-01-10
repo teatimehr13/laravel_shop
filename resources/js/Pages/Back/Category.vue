@@ -349,15 +349,8 @@ const category_id = ref(null);
 const dialogToggle = (row) => {
     dialogFormToggle.value = !dialogFormToggle.value;
     dialogTitle.value = '類別 : ' + row.name;
-    // console.log(row);
     subcategory.value = row.subcategories;
     category_id.value = row.id;
-    // console.log(category_id.value);
-
-    // console.log(fileList.value);
-    // console.log(uploadList.value);
-    // console.log(popForm);
-    // resetForm();
 }
 
 const dialogToggleSecond = (row) => {
@@ -380,6 +373,7 @@ const tempRow = ref({});
 // 切換到編輯模式
 const toggleEdit = async (row) => {
     if (editingRow.value === row.id) {
+        
         try {
             // 發送 AJAX 保存數據
             await saveRow(tempRow.value, row);
@@ -514,12 +508,17 @@ const addNewSubRow = () => {
     //     };
     //     NewSubRowButton.value = !NewSubRowButton.value;
     // }
+    // console.log(subcategory.value);
+    const maxOrderIndex = subcategory.value.length > 0
+    ? Math.max(...subcategory.value.map(item => item.order_index))
+    : 0;
+    
 
     Object.assign(NewSubRowData, {
         name: "",
         search_key: "",
         show_in_list: 1,
-        order_index: subcategory.value.length + 1,
+        order_index: maxOrderIndex + 1,
     });
 
 
@@ -543,10 +542,10 @@ const insertNewSubRow = async () => {
     try {
         await formValidate(newSubFormRef);
         const formData = {
-            name: NewSubRow.value.name,
-            search_key: NewSubRow.value.search_key,
-            show_in_list: NewSubRow.value.show_in_list,
-            order_index: NewSubRow.value.order_index
+            name: NewSubRowData.name,
+            search_key: NewSubRowData.search_key,
+            show_in_list: NewSubRowData.show_in_list,
+            // order_index: NewSubRowData.order_index
         };
 
 
