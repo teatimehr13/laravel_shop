@@ -8,6 +8,7 @@ use App\Http\Resources\Back\SubcategoryResource;
 use App\Models\Subcategory;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SubcategoryController extends Controller
@@ -116,5 +117,27 @@ class SubcategoryController extends Controller
         } else {
             return response()->json(['message' => 'failed'], 500);
         }
+    }
+
+    public function reorderSubcategories(Request $request)
+    {
+        $data = $request->all();
+        Log::info($data);
+
+        DB::transaction(function () use ($data) {
+            // 將被影響的記錄的 `order_index` 設為臨時值
+            foreach ($data as $item) {
+                Subcategory::where('id', $item['id'])->update([
+                    'order_index' => $item['order_index'] + 1000,
+                ]);
+            }
+
+            // 重新設置正確的 `order_index`
+            foreach ($data as $item) {
+                Subcategory::where('id', $item['id'])->update([
+                    'order_index' => $item['order_index'],
+                ]);
+            }
+        });
     }
 }

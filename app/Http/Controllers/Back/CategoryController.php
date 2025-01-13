@@ -129,7 +129,9 @@ class CategoryController extends Controller
             'search_key' => $category->search_key,
             'order_index' => $category->order_index,
             'show_in_list' => $category->show_in_list,
-            'subcategories' => $category->subcategories->map(fn($sub) => [
+            'subcategories' => $category->subcategories->sortBy('order_index')
+            ->values() //更新索引排序
+            ->map(fn($sub) => [
                 'id' => $sub->id,
                 'name' => $sub->name,
                 'search_key' => $sub->search_key,

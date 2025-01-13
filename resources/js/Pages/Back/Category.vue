@@ -143,7 +143,7 @@
 
                             <el-table-column label="順序" width="108">
                                 <template #default="scope">
-                                    <div v-if="editingRow !== scope.row.id" >
+                                    <div v-if="editingRow !== scope.row.id">
                                         {{ scope.row.order_index }}
                                     </div>
                                     <el-form-item v-else>
@@ -154,27 +154,27 @@
 
                             <el-table-column label="操作" width="200">
                                 <template #default="scope">
-                                        <el-button :type="editingRow === scope.row.id ? 'primary' : ''" size="small"
-                                            @click="toggleEdit(scope.row)">
-                                            {{ editingRow === scope.row.id ? "儲存" : "編輯" }}
-                                        </el-button>
-                                        <el-button v-if="editingRow === scope.row.id" size="small" @click="cancelEdit">
-                                            取消
-                                        </el-button>
-    
-                                        <el-popconfirm v-if="editingRow !== scope.row.id" title="確定移除此筆資料?"
-                                            @confirm="deleteSubcategory(scope.row.id)" :width="170" :hide-after="100"
-                                            v-model:visible="popconfirmVisible[scope.row.id]">
-                                            <template #reference>
-                                                <el-button size="small" type="danger">移除</el-button>
-                                            </template>
-                                            <template #actions="{ confirm, cancel }">
-                                                <el-button size="small" @click="cancel">沒有</el-button>
-                                                <el-button type="danger" size="small" @click="confirm">
-                                                    是
-                                                </el-button>
-                                            </template>
-                                        </el-popconfirm>
+                                    <el-button :type="editingRow === scope.row.id ? 'primary' : ''" size="small"
+                                        @click="toggleEdit(scope.row)">
+                                        {{ editingRow === scope.row.id ? "儲存" : "編輯" }}
+                                    </el-button>
+                                    <el-button v-if="editingRow === scope.row.id" size="small" @click="cancelEdit">
+                                        取消
+                                    </el-button>
+
+                                    <el-popconfirm v-if="editingRow !== scope.row.id" title="確定移除此筆資料?"
+                                        @confirm="deleteSubcategory(scope.row.id)" :width="170" :hide-after="100"
+                                        v-model:visible="popconfirmVisible[scope.row.id]">
+                                        <template #reference>
+                                            <el-button size="small" type="danger">移除</el-button>
+                                        </template>
+                                        <template #actions="{ confirm, cancel }">
+                                            <el-button size="small" @click="cancel">沒有</el-button>
+                                            <el-button type="danger" size="small" @click="confirm">
+                                                是
+                                            </el-button>
+                                        </template>
+                                    </el-popconfirm>
 
                                     <!-- <el-button size="small" type="danger" v-if="editingRow !== scope.row.id">移除</el-button> -->
                                 </template>
@@ -361,8 +361,31 @@ const dialogToggleSecond = (row) => {
 }
 
 const onDragEnd = (evt) => {
-    console.log("拖拽完成：", evt);
+    const startIndex = evt.oldIndex;
+    const endIndex = evt.newIndex;
+
+    // 計算影響範圍的數據（startIndex 到 endIndex 之間）
+    const minIndex = Math.min(startIndex, endIndex);
+    const maxIndex = Math.max(startIndex, endIndex);
+
+    // 更新範圍內的數據順序
+    const affectedRows = subcategory.value.slice(minIndex, maxIndex + 1);
+    affectedRows.forEach((item, index) => {
+        item.order_index = minIndex + index + 1;
+    });
+    // console.log(affectedRows);
+
+    reorder(affectedRows);
 };
+
+const reorder = async (affectedRows) => {
+    try {
+        const response = await axios.post("/back/subcategories/reorder", affectedRows);
+        // console.log(response.data);
+      } catch (error) {
+        console.error("更新排序失敗", error);
+      }
+}
 
 // 編輯狀態的行 ID
 const editingRow = ref(null);
@@ -373,7 +396,7 @@ const tempRow = ref({});
 // 切換到編輯模式
 const toggleEdit = async (row) => {
     if (editingRow.value === row.id) {
-        
+
         try {
             // 發送 AJAX 保存數據
             await saveRow(tempRow.value, row);
@@ -510,9 +533,9 @@ const addNewSubRow = () => {
     // }
     // console.log(subcategory.value);
     const maxOrderIndex = subcategory.value.length > 0
-    ? Math.max(...subcategory.value.map(item => item.order_index))
-    : 0;
-    
+        ? Math.max(...subcategory.value.map(item => item.order_index))
+        : 0;
+
 
     Object.assign(NewSubRowData, {
         name: "",
@@ -635,7 +658,7 @@ const formValidate = (forRef) => {
     padding: 0 12px !important;
 }
 
-::v-deep(.el-form-item){
+::v-deep(.el-form-item) {
     margin: auto;
 }
 </style>
