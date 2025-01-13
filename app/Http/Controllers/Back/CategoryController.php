@@ -84,7 +84,9 @@ class CategoryController extends Controller
     //因為有傳入Product實例會自動解析id，故更新無需傳id進來
     public function update($id, CategoryRequest $request)
     {
-        $category = Category::find($id);
+        // Log::info($id);
+        // Log::info($request->validated());
+        $category = Category::findOrFail($id);
         $category->update($request->validated());
         return new CategoryResource($category);
     }

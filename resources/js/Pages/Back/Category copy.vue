@@ -2,162 +2,103 @@
     <BackendLayout>
         <template #switch>
             <div>
-                <VueDraggable v-model="categories.data" target="tbody" @end="onCgDragEnd" :animation="150"
-                    ghostClass="ghost" :disabled="!isCgDraggable">
-                    <el-form :model="tempCgRow" :rules="rules" ref="cgFormRef">
-                        <el-table :data="categories.data" style="width: 100%; height: calc(100vh - 250px)"
-                            v-el-table-infinite-scroll="loadMore" v-loading="loading"
-                            :infinite-scroll-disabled="loading" element-loading-text="加載中..." border>
+                <el-table :data="categories.data" style="width: 100%; height: calc(100vh - 250px)"
+                    v-el-table-infinite-scroll="loadMore" v-loading="loading" :infinite-scroll-disabled="loading"
+                    element-loading-text="加載中..." border>
 
-                            <el-table-column width="220" :fixed="isFixedStore ? 'left' : false" prop="name">
-                                <!-- <template #header>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span>類別名稱</span>
-                                        <el-tooltip content="固定/取消固定類別列">
-                                            <el-checkbox v-model="isFixedStore"></el-checkbox>
-                                        </el-tooltip>
-                                    </div>
-                                </template> -->
-                                <template #header>
-                                    類別名稱
-                                </template>
-                                <template #default="scope">
-                                    <div v-if="editingCgRow !== scope.row.id">
-                                        {{ scope.row.name }}
-                                    </div>
-                                    <el-form-item v-else prop="name">
-                                        <el-input v-model="tempCgRow.name" placeholder="輸入子類別" size="small" />
+                    <el-table-column width="220" :fixed="isFixedStore ? 'left' : false" prop="name">
+                        <template #header>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span>類別名稱</span>
+                                <el-tooltip content="固定/取消固定類別列">
+                                    <el-checkbox v-model="isFixedStore"></el-checkbox>
+                                </el-tooltip>
+                            </div>
+                        </template>
+                    </el-table-column>
+
+                    <el-table-column prop="search_key" label="類別索引" />
+                    <el-table-column prop="order_index" label="順序" />
+                    <el-table-column prop="show_in_list" label="顯示 / 隱藏" />
+
+                    <el-table-column width="140" :fixed="isFixed ? 'right' : false">
+                        <template #header>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span>子類別</span>
+                                <!-- <el-tooltip content="固定/取消固定操作列">
+                                        <el-checkbox v-model="isFixed"></el-checkbox>
+                                    </el-tooltip> -->
+                            </div>
+                        </template>
+
+                        <template #default="scope">
+                            <!-- <template #reference> -->
+                            <el-button type='primary' text @click="dialogToggle(scope.row)">查看</el-button>
+                            <!-- </template> -->
+                        </template>
+
+                        <!-- <el-button size="small">編輯</el-button> -->
+                        <!-- <template #default="scope">
+                                <el-popover :placement="popoverPlacement" trigger="click" :width="350"
+                                    v-model:visible="popoverVisible[scope.row.id]" popper-class="custom-scrollbar"
+                                    :hide-after="0" :show-after="100" @show="handlePopoverShow(scope.row.id)"
+                                    :popper-style="popoverStyle" @before-leave="enableScroll" :offset="offSet"
+                                    ref="popoverRef">
+                                    <template #reference>
+                                        <el-button size="small" @click="openEditPopover(scope.row)"
+                                            :ref="el => (triggerRefs[scope.row.id] = el)"
+                                            :class="{ activeButton: activeRow === scope.row.id }">編輯</el-button>
+                                    </template>
+                                    <StoreForm v-model:file-list="fileList" v-model:form-data="popForm"
+                                        @submit="onSubmitEdit" v-model:uploadList="uploadList" ref="formRef2"
+                                        @uploadList="emitUploadList" />
+                                    <el-form-item>
+                                        <el-button type="primary" @click="onSubmitEdit">儲存</el-button>
+                                        <el-button @click="closePopover(scope.row.id)">關閉</el-button>
                                     </el-form-item>
-                                </template>
-                            </el-table-column>
+                                </el-popover>
+                                <el-popconfirm title="確定移除此筆資料?" @confirm="onSubmitDel(scope.row.id)" :width="170"
+                                    :hide-after="100" v-model:visible="popconfirmVisible[scope.row.id]">
+                                    <template #reference>
+                                        <el-button size="small" type="danger">移除</el-button>
+                                    </template>
+                                    <template #actions="{ confirm, cancel }">
+                                        <el-button size="small" @click="cancel">沒有</el-button>
+                                        <el-button type="danger" size="small" @click="confirm">
+                                            是
+                                        </el-button>
+                                    </template>
+                                </el-popconfirm>
 
-                            <el-table-column prop="search_key" label="類別索引">
-                                <template #header>
-                                    類別名稱
-                                </template>
+                            </template> -->
+                    </el-table-column>
+
+                    <el-table-column label="操作" width="200">
                                 <template #default="scope">
-                                    <div v-if="editingCgRow !== scope.row.id">
-                                        {{ scope.row.search_key }}
-                                    </div>
-                                    <el-form-item v-else prop="search_key">
-                                        <el-input v-model="tempCgRow.search_key" placeholder="輸入子類別" size="small" />
-                                    </el-form-item>
-                                </template>
-                            </el-table-column>>
-
-                            <el-table-column prop="order_index" label="順序" />
-                            <el-table-column prop="show_in_list" label="顯示 / 隱藏">
-                                <template #default="scope">
-                                    <div v-if="editingCgRow !== scope.row.id">
-                                        {{ scope.row.show_in_list == 1 ? "顯示" : "隱藏" }}
-                                    </div>
-                                    <div v-else>
-                                        <el-form-item>
-                                            <el-radio-group v-model="tempCgRow.show_in_list">
-                                                <el-radio :value="1">顯示</el-radio>
-                                                <el-radio :value="0">隱藏</el-radio>
-                                            </el-radio-group>
-                                        </el-form-item>
-                                    </div>
-                                </template>
-                            </el-table-column>
-
-
-
-                            <el-table-column width="140" :fixed="isFixed ? 'right' : false">
-                                <template #header>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span>子類別</span>
-                                        <!-- <el-tooltip content="固定/取消固定操作列">
-                                                <el-checkbox v-model="isFixed"></el-checkbox>
-                                            </el-tooltip> -->
-                                    </div>
-                                </template>
-
-                                <template #default="scope">
-                                    <el-button type='primary' text @click="dialogToggle(scope.row)">查看</el-button>
-                                </template>
-
-                            </el-table-column>
-
-                            <el-table-column label="操作" width="200">
-                                <template #default="scope">
-                                    <el-button :type="editingCgRow === scope.row.id ? 'primary' : ''" size="small"
-                                        @click="toggleCgEdit(scope.row)">
-                                        {{ editingCgRow === scope.row.id ? "儲存" : "編輯" }}
+                                    <el-button :type="editingRow === scope.row.id ? 'primary' : ''" size="small"
+                                        @click="toggleEdit(scope.row)">
+                                        {{ editingRow === scope.row.id ? "儲存" : "編輯" }}
                                     </el-button>
-                                    <el-button v-if="editingCgRow === scope.row.id" size="small" @click="cancelCgEdit">
+                                    <el-button v-if="editingRow === scope.row.id" size="small" @click="cancelEdit">
                                         取消
                                     </el-button>
 
-                                    <!-- <el-popconfirm v-if="editingRow !== scope.row.id" title="確定移除此筆資料?"
+                                    <el-popconfirm v-if="editingRow !== scope.row.id" title="確定移除此筆資料?"
                                         @confirm="deleteSubcategory(scope.row.id)" :width="170" :hide-after="100"
                                         v-model:visible="popconfirmVisible[scope.row.id]">
                                         <template #reference>
                                             <el-button size="small" type="danger">移除</el-button>
                                         </template>
-    <template #actions="{ confirm, cancel }">
+                                        <template #actions="{ confirm, cancel }">
                                             <el-button size="small" @click="cancel">沒有</el-button>
                                             <el-button type="danger" size="small" @click="confirm">
                                                 是
                                             </el-button>
                                         </template>
-    </el-popconfirm> -->
+                                    </el-popconfirm>
                                 </template>
                             </el-table-column>
-                        </el-table>
-                    </el-form>
-
-                </VueDraggable>
-
-                <div v-show="NewCgRow" class="">
-                    <el-form :model="NewCgRowData" :rules="rules" ref="newCgFormRef">
-                        <el-row>
-                            <el-col>
-                                <el-form-item prop="name">
-                                    <el-input v-model="NewSubRowData.name" placeholder="輸入子類別" size="small" />
-                                </el-form-item>
-                            </el-col>
-                            <el-col>
-                                <el-form-item prop="search_key">
-                                    <el-input v-model="NewSubRowData.search_key" placeholder="輸入索引名稱" size="small" />
-                                </el-form-item>
-                            </el-col>
-                            <el-col>
-                                <el-form-item>
-                                    <el-radio-group v-model="NewSubRowData.show_in_list">
-                                        <el-radio :value="1">顯示</el-radio>
-                                        <el-radio :value="0">隱藏</el-radio>
-                                    </el-radio-group>
-                                </el-form-item>
-                            </el-col>
-                            <el-col>
-                                <el-form-item>
-                                    {{ NewSubRowData.order_index }}
-                                </el-form-item>
-                            </el-col>
-                            <el-col>
-                                <el-form-item>
-                                    <el-button size="small" type="success" @click="insertNewSubRow">
-                                        新增
-                                    </el-button>
-                                    <el-button size="small" @click="cancelNewSubRow">
-                                        取消
-                                    </el-button>
-                                </el-form-item>
-                            </el-col>
-                        </el-row>
-                    </el-form>
-                </div>
-
-                <el-button v-if="!NewRowButton" style="margin: 10px 0;" @click="addNewRow">添加類別</el-button>
-                <el-tooltip class="box-item" effect="dark" :content="isCgDraggable === false ? '進行拖曳表格調整' : '結束拖曳表格調整'"
-                    placement="top-start">
-                    <el-button v-if="!NewSubRowButton" style="margin: 10px;" @click="toggleCgDraggable"
-                        :type="isCgDraggable === false ? '' : 'primary'">
-                        {{ isCgDraggable === false ? "調整順序" : "退出調整" }}
-                    </el-button>
-                </el-tooltip>
+                </el-table>
             </div>
 
 
@@ -289,15 +230,13 @@
                 </div>
 
                 <el-button v-if="!NewSubRowButton" style="margin: 10px 0;" @click="addNewSubRow">添加子類別</el-button>
-                <el-tooltip class="box-item" effect="dark" :content="isDraggable === false ? '進行拖曳表格調整' : '結束拖曳表格調整'"
-                    placement="top-start">
+                <el-tooltip class="box-item" effect="dark" :content="isDraggable === false ? '進行拖曳表格調整' : '結束拖曳表格調整'" placement="top-start">
                     <el-button v-if="!NewSubRowButton" style="margin: 10px;" @click="toggleDraggable"
                         :type="isDraggable === false ? '' : 'primary'">
                         {{ isDraggable === false ? "調整順序" : "退出調整" }}
                     </el-button>
                 </el-tooltip>
             </el-dialog>
-
 
             <el-dialog v-model="dialogSecondToggle" :show-close="false" width="800px" :close-on-click-modal="false">
                 <template #header="{ close, titleId, titleClass }">
@@ -406,13 +345,8 @@ const dialogToggleSecond = (row) => {
 }
 
 const isDraggable = ref(false);
-const isCgDraggable = ref(false);
 const toggleDraggable = () => {
     isDraggable.value = !isDraggable.value;
-}
-
-const toggleCgDraggable = () => {
-    isCgDraggable.value = !isCgDraggable.value;
 }
 
 const onDragEnd = (evt) => {
@@ -433,24 +367,6 @@ const onDragEnd = (evt) => {
     reorder(affectedRows);
 };
 
-const onCgDragEnd = (evt) => {
-    const startIndex = evt.oldIndex;
-    const endIndex = evt.newIndex;
-
-    // 計算影響範圍的數據（startIndex 到 endIndex 之間）
-    const minIndex = Math.min(startIndex, endIndex);
-    const maxIndex = Math.max(startIndex, endIndex);
-
-    // 更新範圍內的數據順序
-    const affectedRows = subcategory.value.slice(minIndex, maxIndex + 1);
-    affectedRows.forEach((item, index) => {
-        item.order_index = minIndex + index + 1;
-    });
-    console.log(affectedRows);
-
-    // reorder(affectedRows);
-};
-
 const reorder = async (affectedRows) => {
     try {
         const response = await axios.post("/back/subcategories/reorder", affectedRows);
@@ -462,15 +378,14 @@ const reorder = async (affectedRows) => {
 
 // 編輯狀態的行 ID
 const editingRow = ref(null);
-const editingCgRow = ref(null);
 
 // 臨時數據保存編輯值
 const tempRow = ref({});
-const tempCgRow = ref({});
 
 // 切換到編輯模式
 const toggleEdit = async (row) => {
     if (editingRow.value === row.id) {
+
         try {
             // 發送 AJAX 保存數據
             await saveRow(tempRow.value, row);
@@ -482,25 +397,9 @@ const toggleEdit = async (row) => {
     } else {
         tempRow.value = { ...row }
         editingRow.value = row.id; // 進入編輯模式
+
     }
 };
-
-//類別
-const toggleCgEdit = async (row) => {
-    if (editingCgRow.value === row.id) {
-        try {
-            // 發送 AJAX 保存數據
-            await saveCgRow(tempCgRow.value, row);
-        } catch (error) {
-            console.error('保存失敗', error);
-        }
-    } else {
-        tempCgRow.value = { ...row }
-        editingCgRow.value = row.id; // 進入編輯模式
-        console.log(tempCgRow.value);
-
-    }
-}
 
 // 保存行數據
 const saveRow = async (tempRow, originalRow) => {
@@ -544,54 +443,6 @@ const saveRow = async (tempRow, originalRow) => {
     }
 };
 
-const saveCgRow = async (tempRow, originalRow) => {
-    try {
-        const hasChanged = Object.keys(tempRow).some(
-            (key) => tempRow[key] !== originalRow[key]
-        );
-
-        if (!hasChanged) {
-            editingCgRow.value = null;
-            return; // 不發送 AJAX 請求
-        }
-
-        await formValidate(cgFormRef);
-        let formData = {
-            name: tempRow.name,
-            search_key: tempRow.search_key,
-            show_in_list: tempRow.show_in_list,
-            order_index: tempRow.order_index
-        }
-
-        let category_id = tempRow.id;
-
-        console.log(formData);
-        // console.log(subcategory_id);
-        // return
-        // const response = await axios.post(`/back/categories/${category_id}`, {
-        //     data: {
-        //         formData,
-        //         _method: 'patch'
-        //     }
-        // });
-        const response = await axios.patch(`/back/categories/${category_id}`, formData);
-
-        if (response.data) {
-            Object.assign(originalRow, tempRow); // 更新原始數據
-            editingCgRow.value = null; // 退出編輯模式
-            showMessage("success", "保存成功");
-            return
-        } else {
-            showMessage("error", "保存失敗");
-            throw new Error("保存失敗");
-        }
-
-    } catch (error) {
-        console.error("保存失敗", error);
-        showMessage("error", "保存失敗");
-    }
-};
-
 //刪除
 const deleteSubcategory = async (id) => {
     try {
@@ -612,10 +463,6 @@ const cancelEdit = () => {
     editingRow.value = null;
 };
 
-const cancelCgEdit = () => {
-    editingCgRow.value = null;
-}
-
 // Popconfirm 的顯示狀態
 const popconfirmVisible = ref({});
 
@@ -630,9 +477,6 @@ const showMessage = (type, title) => {
 const NewSubRowButton = ref(false);
 const NewSubRow = ref(false);
 
-const NewRowButton = ref(false);
-const NewRow = ref(false);
-
 // 儲存新增行的數據
 const NewSubRowData = reactive({
     name: "",
@@ -641,18 +485,9 @@ const NewSubRowData = reactive({
     order_index: "",
 });
 
-const NewCgRowData = reactive({
-    name: "",
-    search_key: "",
-    show_in_list: "",
-    order_index: "",
-});
-
 
 const newSubFormRef = ref(null); // 表單引用
-const newCgFormRef = ref(null); // 表單引用
 const subFormRef = ref(null);
-const cgFormRef = ref(null);
 
 // 表單驗證規則
 const rules = reactive({
@@ -676,6 +511,16 @@ const rules = reactive({
 
 //添加子類別
 const addNewSubRow = () => {
+    // if (!NewSubRow.value) {
+    //     NewSubRow.value = {
+    //         name: "",
+    //         search_key: "",
+    //         show_in_list: 1,
+    //         order_index: subcategory.value.length + 1,
+    //     };
+    //     NewSubRowButton.value = !NewSubRowButton.value;
+    // }
+    // console.log(subcategory.value);
     const maxOrderIndex = subcategory.value.length > 0
         ? Math.max(...subcategory.value.map(item => item.order_index))
         : 0;
@@ -691,9 +536,6 @@ const addNewSubRow = () => {
 
     NewSubRowButton.value = !NewSubRowButton.value;
     NewSubRow.value = !NewSubRow.value;
-};
-
-const addNewRow = () => {
 
 };
 

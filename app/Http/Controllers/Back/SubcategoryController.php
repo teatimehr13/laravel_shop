@@ -122,7 +122,7 @@ class SubcategoryController extends Controller
     public function reorderSubcategories(Request $request)
     {
         $data = $request->all();
-        Log::info($data);
+        // Log::info($data);
 
         DB::transaction(function () use ($data) {
             // 將被影響的記錄的 `order_index` 設為臨時值

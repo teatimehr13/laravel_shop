@@ -54,8 +54,8 @@ Route::prefix('back')->name('back.')->group(function () {
 });
 
 
-Route::resource('categories', BackCategoryController::class)->only(['store', 'update']);
-Route::resource('categories.subcategories', BackSubcategoryController::class)->except(['show', 'create', 'edit']);
+// Route::resource('categories', BackCategoryController::class)->only(['store', 'update']);
+// Route::resource('categories.subcategories', BackSubcategoryController::class)->except(['show', 'create', 'edit']);
 
 //cart
 Route::prefix('cart')->name('cart.')->group(function () {
