@@ -1,6 +1,15 @@
 <template>
     <BackendLayout>
         <template #switch>
+            <el-button style="margin: 10px 0;" @click="addCgToggle">添加類別</el-button>
+            <el-tooltip class="box-item" effect="dark" :content="isCgDraggable === false ? '進行拖曳表格調整' : '結束拖曳表格調整'"
+                placement="top-start">
+                <el-button v-if="!NewSubRowButton" style="margin: 10px;" @click="toggleCgDraggable"
+                    :type="isCgDraggable === false ? '' : 'primary'">
+                    {{ isCgDraggable === false ? "調整順序" : "退出調整" }}
+                </el-button>
+            </el-tooltip>
+
             <div>
                 <VueDraggable v-model="categories.data" target="tbody" @end="onCgDragEnd" :animation="150"
                     ghostClass="ghost" :disabled="!isCgDraggable">
@@ -33,7 +42,7 @@
 
                             <el-table-column prop="search_key" label="類別索引">
                                 <template #header>
-                                    類別名稱
+                                    類別索引
                                 </template>
                                 <template #default="scope">
                                     <div v-if="editingCgRow !== scope.row.id">
@@ -43,7 +52,7 @@
                                         <el-input v-model="tempCgRow.search_key" placeholder="輸入子類別" size="small" />
                                     </el-form-item>
                                 </template>
-                            </el-table-column>>
+                            </el-table-column>
 
                             <el-table-column prop="order_index" label="順序" />
                             <el-table-column prop="show_in_list" label="顯示 / 隱藏">
@@ -88,7 +97,7 @@
                                         取消
                                     </el-button>
 
-                                    <el-popconfirm v-if="editingRow !== scope.row.id" title="確定移除此筆資料??"
+                                    <el-popconfirm v-if="editingCgRow !== scope.row.id" title="確定移除此筆資料?"
                                         @confirm="deletecategory(scope.row.id)" :width="170" :hide-after="100"
                                         v-model:visible="popconfirmVisible[scope.row.id]">
                                         <template #reference>
@@ -108,56 +117,7 @@
 
                 </VueDraggable>
 
-                <div v-show="NewCgRow" class="">
-                    <el-form :model="NewCgRowData" :rules="rules" ref="newCgFormRef">
-                        <el-row>
-                            <el-col>
-                                <el-form-item prop="name">
-                                    <el-input v-model="NewSubRowData.name" placeholder="輸入子類別" size="small" />
-                                </el-form-item>
-                            </el-col>
-                            <el-col>
-                                <el-form-item prop="search_key">
-                                    <el-input v-model="NewSubRowData.search_key" placeholder="輸入索引名稱" size="small" />
-                                </el-form-item>
-                            </el-col>
-                            <el-col>
-                                <el-form-item>
-                                    <el-radio-group v-model="NewSubRowData.show_in_list">
-                                        <el-radio :value="1">顯示</el-radio>
-                                        <el-radio :value="0">隱藏</el-radio>
-                                    </el-radio-group>
-                                </el-form-item>
-                            </el-col>
-                            <el-col>
-                                <el-form-item>
-                                    {{ NewSubRowData.order_index }}
-                                </el-form-item>
-                            </el-col>
-                            <el-col>
-                                <el-form-item>
-                                    <el-button size="small" type="success" @click="insertNewSubRow">
-                                        新增
-                                    </el-button>
-                                    <el-button size="small" @click="cancelNewSubRow">
-                                        取消
-                                    </el-button>
-                                </el-form-item>
-                            </el-col>
-                        </el-row>
-                    </el-form>
-                </div>
-
-                <el-button v-if="!NewRowButton" style="margin: 10px 0;" @click="addNewRow">添加類別</el-button>
-                <el-tooltip class="box-item" effect="dark" :content="isCgDraggable === false ? '進行拖曳表格調整' : '結束拖曳表格調整'"
-                    placement="top-start">
-                    <el-button v-if="!NewSubRowButton" style="margin: 10px;" @click="toggleCgDraggable"
-                        :type="isCgDraggable === false ? '' : 'primary'">
-                        {{ isCgDraggable === false ? "調整順序" : "退出調整" }}
-                    </el-button>
-                </el-tooltip>
             </div>
-
 
             <!-- 對話框 -->
             <el-dialog v-model="dialogFormToggle" :title="dialogTitle" width="1000px">
@@ -296,17 +256,32 @@
                 </el-tooltip>
             </el-dialog>
 
+            <!-- 新增類別 -->
+            <el-dialog v-model="dialogCgToggle" title="新增類別" width="400px">
+                <el-form :model="addCgform" class="demo-ruleForm" :rules="rules" ref="newCgFormRef">
+                    <el-form-item label="類別名稱" :label-position="labelPosition" prop="name">
+                        <el-input v-model="addCgform.name" />
+                    </el-form-item>
 
-            <el-dialog v-model="dialogSecondToggle" :show-close="false" width="800px" :close-on-click-modal="false">
-                <template #header="{ close, titleId, titleClass }">
-                    <div class="my-header">
-                        <el-button size="large" @click="dialogToggleSecond" text>
-                            <el-icon :size="18">
-                                <ArrowLeft />
-                            </el-icon>
-                        </el-button>
-                        <h4 :id="titleId" :class="titleClass" style="color:#44546f">編輯子類別</h4>
-                    </div>
+                    <el-form-item label="索引名稱" :label-position="labelPosition" prop="search_key">
+                        <el-input v-model="addCgform.search_key" />
+                    </el-form-item>
+
+                    <!-- <el-form-item label="順序" :label-position="labelPosition" prop="order_index">
+                        <el-input v-model="addCgform.show_in_list" />
+                    </el-form-item> -->
+
+                    <el-form-item label="顯示 / 隱藏" :label-position="labelPosition" prop="show_in_list">
+                        <el-radio-group v-model="addCgform.show_in_list">
+                            <el-radio :value="1">顯示</el-radio>
+                            <el-radio :value="0">隱藏</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+
+                </el-form>
+                <template #footer>
+                    <el-button type="primary" @click="insertNewCg">提交</el-button>
+                    <el-button @click="cancelCgform">取消</el-button>
                 </template>
             </el-dialog>
 
@@ -383,11 +358,13 @@ const loadMore = debounce(async () => {
 
 //對話框
 const dialogFormToggle = ref(false);
-const dialogSecondToggle = ref(false);
 const dialogTitle = ref();
 const subcategory = ref();
 const category_id = ref(null);
 
+/*子類別*/
+
+//查看子類別
 const dialogToggle = (row) => {
     dialogFormToggle.value = !dialogFormToggle.value;
     dialogTitle.value = '類別 : ' + row.name;
@@ -396,23 +373,11 @@ const dialogToggle = (row) => {
     cancelNewSubRow();
 }
 
-const dialogToggleSecond = (row) => {
-    // dialogFormToggle.value = !dialogFormToggle.value;
-    // dialogSecondToggle.value = !dialogSecondToggle.value;
-    console.log(row);
-
-}
-
+//子類別順序調整
 const isDraggable = ref(false);
-const isCgDraggable = ref(false);
 const toggleDraggable = () => {
     isDraggable.value = !isDraggable.value;
 }
-
-const toggleCgDraggable = () => {
-    isCgDraggable.value = !isCgDraggable.value;
-}
-
 const onDragEnd = (evt) => {
     const startIndex = evt.oldIndex;
     const endIndex = evt.newIndex;
@@ -430,6 +395,22 @@ const onDragEnd = (evt) => {
 
     reorder(affectedRows);
 };
+
+const reorder = async (affectedRows) => {
+    try {
+        const response = await axios.post("/back/subcategories/reorder", affectedRows);
+        // console.log(response.data);
+    } catch (error) {
+        console.error("更新排序失敗", error);
+    }
+}
+
+//類別順序調整
+const isCgDraggable = ref(false);
+
+const toggleCgDraggable = () => {
+    isCgDraggable.value = !isCgDraggable.value;
+}
 
 const onCgDragEnd = (evt) => {
     const startIndex = evt.oldIndex;
@@ -449,24 +430,17 @@ const onCgDragEnd = (evt) => {
     // reorder(affectedRows);
 };
 
-const reorder = async (affectedRows) => {
-    try {
-        const response = await axios.post("/back/subcategories/reorder", affectedRows);
-        // console.log(response.data);
-    } catch (error) {
-        console.error("更新排序失敗", error);
-    }
-}
+//子類別按鈕
+const NewSubRowButton = ref(false);
+const NewSubRow = ref(false);
 
-// 編輯狀態的行 ID
+// 編輯子類別的輸入行
 const editingRow = ref(null);
-const editingCgRow = ref(null);
 
 // 臨時數據保存編輯值
 const tempRow = ref({});
-const tempCgRow = ref({});
 
-// 切換到編輯模式
+//子類別編輯模式
 const toggleEdit = async (row) => {
     if (editingRow.value === row.id) {
         try {
@@ -483,24 +457,7 @@ const toggleEdit = async (row) => {
     }
 };
 
-//類別
-const toggleCgEdit = async (row) => {
-    if (editingCgRow.value === row.id) {
-        try {
-            // 發送 AJAX 保存數據
-            await saveCgRow(tempCgRow.value, row);
-        } catch (error) {
-            console.error('保存失敗', error);
-        }
-    } else {
-        tempCgRow.value = { ...row }
-        editingCgRow.value = row.id; // 進入編輯模式
-        console.log(tempCgRow.value);
-
-    }
-}
-
-// 保存行數據
+// 編輯(保存)子類別行數據
 const saveRow = async (tempRow, originalRow) => {
     try {
         const hasChanged = Object.keys(tempRow).some(
@@ -542,6 +499,125 @@ const saveRow = async (tempRow, originalRow) => {
     }
 };
 
+//刪除子類別
+const deleteSubcategory = async (id) => {
+    try {
+        const response = await axios.delete(`/back/subcategories/${id}`);
+        if (response.data.message == 'success') {
+            subcategory.value = subcategory.value.filter((item) => item.id !== id);
+            showMessage("success", "刪除成功");
+        } else {
+            showMessage("error", "刪除失敗");
+        }
+    } catch (error) {
+        showMessage("error", "刪除失敗");
+    }
+}
+
+// 取消子類別編輯模式
+const cancelEdit = () => {
+    editingRow.value = null;
+};
+
+// 儲存新增行的數據
+const NewSubRowData = reactive({
+    name: "",
+    search_key: "",
+    show_in_list: "",
+    order_index: "",
+});
+
+//添加子類別
+const labelPosition = ref('top');
+const addNewSubRow = () => {
+    const maxOrderIndex = subcategory.value.length > 0
+        ? Math.max(...subcategory.value.map(item => item.order_index))
+        : 0;
+
+
+    Object.assign(NewSubRowData, {
+        name: "",
+        search_key: "",
+        show_in_list: 1,
+        order_index: maxOrderIndex + 1,
+    });
+
+
+    NewSubRowButton.value = !NewSubRowButton.value;
+    NewSubRow.value = !NewSubRow.value;
+};
+
+//新增子類別(取消)
+const cancelNewSubRow = () => {
+    NewSubRow.value = null;
+    NewSubRowButton.value = false;
+
+    if (newSubFormRef.value) {
+        newSubFormRef.value.resetFields();
+    }
+}
+
+//新增子類別(送出)
+const insertNewSubRow = async () => {
+    try {
+        await formValidate(newSubFormRef);
+        const formData = {
+            name: NewSubRowData.name,
+            search_key: NewSubRowData.search_key,
+            show_in_list: NewSubRowData.show_in_list,
+            // order_index: NewSubRowData.order_index
+        };
+
+
+        // 發送 POST 請求到後端
+        const response = await axios.post(
+            `/back/categories/${category_id.value}/subcategories`,
+            formData
+        );
+
+        console.log(response.data.data);
+
+        if (response.data.data) {
+            // 如果請求成功，將新數據插入到子類別列表中
+            subcategory.value.push(response.data.data);
+            NewSubRow.value = null;
+            NewSubRowButton.value = !NewSubRowButton.value;
+            showMessage("success", "新增成功");
+        } else {
+            showMessage("error", "新增失敗");
+        }
+    } catch (error) {
+        // showMessage("error", "新增失敗");
+    }
+};
+
+
+/*類別*/
+
+// 編輯類別的輸入行
+const editingCgRow = ref(null);
+
+// 臨時數據保存編輯值
+const tempCgRow = ref({});
+
+//類別編輯模式
+const toggleCgEdit = async (row) => {
+    if (editingCgRow.value === row.id) {
+        try {
+            // 發送 AJAX 保存數據
+            await saveCgRow(tempCgRow.value, row);
+        } catch (error) {
+            console.error('保存失敗', error);
+        }
+    } else {
+        tempCgRow.value = { ...row }
+        editingCgRow.value = row.id; // 進入編輯模式
+        console.log(tempCgRow.value);
+
+    }
+}
+
+//編輯(保存)類別行數據
 const saveCgRow = async (tempRow, originalRow) => {
     try {
         const hasChanged = Object.keys(tempRow).some(
@@ -590,13 +666,17 @@ const saveCgRow = async (tempRow, originalRow) => {
     }
 };
 
-//刪除
-const deleteSubcategory = async (id) => {
+//刪除類別
+const deletecategory = async (id) => {
     try {
-        const response = await axios.delete(`/back/subcategories/${id}`);
+        const response = await axios.delete(`/back/categories/${id}`);
+        console.log(response.data);
+
         if (response.data.message == 'success') {
-            subcategory.value = subcategory.value.filter((item) => item.id !== id);
+            categories.data = categories.data.filter((item) => item.id !== id);
             showMessage("success", "刪除成功");
+        } else if (response.data.message == 'subcategory exist') {
+            showMessage("error", '關聯之子類別尚存在');
         } else {
             showMessage("error", "刪除失敗");
         }
@@ -605,29 +685,7 @@ const deleteSubcategory = async (id) => {
     }
 }
 
-const deletecategory = async (id) => {
-    try {
-        const response = await axios.delete(`/back/categories/${id}`);
-        console.log(response.data);
-        
-        if (response.data.message == 'success') {
-            categories.data = categories.data.filter((item) => item.id !== id);
-            showMessage("success", "刪除成功");
-        } else if(response.data.message == 'subcategory exist'){
-            showMessage("error", '關聯之子類別尚存在');
-        } else{
-            showMessage("error", "刪除失敗");
-        }
-    } catch (error) {
-        showMessage("error", "刪除失敗");
-    }
-}
-
-// 取消編輯
-const cancelEdit = () => {
-    editingRow.value = null;
-};
-
+// 取消類別編輯模式
 const cancelCgEdit = () => {
     editingCgRow.value = null;
 }
@@ -643,33 +701,68 @@ const showMessage = (type, title) => {
     });
 };
 
-const NewSubRowButton = ref(false);
-const NewSubRow = ref(false);
-
-const NewRowButton = ref(false);
-const NewRow = ref(false);
-
-// 儲存新增行的數據
-const NewSubRowData = reactive({
-    name: "",
-    search_key: "",
-    show_in_list: "",
-    order_index: "",
-});
-
-const NewCgRowData = reactive({
-    name: "",
-    search_key: "",
-    show_in_list: "",
-    order_index: "",
-});
-
 const newSubFormRef = ref(null); // 表單引用
 const newCgFormRef = ref(null); // 表單引用
 const subFormRef = ref(null);
 const cgFormRef = ref(null);
 
-// 表單驗證規則
+
+//新增類別對話框
+const dialogCgToggle = ref(false);
+const addCgToggle = () => {
+    dialogCgToggle.value = !dialogCgToggle.value;
+    if (newCgFormRef.value) {
+        newCgFormRef.value.resetFields();
+    }
+}
+
+//新增類別(送出)
+const insertNewCg = async () => {
+    try {
+        await formValidate(newCgFormRef);
+        const formData = {
+            name: addCgform.name,
+            search_key: addCgform.search_key,
+            show_in_list: addCgform.show_in_list,
+            // order_index: NewSubRowData.order_index
+        };
+        console.log(formData);
+
+        // 發送 POST 請求到後端
+        const response = await axios.post(
+            `/back/categories`,
+            formData
+        );
+
+        console.log(response.data);
+
+        if (response.data) {
+            // 如果請求成功，將新數據插入到子類別列表中
+            categories.data.push(response.data);
+            dialogCgToggle.value = false;
+            showMessage("success", "新增成功");
+        } else {
+            showMessage("error", "新增失敗");
+        }
+    } catch (error) {
+        // showMessage("error", "新增失敗");
+    }
+};
+
+//新增類別之表單
+const addCgform = reactive({
+    name: "",
+    search_key: "",
+    show_in_list: "",
+    order_index: "",
+});
+
+//關閉新增類別表單
+const cancelCgform = () => {
+    dialogCgToggle.value = false; 
+}
+
+//表單驗證規則
 const rules = reactive({
     name: [
         { required: true, message: "子類別名稱為必填項", trigger: "blur" },
@@ -682,84 +775,12 @@ const rules = reactive({
             trigger: "change",
         },
     ],
-    // show_in_list: [
-    //     { required: true, message: "必須選擇顯示/隱藏", trigger: "change" },
-    // ],
+    show_in_list: [
+        { required: true, message: "必須選擇顯示/隱藏", trigger: "change" },
+    ],
 });
 
-
-
-//添加子類別
-const addNewSubRow = () => {
-    const maxOrderIndex = subcategory.value.length > 0
-        ? Math.max(...subcategory.value.map(item => item.order_index))
-        : 0;
-
-
-    Object.assign(NewSubRowData, {
-        name: "",
-        search_key: "",
-        show_in_list: 1,
-        order_index: maxOrderIndex + 1,
-    });
-
-
-    NewSubRowButton.value = !NewSubRowButton.value;
-    NewSubRow.value = !NewSubRow.value;
-};
-
-const addNewRow = () => {
-
-};
-
-//新增(取消)
-const cancelNewSubRow = () => {
-    NewSubRow.value = null;
-    NewSubRowButton.value = false;
-
-    if (newSubFormRef.value) {
-        newSubFormRef.value.resetFields();
-    }
-}
-
-//新增(送出)
-const insertNewSubRow = async () => {
-    // console.log(category_id.value);
-    // console.log(NewSubRow.value);
-
-    try {
-        await formValidate(newSubFormRef);
-        const formData = {
-            name: NewSubRowData.name,
-            search_key: NewSubRowData.search_key,
-            show_in_list: NewSubRowData.show_in_list,
-            // order_index: NewSubRowData.order_index
-        };
-
-
-        // 發送 POST 請求到後端
-        const response = await axios.post(
-            `/back/categories/${category_id.value}/subcategories`,
-            formData
-        );
-
-        console.log(response.data.data);
-
-        if (response.data.data) {
-            // 如果請求成功，將新數據插入到子類別列表中
-            subcategory.value.push(response.data.data);
-            NewSubRow.value = null;
-            NewSubRowButton.value = !NewSubRowButton.value;
-            showMessage("success", "新增成功");
-        } else {
-            showMessage("error", "新增失敗");
-        }
-    } catch (error) {
-        // showMessage("error", "新增失敗");
-    }
-};
-
-
+//表單驗證
 const formValidate = (forRef) => {
     return new Promise((resolve, reject) => {
         if (!forRef.value) {
@@ -825,5 +846,16 @@ const formValidate = (forRef) => {
 
 ::v-deep(.el-form-item) {
     margin: auto;
+}
+
+::v-deep(.demo-ruleForm > .el-form-item) {
+    margin: 20px auto;
+}
+
+
+::v-deep(.el-form-item__label) {
+    margin-bottom: 4px;
+    color: #172b4d;
+    width: auto !important;
 }
 </style>

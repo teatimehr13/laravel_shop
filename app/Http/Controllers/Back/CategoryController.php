@@ -58,7 +58,7 @@ class CategoryController extends Controller
         $validated['order_index'] = ($maxOrderIndex ?? 0) + 1;
 
         $category = Category::create($validated);
-        return response()->json(['msg' => 'create successful', 'data' => $category]);
+        return response()->json($category);
         // return new CategoryResource($category);
     }
 
