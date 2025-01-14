@@ -89,12 +89,12 @@ async function updateCartItem() {
         });
         // console.log(transformedProductOptions.value);
 
-        // const response = await api.post('/cart/updateCartItem', {
-        //     data: {
-        //         productOptions: transformedProductOptions.value,
-        //         _method: 'patch'
-        //     },
-        // });
+        const response = await api.post('/cart/updateCartItem', {
+            data: {
+                productOptions: transformedProductOptions.value,
+                _method: 'patch'
+            },
+        });
 
         if (response.status === 200 && response.data == 'success') {
             console.log(123);

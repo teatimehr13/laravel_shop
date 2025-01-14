@@ -62,8 +62,6 @@
                                 </template>
                             </el-table-column>
 
-
-
                             <el-table-column width="140" :fixed="isFixed ? 'right' : false">
                                 <template #header>
                                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -90,19 +88,19 @@
                                         取消
                                     </el-button>
 
-                                    <!-- <el-popconfirm v-if="editingRow !== scope.row.id" title="確定移除此筆資料?"
-                                        @confirm="deleteSubcategory(scope.row.id)" :width="170" :hide-after="100"
+                                    <el-popconfirm v-if="editingRow !== scope.row.id" title="確定移除此筆資料??"
+                                        @confirm="deletecategory(scope.row.id)" :width="170" :hide-after="100"
                                         v-model:visible="popconfirmVisible[scope.row.id]">
                                         <template #reference>
                                             <el-button size="small" type="danger">移除</el-button>
                                         </template>
-    <template #actions="{ confirm, cancel }">
+                                        <template #actions="{ confirm, cancel }">
                                             <el-button size="small" @click="cancel">沒有</el-button>
                                             <el-button type="danger" size="small" @click="confirm">
                                                 是
                                             </el-button>
                                         </template>
-    </el-popconfirm> -->
+                                    </el-popconfirm>
                                 </template>
                             </el-table-column>
                         </el-table>
@@ -600,7 +598,25 @@ const deleteSubcategory = async (id) => {
             subcategory.value = subcategory.value.filter((item) => item.id !== id);
             showMessage("success", "刪除成功");
         } else {
-            showMessage("success", "刪除失敗");
+            showMessage("error", "刪除失敗");
+        }
+    } catch (error) {
+        showMessage("error", "刪除失敗");
+    }
+}
+
+const deletecategory = async (id) => {
+    try {
+        const response = await axios.delete(`/back/categories/${id}`);
+        console.log(response.data);
+        
+        if (response.data.message == 'success') {
+            categories.data = categories.data.filter((item) => item.id !== id);
+            showMessage("success", "刪除成功");
+        } else if(response.data.message == 'subcategory exist'){
+            showMessage("error", '關聯之子類別尚存在');
+        } else{
+            showMessage("error", "刪除失敗");
         }
     } catch (error) {
         showMessage("error", "刪除失敗");
@@ -647,7 +663,6 @@ const NewCgRowData = reactive({
     show_in_list: "",
     order_index: "",
 });
-
 
 const newSubFormRef = ref(null); // 表單引用
 const newCgFormRef = ref(null); // 表單引用
