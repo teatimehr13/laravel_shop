@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\Category;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -119,11 +120,13 @@ class CategoryController extends Controller
         // $query = Store::where('is_enabled', 1);
         // $query = Category::whereIn('show_in_list', [0, 1]);
         $query = Category::with('subcategories') // 加入 Eager Loading
-            ->whereIn('show_in_list', [0, 1]);
+            ->whereIn('show_in_list', [0, 1])
+            ->orderBy('order_index');
 
         if (!is_null($name)) {
             $query->where('name', 'LIKE', "%$name%");
         }
+
 
         return $query->paginate(20)->through(fn($category) => [
             'id' => $category->id,
@@ -142,5 +145,28 @@ class CategoryController extends Controller
                     'category_id' => $category->id
                 ]),
         ]);
+    }
+
+
+    public function reorderCategories(Request $request)
+    {
+        $data = $request->all();
+        // Log::info($data);
+
+        DB::transaction(function () use ($data) {
+            // 將被影響的記錄的 `order_index` 設為臨時值
+            foreach ($data as $item) {
+                Category::where('id', $item['id'])->update([
+                    'order_index' => $item['order_index'] + 1000,
+                ]);
+            }
+
+            // 重新設置正確的 `order_index`
+            foreach ($data as $item) {
+                Category::where('id', $item['id'])->update([
+                    'order_index' => $item['order_index'],
+                ]);
+            }
+        });
     }
 }

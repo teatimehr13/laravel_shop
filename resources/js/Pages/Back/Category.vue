@@ -405,6 +405,14 @@ const reorder = async (affectedRows) => {
     }
 }
 
+const reCgorder = async (affectedRows) => {
+    try {
+        const response = await axios.post("/back/categories/reorder", affectedRows);
+    } catch (error) {
+        console.error("更新排序失敗", error);
+    }
+}
+
 //類別順序調整
 const isCgDraggable = ref(false);
 
@@ -421,13 +429,13 @@ const onCgDragEnd = (evt) => {
     const maxIndex = Math.max(startIndex, endIndex);
 
     // 更新範圍內的數據順序
-    const affectedRows = subcategory.value.slice(minIndex, maxIndex + 1);
+    const affectedRows = categories.data.slice(minIndex, maxIndex + 1);
     affectedRows.forEach((item, index) => {
         item.order_index = minIndex + index + 1;
     });
     console.log(affectedRows);
 
-    // reorder(affectedRows);
+    reCgorder(affectedRows);
 };
 
 //子類別按鈕
@@ -759,7 +767,7 @@ const addCgform = reactive({
 
 //關閉新增類別表單
 const cancelCgform = () => {
-    dialogCgToggle.value = false; 
+    dialogCgToggle.value = false;
 }
 
 //表單驗證規則
