@@ -390,7 +390,7 @@ const toggleDraggable = (type) => {
     }
 
 }
-
+   
 const onDragEnd = (evt, type) => {
     let data = type === TypeEnum.SUBCATEGORY ? subcategory.value : categories.data;
 
@@ -616,7 +616,6 @@ const getDeleteConfig = (type) => {
             throw new Error("未知的刪除類型");
     }
 };
-
 
 
 // 取消子類別編輯模式

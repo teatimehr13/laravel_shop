@@ -21,31 +21,76 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // public function index()
+    // {
+    //     $products = Product::with(['subcategory:id,name', 'product_options'])->get();
+    //     // $subcategory = $products->subcategory();
+    //     // $products = Product::with(['subcategory:id,name'])->get();
+    //     $formateProducts = $products->map(function ($product) {
+    //         $productArray = $product->toArray();
+    //         // $productArray['product_options'] = $product->product_options->pluck('color_code', 'id');
+    //         $productArray['color_codes'] = $product->product_options->map(function ($option) {
+    //             // return [
+    //             //     'id' => $option->id,
+    //             //     'color_code' => $option->color_code,
+    //             // ];
+    //             return $option->color_code;
+    //         });
+    //         unset($productArray['product_options']);
+    //         return $productArray;
+    //     });
+
+    //     // return response()->json(['data' => $formateProducts]);
+
+    //     return Inertia::render('Back/Product', [
+    //         'products' => $formateProducts
+    //     ]);
+    // }
+
     public function index()
     {
-        $products = Product::with(['subcategory:id,name', 'product_options'])->get();
-        // $subcategory = $products->subcategory();
-        // $products = Product::with(['subcategory:id,name'])->get();
-        $formateProducts = $products->map(function ($product) {
+        $products = Product::with([
+            'subcategory.category.subcategories' => function ($query) {
+                $query->orderBy('order_index', 'asc');
+            },
+            'product_options',
+        ])->get();
+
+        $formattedProducts = $products->map(function ($product) {
             $productArray = $product->toArray();
-            // $productArray['product_options'] = $product->product_options->pluck('color_code', 'id');
-            $productArray['color_codes'] = $product->product_options->map(function ($option) {
-                // return [
-                //     'id' => $option->id,
-                //     'color_code' => $option->color_code,
-                // ];
-                return $option->color_code;
-            });
-            unset($productArray['product_options']);
+            // Log::info($productArray);
+
+            // 提取產品選項的顏色
+            $productArray['color_codes'] = $product->product_options->pluck('color_code');
+
+            $productArray['subcategory'] = $product->subcategory
+                ? [
+                    'id' => $product->subcategory->id,
+                    'name' => $product->subcategory->name,
+                ]
+                : null;
+
+            // 如果有子類別，加入子類別的詳細資料
+            if ($product->subcategory && $product->subcategory->category) {
+                $productArray['subcategories'] = $product->subcategory->category->subcategories->map(function ($sub) {
+                    return [
+                        'id' => $sub->id,
+                        'name' => $sub->name,
+                        // 'order_index' => $sub->order_index,
+                        // 'show_in_list' => $sub->show_in_list,
+                    ];
+                });
+            }
+
+            unset($productArray['subcategory_id'] ,$productArray['product_options']);
             return $productArray;
         });
-        
-        // return response()->json(['data' => $formateProducts]);
 
         return Inertia::render('Back/Product', [
-            'products' => $formateProducts
+            'products' => $formattedProducts,
         ]);
     }
+
 
     /**
      * Show the form for creating a new resource.
