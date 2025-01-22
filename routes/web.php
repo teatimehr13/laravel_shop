@@ -61,10 +61,14 @@ Route::middleware('auth')->group(function () {
         //     return Inertia::render('Back/Product');
         // })->name('products');
 
-        Route::resource('products', BackProductController::class)->only(['index']);
+        Route::resource('products', BackProductController::class)->only(['index', 'update', 'destroy','store']);
+        Route::post('/categories/{category_id}/subsel', [BackProductController::class, 'getSubSel']);
+        
         Route::resource('stores', BackStoreController::class);
         Route::resource('categories', BackCategoryController::class)->only(['index','update','destroy','store']);
         Route::post('/categories/reorder', [BackCategoryController::class, 'reorderCategories']);
+        
+
         
         // Route::post('/subcategories/update_sub', [BackSubcategoryController::class, 'updateSub'])->name('subcategories.updateSub');
         Route::resource('subcategories', BackSubcategoryController::class)->only(['destroy']);

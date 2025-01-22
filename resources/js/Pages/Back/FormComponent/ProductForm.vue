@@ -3,29 +3,33 @@
         <el-form-item label="產品名稱" :label-position="labelPosition" prop="name">
             <el-input v-model="formData.name" />
         </el-form-item>
-        <!-- <el-form-item label="類型" :label-position="labelPosition" prop="store_type">
-            <el-select v-model="formData.store_type" :teleported="false" @change="handleSelectChange">
-                <el-option label="直營" :value="0" />
-                <el-option label="特約展售" :value="1" />
-                <el-option label="授權經銷商" :value="2" />
+
+        <el-form-item label="產品title" :label-position="labelPosition" prop="title">
+            <el-input v-model="formData.title" />
+        </el-form-item>
+
+        <el-form-item v-if="mode == 'add'" label="類別" :label-position="labelPosition" prop="category_id">
+            <el-select v-model="formData.category_id" :teleported="false" @change="categoryChange(formData.category_id)">
+                <el-option v-for="category in formData.categories" :key="category.id" :label="category.name"
+                    :value="category.id">
+                </el-option>
             </el-select>
-        </el-form-item> -->
+        </el-form-item>
 
-        <!-- <el-form-item label="類別" :label-position="labelPosition" prop="address">
-            <el-input v-model="formData.address" />
-        </el-form-item> -->
+        <el-form-item label="子類別" :label-position="labelPosition" prop="subcategory_id">
+            <el-select v-model="formData.subcategory_id" :teleported="false" @change="handleSelectChange">
+                <el-option v-for="subcategory in formData.subcategories" :key="subcategory.id" :label="subcategory.name"
+                    :value="subcategory.id">
+                </el-option>
+            </el-select>
+        </el-form-item>
 
-         <el-form-item label="操作" :label-position="labelPosition" prop="published_status">
+        <el-form-item label="操作" :label-position="labelPosition" prop="published_status">
             <el-radio-group v-model="formData['published_status']">
                 <el-radio :value="1">顯示</el-radio>
                 <el-radio :value="0">隱藏</el-radio>
             </el-radio-group>
         </el-form-item>
-
-
-        <!-- <el-form-item label="顏色" :label-position="labelPosition" prop="color_codes">
-            <el-input v-model="formData.color_codes" type="textarea" :autosize="{ minRows: 2, maxRows: 6 }" />
-        </el-form-item> -->
 
         <el-form-item label="圖片" :label-position="labelPosition" prop="image">
             <el-upload :file-list="fileList" class="upload-demo" action="" :on-preview="handlePreview"
@@ -38,8 +42,6 @@
                 <img w-full :src="dialogImageUrl" alt="Preview Image" style="margin: auto;" />
             </el-dialog>
         </el-form-item>
-
-       
     </el-form>
 </template>
 
@@ -47,13 +49,19 @@
 
 import { reactive, watch, ref, toRef } from "vue";
 import { genFileId } from 'element-plus';
+import axios from "axios";
 
 //拿到父組件的資料
 const props = defineProps({
     formData: Object,
     fileList: Array,
     uploadList: Array,
+    mode: {
+        type: String,
+        default: "edit", // 預設為編輯模式
+    },
 });
+console.log(props.formData);
 
 //傳給父組件資料
 const emits = defineEmits(["update:file-list", "update:form-data", "submit", "uploadList"]);
@@ -68,8 +76,6 @@ const dialogImageUrl = ref('');
 const dialogVisible = ref(false);
 
 // console.log(toRef(props,'formData'));
-
-
 
 const internalFormRef = ref(null); // 引用 el-form
 
@@ -92,43 +98,69 @@ const formValidate = () => {
 };
 
 const handleSelectChange = () => {
-    internalFormRef.value.clearValidate(['store_type']); // 清除 store_type 的驗證錯誤
+    // internalFormRef.value.clearValidate(['store_type']); // 清除 store_type 的驗證錯誤
 };
 
+const categoryChange = async (category_id) => {
+    const response =  await axios.post(`/back/categories/${category_id}/subsel`);
+    console.log(response.data);   
+    
+    props.formData.subcategories = response.data;
+    props.formData.subcategory_id = response.data.length ? response.data[0].id : '';
+}
+
 const formRules = reactive({
-    store_name: [
-        { required: true, message: "門市名稱為必填項", trigger: "blur" },
+    name: [
+        { required: true, message: "產品名稱必填項", trigger: "blur" },
     ],
-    store_type: [
-        { required: true, message: "類型為必選項", trigger: "submit" },
+    title: [
+        { required: true, message: "產品title為必選項", trigger: "submit" },
     ],
-    address: [
-        { max: 255, message: "地址不能超過 255 個字", trigger: "blur" },
+    subcategory_id: [
+        { required: true, message: "子類別為必選項", trigger: "blur" },
     ],
-    'is_enabled': [
+    'published_status': [
         { required: true, message: "請選擇顯示或隱藏", trigger: "submit" }
     ],
     image: [
         {
             validator: (rule, value, callback) => {
-                if (localUploadList.value.length === 0) {
-                    console.log(localUploadList.value);
-                    callback();
-                } else {
-                    const file = localUploadList.value[0].raw;
-                    console.log(file);
-                    const validTypes = ["image/jpeg", "image/png", "image/gif"];
-                    if (!validTypes.includes(file.type)) {
-                        callback(new Error("圖片格式僅限 jpg/png/gif"));
-                    } else {
-                        callback();
-                    }
+                console.log(localUploadList.value);
+
+                if (!localUploadList.value || localUploadList.value.length === 0) {
+                    return callback();
                 }
+
+                const file = localUploadList.value[0]?.raw;
+                if (!file) {
+                    return callback();
+                }
+
+                const validTypes = ["image/jpeg", "image/png", "image/gif"];
+                if (!validTypes.includes(file.type)) {
+                    return callback(new Error("圖片格式僅限 jpg/png/gif"));
+                }
+
+                callback();
             },
             trigger: "change",
         },
     ],
+
+    category_id: [{ required: true, message: "此選項為必填", trigger: "blur" }]
 });
+
+// watch(
+//     () => props.mode,
+//     (newMode) => {
+//         if (newMode === "add") {
+//             formRules.category_id = [{ required: true, message: "此選項為必填", trigger: "blur" }];
+//         } else {
+//             delete formRules.category_id;
+//         }
+//     },
+//     { immediate: true }
+// );
 
 defineExpose({
     formValidate,
@@ -159,7 +191,7 @@ const handleOnChange = (file) => {
         uid: file.uid,
         raw: file.raw,
     }];
-    // console.log(localUploadList.value[0].raw);
+    // console.log(localUploadList.value[0]);
     emits("uploadList", localUploadList.value);
 }
 
@@ -171,6 +203,5 @@ const handleExceed = (files) => {
     file.uid = genFileId(); // 生成唯一的 UID
     upload.value.handleStart(file)
 };
-
 
 </script>
