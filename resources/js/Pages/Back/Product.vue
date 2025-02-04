@@ -27,8 +27,15 @@
                         </template>
                     </el-table-column>
                     <el-table-column prop="subcategory.name" label="類別" width="120" />
-                    <el-table-column prop="published_status" label="狀態" width="300" />
-                    <el-table-column prop="color_codes" label="顏色" width="150">
+                    <el-table-column prop="published_status" label="狀態" width="100">
+                        <template #default="scope">
+                            <span>
+                                {{ scope.row.published_status == 1 ? '上架' : '下架' }}
+                            </span>
+                        </template>
+                    </el-table-column>
+
+                    <el-table-column prop="color_codes" label="顏色" width="200">
                         <template #default="scope">
                             <span v-for="(color_name, index) in scope.row.color_codes" :key="index">
                                 {{ color_name }}<span v-if="index < scope.row.color_codes.length - 1">、 </span>
@@ -36,7 +43,7 @@
                         </template>
                     </el-table-column>
 
-                    <el-table-column width="140" :fixed="isFixed ? 'right' : false">
+                    <el-table-column width="300" :fixed="isFixed ? 'right' : false">
                         <template #header>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span>操作</span>
@@ -46,8 +53,11 @@
                             </div>
                         </template>
 
-                        <!-- <el-button size="small">編輯</el-button> -->
                         <template #default="scope">
+                            <el-button @click="dialogColorToggle(scope.row)" size="small" type="info">
+                                顏色管理
+                            </el-button>
+
                             <el-popover :placement="popoverPlacement" trigger="click" :width="350"
                                 v-model:visible="popoverVisible[scope.row.id]" popper-class="custom-scrollbar"
                                 :hide-after="0" :show-after="100" @show="handlePopoverShow(scope.row.id)"
@@ -68,6 +78,7 @@
                                     <el-button @click="closePopover(scope.row.id)">關閉</el-button>
                                 </el-form-item>
                             </el-popover>
+
                             <el-popconfirm title="確定移除此筆資料?" @confirm="onSubmitDel(scope.row.id)" :width="170"
                                 :hide-after="100" v-model:visible="popconfirmVisible[scope.row.id]">
                                 <template #reference>
@@ -84,6 +95,46 @@
                         </template>
                     </el-table-column>
                 </el-table>
+
+                <!-- <div v-show="NewSubRow" class="new_sub_row">
+                    <el-form :model="NewSubRowData" :rules="rules" ref="newSubFormRef">
+                        <el-row>
+                            <el-col>
+                                <el-form-item prop="name">
+                                    <el-input v-model="NewSubRowData.name" placeholder="輸入子類別" size="small" />
+                                </el-form-item>
+                            </el-col>
+                            <el-col>
+                                <el-form-item prop="search_key">
+                                    <el-input v-model="NewSubRowData.search_key" placeholder="輸入索引名稱" size="small" />
+                                </el-form-item>
+                            </el-col>
+                            <el-col>
+                                <el-form-item>
+                                    <el-radio-group v-model="NewSubRowData.show_in_list">
+                                        <el-radio :value="1">顯示</el-radio>
+                                        <el-radio :value="0">隱藏</el-radio>
+                                    </el-radio-group>
+                                </el-form-item>
+                            </el-col>
+                            <el-col>
+                                <el-form-item>
+                                    {{ NewSubRowData.order_index }}
+                                </el-form-item>
+                            </el-col>
+                            <el-col>
+                                <el-form-item>
+                                    <el-button size="small" type="success" @click="insertNewItem(TypeEnum.SUBCATEGORY)">
+                                        新增
+                                    </el-button>
+                                    <el-button size="small" @click="cancelNewSubRow">
+                                        取消
+                                    </el-button>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                </div> -->
             </div>
 
             <el-dialog v-model="dialogFormToggle" title="新增" width="400px">
@@ -92,8 +143,103 @@
                 <template #footer>
                     <el-button type="primary" @click="onSubmitAdd">提交</el-button>
                     <el-button @click="dialogToggle">取消</el-button>
-                    <!-- <el-button @click="dd">測試</el-button> -->
                 </template>
+            </el-dialog>
+
+            <el-dialog v-model="dialogColorVisible" :title="product_dialog_title" width="1000">
+                <el-form :model="tempRow" :rules="rules" ref="colorFormRef">
+                    <el-table :data="color_options_data">
+                        <el-table-column label="顏色名稱" width="130">
+                            <template #default="scope">
+                                <div v-if="editingRow !== scope.row.id">
+                                    {{ scope.row.color_name }}
+                                </div>
+                                <el-form-item v-else prop="color_name">
+                                    <el-input v-model="tempRow.color_name" placeholder="輸入顏色" size="small" />
+                                </el-form-item>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="顏色" width="130">
+                            <template #default="scope">
+                                <div v-if="editingRow !== scope.row.id">
+                                    {{ scope.row.color_code }}
+                                </div>
+                                <el-form-item v-else prop="color_code">
+                                    <el-input v-model="tempRow.color_code" placeholder="輸入顏色" size="small" />
+                                </el-form-item>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="價格" width="130">
+                            <template #default="scope">
+                                <div v-if="editingRow !== scope.row.id">
+                                    {{ scope.row.price }}
+                                </div>
+                                <el-form-item v-else prop="price">
+                                    <el-input v-model="tempRow.price" placeholder="輸入價格" size="small" />
+                                </el-form-item>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column label="顯示選項" width="200">
+                            <template #default="scope">
+                                <div v-if="editingRow !== scope.row.id">
+                                    {{ scope.row.enable == '1' ? "顯示" : '隱藏' }}
+                                </div>
+                                <el-form-item v-else prop="enable">
+                                    <el-radio-group v-model="tempRow.enable">
+                                        <el-radio :value="1">顯示</el-radio>
+                                        <el-radio :value="0">隱藏</el-radio>
+                                    </el-radio-group>
+                                    <!-- <el-input v-model="tempRow.price" placeholder="輸入價格" size="small" /> -->
+                                </el-form-item>
+                            </template>
+                        </el-table-column>
+
+
+                        <!-- <el-table-column property="color_name" label="顏色名稱" width="100" /> -->
+                        <!-- <el-table-column property="color_code" label="顏色" width="100" /> -->
+                        <el-table-column label="圖片">
+                            <template #default="scope">
+                                <img :src="scope.row.image" width="50px">
+                            </template>
+                        </el-table-column>
+                        <!-- <el-table-column property="price" label="價格" /> -->
+                        <!-- <el-table-column label="顯示選項">
+                                <template #default="scope">
+                                    {{ scope.row.enable == '1' ? "顯示" : '隱藏' }}
+                                </template>
+                            </el-table-column> -->
+                        <el-table-column label="操作" width="200px">
+                            <template #default="scope">
+                                <el-button size="small" type="info" v-show="editingRow !== scope.row.id">
+                                    附圖管理
+                                </el-button>
+
+                                <el-button :type="editingRow === scope.row.id ? 'primary' : ''" size="small"
+                                    @click="toggleEdit(scope.row)">
+                                    {{ editingRow === scope.row.id ? "儲存" : "編輯" }}
+                                </el-button>
+                                <el-button v-show="editingRow === scope.row.id" size="small" @click="cancelEdit">
+                                    取消
+                                </el-button>
+                                <!-- <el-popconfirm title="確定移除此筆資料?" @confirm="onSubmitDel(scope.row.id)" :width="170"
+                                    :hide-after="100" v-model:visible="popconfirmVisible[scope.row.id]">
+                                    <template #reference>
+                                        <el-button size="small" type="danger">移除</el-button>
+                                    </template>
+                <template #actions="{ confirm, cancel }">
+                                        <el-button size="small" @click="cancel">沒有</el-button>
+                                        <el-button type="danger" size="small" @click="confirm">
+                                            是
+                                        </el-button>
+                                    </template>
+                </el-popconfirm> -->
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-form>
             </el-dialog>
         </template>
     </BackendLayout>
@@ -142,11 +288,6 @@ const storeTypeArr = [
 
 // 表單數據
 const popForm = reactive({
-    // store_name: '',       // 名稱
-    // store_type: '',       // 類型
-    // address: '',
-    // contact_number: '',
-    // opening_hours: '',
     name: '',
     title: '',
     subcategory_id: '',
@@ -251,7 +392,7 @@ const size = ref('default');
 let offSet = ref(8);
 
 const popoverStyle = ref({
-    height: "550px",
+    // height: "550px",
     overflowX: "hidden",
     overflowY: "auto"
 });
@@ -264,7 +405,7 @@ const closePopover = (id) => {
 const activeRow = ref(null);
 const openEditPopover = (row) => {
     console.log(row);
-    
+
     // formRef2.value.resetFields();
     setTimeout(() => {
         formRef2.value.internalFormRef.resetFields()
@@ -290,7 +431,7 @@ const openEditPopover = (row) => {
         popForm.subcategory_id = parseInt(row.subcategory_id);
         popForm.published_status = parseInt(row.published_status);
         popForm.color_codes = row.color_codes;
-        
+
     }, 100)
 };
 
@@ -335,6 +476,9 @@ const scrollStyle = () => {
 
 const popoverClass = ref("");
 //對話框
+const color_options_data = ref([]);
+
+const product_dialog_title = ref(false);
 const dialogFormToggle = ref(false);
 const dialogToggle = () => {
     dialogFormToggle.value = !dialogFormToggle.value;
@@ -344,6 +488,75 @@ const dialogToggle = () => {
     console.log(popForm);
     resetForm();
 }
+
+const dialogColorVisible = ref(false);
+const dialogColorToggle = async (product) => {
+    product_dialog_title.value = product.name + " 顏色管理";
+
+    try {
+        const response = await axios.get(`/back/products/${product.id}/prod_options`);
+
+        color_options_data.value = response.data;
+        // 確保資料載入後才打開 dialog
+        dialogColorVisible.value = true;
+        console.log(color_options_data.value);
+    } catch (error) {
+        console.error("載入產品顏色資料失敗：", error);
+    }
+};
+
+const colorFormRef = ref();
+const tempRow = ref({});
+const editingRow = ref(null);
+
+//編輯模式
+const toggleEdit = async (row) => {
+    // const isEditing = type === TypeEnum.CATEGORY ? editingCgRow.value === row.id : editingRow.value === row.id;
+    const isEditing = editingRow.value === row.id ? editingRow.value : null;
+
+    if (isEditing) {
+        // await saveData(row); // 保存數據的邏輯
+    } else {
+        editingRow.value = row.id;
+        tempRow.value = { ...row };
+        // enterEditMode(row); // 進入編輯模式的邏輯
+    }
+};
+
+// 取消子類別編輯模式
+const cancelEdit = () => {
+    editingRow.value = null;
+};
+
+//表單驗證規則
+const rules = reactive({
+    // name: [
+    //     { required: true, message: "子類別名稱為必填項", trigger: "blur" },
+    // ],
+    // search_key: [
+    //     { required: true, message: "索引名稱為必填項", trigger: "blur" },
+    //     {
+    //         pattern: /^[a-zA-Z0-9_]+$/,
+    //         message: "索引名稱只能包含字母、數字或底線",
+    //         trigger: "change",
+    //     },
+    // ],
+    // show_in_list: [
+    //     { required: true, message: "必須選擇顯示/隱藏", trigger: "change" },
+    // ],
+});
+
+// const NewSubRow = ref(false);
+
+// // 儲存新增行的數據
+// const NewSubRowData = reactive({
+//     name: "",
+//     search_key: "",
+//     show_in_list: "",
+//     order_index: "",
+// });
+
+
 
 //通知
 const open3 = () => {
@@ -481,7 +694,7 @@ const onSubmitEdit = async (id) => {
             }
             // console.log(products.value[index]);
             // console.log(popForm);
-            
+
             closePopover(popForm.id);
             open3();
             return
@@ -663,5 +876,9 @@ watch(
 
 ::v-deep(.el-form-item__content .el-dialog) {
     width: max-content;
+}
+
+::v-deep(.el-form-item) {
+    margin: auto;
 }
 </style>

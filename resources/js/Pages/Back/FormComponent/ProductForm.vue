@@ -26,8 +26,8 @@
 
         <el-form-item label="操作" :label-position="labelPosition" prop="published_status">
             <el-radio-group v-model="formData['published_status']">
-                <el-radio :value="1">顯示</el-radio>
-                <el-radio :value="0">隱藏</el-radio>
+                <el-radio :value="1">上架</el-radio>
+                <el-radio :value="0">下架</el-radio>
             </el-radio-group>
         </el-form-item>
 
@@ -205,3 +205,5 @@ const handleExceed = (files) => {
 };
 
 </script>
+
+

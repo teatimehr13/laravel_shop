@@ -38,7 +38,7 @@ class ProductController extends Controller
             // Log::info($productArray);
 
             // 提取產品選項的顏色
-            $productArray['color_codes'] = $product->product_options->pluck('color_code');
+            $productArray['color_codes'] = $product->product_options->pluck('color_name');
             $productArray['subcategory'] = $product->subcategory
                 ? [
                     'id' => $product->subcategory->id,
@@ -357,5 +357,11 @@ class ProductController extends Controller
         });
 
         return response()->json($subSel);
+    }
+
+    public function prod_options($product_id){
+        $product = Product::find($product_id);
+        $product_option = $product->product_options()->get();
+        return response()->json($product_option);
     }
 }
