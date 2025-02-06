@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Back;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Back\ProductRequest;
+use App\Http\Requests\Back\ProductOptionRequest;
 use App\Http\Resources\Back\ProductResource;
 use App\Models\Category;
 use App\Models\Product;
@@ -237,10 +238,10 @@ class ProductController extends Controller
             if ($image && Storage::disk('public')->exists($image)) {
                 Storage::disk('public')->delete($image);
             }
-            
-            if(!$product->delete()){
+
+            if (!$product->delete()) {
                 return response()->json(['message' => 'failed'], 200);
-            } 
+            }
 
             return response()->json(['message' => 'success'], 200);
         }
@@ -359,9 +360,64 @@ class ProductController extends Controller
         return response()->json($subSel);
     }
 
-    public function prod_options($product_id){
+    public function prod_options($product_id)
+    {
         $product = Product::find($product_id);
         $product_option = $product->product_options()->get();
+        return response()->json($product_option);
+    }
+
+    public function updateProdCo($product_option_id, ProductOptionRequest $request)
+    {
+        $product_option = ProductOption::find($product_option_id);
+        $validated = $request->validated();
+
+        // Log::info($product_option);
+        // Log::info($validated);
+
+        // return;
+
+        //收到delete_image為true時刪掉，為false時不刪 (例如有某照片誤傳，但又沒有適合的圖時)
+        if ($request->has('delete_image') && $request->input('delete_image') == true) {
+            $path = str_replace('/storage/', '', $product_option->image);
+            Storage::disk('public')->delete($path);
+            $validated['image'] = null; // 將 image 字段設為 null
+        } else {
+            unset($validated['image']);
+        }
+
+        if (isset($validated['image'])) {
+            unset($validated['image']);
+
+            Storage::disk('public')->delete(
+                str_replace(
+                    '/storage/',
+                    '',
+                    $product_option->image
+                )
+            );
+        }
+
+
+        if ($request->hasFile('image')) {
+            //有新圖片一律把舊的刪掉
+            if ($product_option->image) {
+                $path = str_replace('/storage/', '', $product_option->image);
+                Storage::disk('public')->delete($path);
+            }
+
+            //上傳新圖
+            $name = time() . '_' . $request->file('image')->getClientOriginalName();
+            $path = "/storage/" . $request->file('image')->storeAs(
+                'product_options',
+                $name,
+                'public'
+            );
+            $validated['image'] = $path;
+        }
+
+       $product_option->update($validated);
+
         return response()->json($product_option);
     }
 }

@@ -202,7 +202,62 @@
                         <!-- <el-table-column property="color_code" label="顏色" width="100" /> -->
                         <el-table-column label="圖片">
                             <template #default="scope">
-                                <img :src="scope.row.image" width="50px">
+                                <div v-if="editingRow !== scope.row.id">
+                                    <img :src="scope.row.image" width="50px" @click="previewImage(scope.row.image)">
+                                </div>
+                                <div class="icon_gp" v-else>
+                                    <input ref="fileInput" type="file" class="hidden-input"
+                                        @change="handleFileChange" />
+
+                                    <!-- <el-upload v-if="fileList_co.length === 0" class="color_option_image"
+                                        action="your-upload-api-url" :limit="1"
+                                        :on-exceed="handleExceed" :on-preview="handlePictureCardPreview"
+                                        :on-remove="handleRemove" :before-upload="beforeUpload" :file-list="fileList_co"
+                                        :auto-upload="false" ref="upload_co">
+                                        <el-icon>
+                                            <Plus />
+                                        </el-icon>
+
+                                    </el-upload> -->
+
+                                    <div v-if="fileList_co.length > 0" class="custom-file-wrapper">
+                                        <img :src="fileList_co[0].url" class="upload-img" />
+                                        <div class="file-actions">
+                                            <el-icon class="action-icon" @click="handlePreview(fileList_co[0])">
+                                                <ZoomIn />
+                                            </el-icon>
+                                            <el-icon class="action-icon" @click="handleRemove(fileList_co[0])">
+                                                <Delete />
+                                            </el-icon>
+                                            <el-icon class="action-icon plus-icon" @click="triggerUpload">
+                                                <Plus />
+                                            </el-icon>
+                                        </div>
+                                    </div>
+
+                                    <div v-else-if="tempRow.image" class="custom-file-wrapper">
+                                        <img :src="tempRow.image" class="upload-img" />
+                                        <div class="file-actions">
+                                            <el-icon class="action-icon" @click="handlePreview({ url: tempRow.image })">
+                                                <ZoomIn />
+                                            </el-icon>
+                                            <el-icon class="action-icon" @click="handleRemove">
+                                                <Delete />
+                                            </el-icon>
+                                            <el-icon class="action-icon plus-icon" @click="triggerUpload">
+                                                <Plus />
+                                            </el-icon>
+                                        </div>
+                                    </div>
+
+                                    <div v-else class="upload-placeholder" @click="triggerUpload">
+                                        <el-icon>
+                                            <Plus />
+                                        </el-icon>
+                                    </div>
+
+
+                                </div>
                             </template>
                         </el-table-column>
                         <!-- <el-table-column property="price" label="價格" /> -->
@@ -241,6 +296,10 @@
                     </el-table>
                 </el-form>
             </el-dialog>
+
+            <el-dialog v-model="uploadCoVisible" style="width: max-content;">
+                <img w-full :src="uploadCoImageUrl" alt="Preview Image" />
+            </el-dialog>
         </template>
     </BackendLayout>
 </template>
@@ -253,6 +312,7 @@ import BackendLayout from '@/Layouts/BackendLayout.vue';
 import ProductForm from "./FormComponent/ProductForm.vue";
 import debounce from "lodash.debounce";
 import { genFileId } from 'element-plus'
+
 
 const props = defineProps({
     products: {
@@ -509,16 +569,102 @@ const colorFormRef = ref();
 const tempRow = ref({});
 const editingRow = ref(null);
 
+let formDataForCo = new FormData();
+
 //編輯模式
 const toggleEdit = async (row) => {
     // const isEditing = type === TypeEnum.CATEGORY ? editingCgRow.value === row.id : editingRow.value === row.id;
     const isEditing = editingRow.value === row.id ? editingRow.value : null;
 
     if (isEditing) {
+        console.log(row);
+        console.log(tempRow.value);
+        const hasChange = Object.keys(tempRow.value).some((key) =>
+            tempRow.value[key] !== row[key]
+        )
+        // console.log(hasChange);
+        if (!hasChange && !fileList_co.value.length) {
+            editingRow.value = null;
+            return
+        }
+        console.log(fileList_co.value);
+
+        formDataForCo = new FormData();
+        formDataForCo.append('id', tempRow.value.id);
+        formDataForCo.append('product_id', tempRow.value.product_id);
+        formDataForCo.append('color_name', tempRow.value.color_name);
+        formDataForCo.append('color_code', tempRow.value.color_code);
+        formDataForCo.append('price', tempRow.value.price);
+        // formDataForCo.append('image', tempRow.value.image);
+        formDataForCo.append('enable', tempRow.value.enable);
+
+        console.log(fileList_co.value);
+        if (fileList_co.value.length > 0) {
+            const file = fileList_co.value[0].file;
+            //有傳新圖片時
+            if (file) {
+                formDataForCo.append('image', file);
+            }
+
+        } else {
+            //刪掉現有的圖片
+            if (!tempRow.value.image) {
+                formDataForCo.append('delete_image', true);
+                console.log('delete image');
+            } else {
+                //沒傳圖片，但也沒刪
+                console.log('do not delete_image');
+            }
+
+        }
+
+        // for (const [key, value] of formDataForCo.entries()) {
+        //     console.log(`${key}:`, value);
+        // }
+
+        // await updateCo(tempRow.value.id);
+
+
         // await saveData(row); // 保存數據的邏輯
+
+        const response = await axios.post(`/back/product_options/${tempRow.value.id}/updateProdCo`, formDataForCo, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                '_method': 'patch'
+            },
+        });
+
+        // const updatedCo = response.data;
+        console.log(response.data);
+        console.log(tempRow.value);
+        // console.log(color_options_data);
+
+        // Object.assign(tempRow.value, response.data);
+        // console.log(color_options_data);
+        // Object.assign(color_options_data, response.data);
+        if (response.data) {
+            const index = color_options_data.value.findIndex(option => option.id === response.data.id);
+            if (index !== -1) {
+                console.log(color_options_data.value[index]);
+                color_options_data.value[index] = {
+                    ...response.data, // 展開所有其他資料
+                    enable: Number(response.data.enable),
+                    price: Number(response.data.price),
+                }; // 更新數據
+                editingRow.value = null;
+                // console.log(color_options_data.value[index]);
+
+            }
+        }
+        // color_options_data
+
     } else {
         editingRow.value = row.id;
         tempRow.value = { ...row };
+        console.log(fileList_co.value);
+
+        // fileList_co.value[0].name = tempRow.value.color_name;
+        // fileList_co.value[0].url = tempRow.value.image;
         // enterEditMode(row); // 進入編輯模式的邏輯
     }
 };
@@ -526,7 +672,129 @@ const toggleEdit = async (row) => {
 // 取消子類別編輯模式
 const cancelEdit = () => {
     editingRow.value = null;
+    fileList_co.value = [];
 };
+
+const fileList_co = ref([
+    // {
+    //     name: "",
+    //     url: "", // 這裡應該放你的圖片網址
+    // },
+]);
+
+const fileInput = ref(null);
+
+const handleRemove = (file) => {
+    fileList_co.value = [];
+    tempRow.value.image = '';
+};
+
+const triggerUpload = () => {
+    fileInput.value.click();
+};
+
+const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    console.log(file);
+
+    if (file) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            fileList_co.value = [{ name: file.name, url: reader.result, file: file }];
+            console.log(fileList_co.value);
+        };
+    }
+};
+
+const beforeUpload = (file) => {
+    console.log("即將上傳文件:", file);
+    return false; // 阻止自動上傳，使用手動上傳邏輯
+};
+
+const previewImage = (image) => {
+    uploadCoImageUrl.value = image;
+    uploadCoVisible.value = true;
+}
+
+const handlePreview = (file) => {
+    // console.log("預覽圖片:", file.url);
+    uploadCoVisible.value = true;
+    uploadCoImageUrl.value = file.url;
+    // dialogColorVisible.value = false;
+};
+
+const upload_co = ref();
+
+//限制僅上傳一筆
+const handleExceed = (files) => {
+    // console.log(files);
+    upload_co.value.clearFiles();
+    const file = files[0];
+    file.uid = genFileId(); // 生成唯一的 UID
+    upload_co.value.handleStart(file)
+};
+
+//上傳upload
+const fileList = ref([]);
+let uploadList = ref([]);
+
+// const upload = ref();
+
+const uploadCoImageUrl = ref('');
+const uploadCoVisible = ref(false);
+
+const handleDialogClose = () => {
+    dialogColorVisible.value = !dialogColorVisible.value;
+    uploadCoVisible.value = !uploadCoVisible.value;
+};
+
+//編輯
+const updateCo = async (product_option_id) => {
+    try {
+        // await formValidated("edit");
+        // await formBeforSubmit();
+        for (const [key, value] of formDataForCo.entries()) {
+            console.log(`${key}:`, value);
+        }
+
+        const response = await axios.post(`/back/product_options/${product_option_id}/updateProdCo`, formDataForCo, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                '_method': 'patch'
+            },
+        });
+
+        // console.log('stores.data', stores.data);
+        // console.log('提交成功:', response.data);
+
+        // 從後端獲取更新後的數據
+        const updatedCo = response.data;
+        console.log(updatedCo);
+
+        // if (updatedStore) {
+        //     // 更新目標行
+        //     const index = stores.data.findIndex(store => store.id === updatedStore.id);
+        //     if (index !== -1) {
+        //         console.log(stores.data[index]);
+        //         stores.data[index] = updatedStore; // 更新數據
+        //     }
+        //     console.log(stores.data[index]);
+
+
+        //     closePopover(popForm.id);
+        //     open3();
+        //     return
+        // }
+
+        //上傳失敗提示
+        open4();
+
+    } catch (error) {
+        console.error('提交失败:', error);
+    }
+};
+
 
 //表單驗證規則
 const rules = reactive({
@@ -576,11 +844,6 @@ const open4 = () => {
     })
 }
 
-//上傳upload
-const fileList = ref([]);
-let uploadList = ref([]);
-
-// const upload = ref();
 
 
 //表單
@@ -880,5 +1143,57 @@ watch(
 
 ::v-deep(.el-form-item) {
     margin: auto;
+}
+
+.custom-file-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.upload-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    max-width: 50px;
+}
+
+.file-actions {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.custom-file-wrapper:hover .file-actions {
+    opacity: 1;
+}
+
+.action-icon {
+    font-size: 20px;
+    color: white;
+    cursor: pointer;
+}
+
+.plus-icon {
+    font-size: 20px;
+    color: white;
+}
+
+.hidden-input {
+    display: none;
+}
+
+.icon_gp .el-icon:hover {
+    transform: scale(1.3);
+    transition: linear .15s;
 }
 </style>

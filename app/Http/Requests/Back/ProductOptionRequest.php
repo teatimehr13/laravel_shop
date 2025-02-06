@@ -29,12 +29,12 @@ class ProductOptionRequest extends FormRequest
             'color_name' => 'required|string',
             'color_code' => 'required|string',
             'image' => 'image|nullable',
-            'description' => 'string|nullable',
+            // 'description' => 'string|nullable',
             'price' => 'string',
-            'published_status' => [
-                'required',
-                // Rule::in(array_keys(Product::published_statuses)) //限定值在自定義範圍內
-            ],
+            // 'published_status' => [
+            //     'required',
+            //     // Rule::in(array_keys(Product::published_statuses)) //限定值在自定義範圍內
+            // ],
             'product_id' => 'required|integer|exists:products,id',
             'enable' => 'required|integer'
             // 'product_options' => 'nullable|array' //放productOptionsRequest那
