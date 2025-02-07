@@ -95,46 +95,6 @@
                         </template>
                     </el-table-column>
                 </el-table>
-
-                <!-- <div v-show="NewSubRow" class="new_sub_row">
-                    <el-form :model="NewSubRowData" :rules="rules" ref="newSubFormRef">
-                        <el-row>
-                            <el-col>
-                                <el-form-item prop="name">
-                                    <el-input v-model="NewSubRowData.name" placeholder="輸入子類別" size="small" />
-                                </el-form-item>
-                            </el-col>
-                            <el-col>
-                                <el-form-item prop="search_key">
-                                    <el-input v-model="NewSubRowData.search_key" placeholder="輸入索引名稱" size="small" />
-                                </el-form-item>
-                            </el-col>
-                            <el-col>
-                                <el-form-item>
-                                    <el-radio-group v-model="NewSubRowData.show_in_list">
-                                        <el-radio :value="1">顯示</el-radio>
-                                        <el-radio :value="0">隱藏</el-radio>
-                                    </el-radio-group>
-                                </el-form-item>
-                            </el-col>
-                            <el-col>
-                                <el-form-item>
-                                    {{ NewSubRowData.order_index }}
-                                </el-form-item>
-                            </el-col>
-                            <el-col>
-                                <el-form-item>
-                                    <el-button size="small" type="success" @click="insertNewItem(TypeEnum.SUBCATEGORY)">
-                                        新增
-                                    </el-button>
-                                    <el-button size="small" @click="cancelNewSubRow">
-                                        取消
-                                    </el-button>
-                                </el-form-item>
-                            </el-col>
-                        </el-row>
-                    </el-form>
-                </div> -->
             </div>
 
             <el-dialog v-model="dialogFormToggle" title="新增" width="400px">
@@ -148,13 +108,14 @@
 
             <!-- 增刪改查product color -->
             <el-dialog v-model="dialogColorVisible" :title="product_dialog_title" width="1000">
-                <ProductCoEditForm v-model:color_options_data="color_options_data" 
-                    v-model:fileList_co="fileList_co" v-model:tempRow="tempRow"
-                    :editingRow="editingRow" @toggle-edit="toggleEdit" @cancel-edit="cancelEdit" 
-                    ref="colorFormRef" />
-            </el-dialog>
+                <ProductCoEditForm v-model:color_options_data="color_options_data" v-model:fileList_co="fileList_co"
+                    v-model:tempRow="tempRow" :editingRow="editingRow" @toggle-edit="toggleEdit"
+                    @cancel-edit="cancelEdit" ref="colorFormRef" />
 
-        
+                <PorductCoAddForm ref="newCoFormRef" v-model:newCoRowData="newCoRowData"
+                    v-model:newCoRowVisible="newCoRowVisible" v-model:fileListAdd_co="fileListAdd_co"  />
+                    
+            </el-dialog>
         </template>
     </BackendLayout>
 </template>
@@ -166,6 +127,7 @@ import axios from "axios";
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import ProductForm from "./FormComponent/ProductForm.vue";
 import ProductCoEditForm from "./FormComponent/ProductCoEditForm.vue";
+import PorductCoAddForm from "./FormComponent/ProductCoAddForm.vue";
 import debounce from "lodash.debounce";
 import { genFileId } from 'element-plus'
 
@@ -192,7 +154,6 @@ console.log(products.value);
 const emitUploadList = (data) => {
     uploadList.value = data;
 }
-
 
 // 篩選select
 const storeTypeArr = [
@@ -391,9 +352,9 @@ const scrollStyle = () => {
 }
 
 const popoverClass = ref("");
+
 //對話框
 const color_options_data = ref([]);
-
 const product_dialog_title = ref('');
 const dialogFormToggle = ref(false);
 const dialogToggle = () => {
@@ -405,142 +366,9 @@ const dialogToggle = () => {
     resetForm();
 }
 
-const dialogColorVisible = ref(false);
-const dialogColorToggle = async (product) => {
-    product_dialog_title.value = product.name + " 顏色管理";
-
-    try {
-        const response = await axios.get(`/back/products/${product.id}/prod_options`);
-
-        color_options_data.value = response.data;
-        // 確保資料載入後才打開 dialog
-        dialogColorVisible.value = true;
-        console.log(color_options_data.value);
-    } catch (error) {
-        console.error("載入產品顏色資料失敗：", error);
-    }
-};
-
-
-const colorFormRef = ref();
-const tempRow = ref({});
-const editingRow = ref(null);
-
-let formDataForCo = new FormData();
-
-//編輯模式
-const toggleEdit = async (row) => {
-    // const isEditing = type === TypeEnum.CATEGORY ? editingCgRow.value === row.id : editingRow.value === row.id;
-    const isEditing = editingRow.value === row.id ? editingRow.value : null;
-
-    if (isEditing) {
-        console.log(row);
-        console.log(tempRow.value);
-        const hasChange = Object.keys(tempRow.value).some((key) =>
-            tempRow.value[key] !== row[key]
-        )
-
-        if (!hasChange && !fileList_co.value.length) {
-            editingRow.value = null;
-            return
-        }
-        console.log(fileList_co.value);
-
-        // for (const [key, value] of formDataForCo.entries()) {
-        //     console.log(`${key}:`, value);
-        // }
-
-        await colorFormRef.value.colorFormValidate();
-        await colorFormBeforSubmit();
-        await updateCo(tempRow.value.id);
-
-    } else {
-        editingRow.value = row.id;
-        tempRow.value = { ...row };
-        console.log(fileList_co.value);
-    }
-};
-
-const colorFormBeforSubmit = () => {
-    formDataForCo = new FormData();
-    formDataForCo.append('id', tempRow.value.id);
-    formDataForCo.append('product_id', tempRow.value.product_id);
-    formDataForCo.append('color_name', tempRow.value.color_name);
-    formDataForCo.append('color_code', tempRow.value.color_code);
-    formDataForCo.append('price', tempRow.value.price);
-    formDataForCo.append('enable', tempRow.value.enable);
-
-    console.log(fileList_co.value);
-    if (fileList_co.value.length > 0) {
-        const file = fileList_co.value[0].file;
-        //有傳新圖片時
-        if (file) {
-            formDataForCo.append('image', file);
-        }
-
-    } else {
-        //刪掉現有的圖片
-        if (!tempRow.value.image) {
-            formDataForCo.append('delete_image', true);
-            console.log('delete image');
-        } else {
-            //沒傳圖片，但也沒刪
-            console.log('do not delete_image');
-        }
-    }
-    return formDataForCo;
-}
-
-
-// 取消子類別編輯模式
-const cancelEdit = () => {
-    editingRow.value = null;
-    fileList_co.value = [];
-};
-
-const fileList_co = ref([]);
-const upload_co = ref();
-
 //上傳upload
 const fileList = ref([]);
 let uploadList = ref([]);
-
-// const upload = ref();
-
-
-
-//編輯
-const updateCo = async (product_option_id) => {
-    try {
-        const response = await axios.post(`/back/product_options/${product_option_id}/updateProdCo`, formDataForCo, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                '_method': 'patch'
-            },
-        });
-
-        // console.log(response.data);
-        // console.log(tempRow.value);
-
-        if (response.data) {
-            const index = color_options_data.value.findIndex(option => option.id === response.data.id);
-            if (index !== -1) {
-                console.log(color_options_data.value[index]);
-                color_options_data.value[index] = {
-                    ...response.data, // 展開所有其他資料
-                    enable: Number(response.data.enable),
-                    price: Number(response.data.price),
-                }; // 更新數據
-                editingRow.value = null;
-            }
-            showMessage("success", "保存成功");
-        }
-
-    } catch (error) {
-        console.error('提交失败:', error);
-        showMessage("error", "保存失敗");
-    }
-};
 
 // const NewSubRow = ref(false);
 
@@ -748,6 +576,145 @@ const onSubmitDel = async (id) => {
     }
 }
 
+
+//顏色管理 - 編輯
+const dialogColorVisible = ref(false);
+const dialogColorToggle = async (product) => {
+    product_dialog_title.value = product.name + " 顏色管理";
+
+    try {
+        const response = await axios.get(`/back/products/${product.id}/prod_options`);
+
+        color_options_data.value = response.data;
+        // 確保資料載入後才打開 dialog
+        dialogColorVisible.value = true;
+        console.log(color_options_data.value);
+    } catch (error) {
+        console.error("載入產品顏色資料失敗：", error);
+    }
+};
+
+let formDataForCo = new FormData();
+
+const toggleEdit = async (row) => {
+    // const isEditing = type === TypeEnum.CATEGORY ? editingCgRow.value === row.id : editingRow.value === row.id;
+    const isEditing = editingRow.value === row.id ? editingRow.value : null;
+
+    if (isEditing) {
+        console.log(row);
+        console.log(tempRow.value);
+        const hasChange = Object.keys(tempRow.value).some((key) =>
+            tempRow.value[key] !== row[key]
+        )
+
+        if (!hasChange && !fileList_co.value.length) {
+            editingRow.value = null;
+            return
+        }
+        console.log(fileList_co.value);
+
+        // for (const [key, value] of formDataForCo.entries()) {
+        //     console.log(`${key}:`, value);
+        // }
+
+        await colorFormRef.value.colorFormValidate();
+        await colorFormBeforSubmit();
+        await updateCo(tempRow.value.id);
+
+    } else {
+        editingRow.value = row.id;
+        tempRow.value = { ...row };
+        console.log(fileList_co.value);
+    }
+};
+
+const colorFormRef = ref();
+const tempRow = ref({});
+const editingRow = ref(null);
+const colorFormBeforSubmit = () => {
+    formDataForCo = new FormData();
+    formDataForCo.append('id', tempRow.value.id);
+    formDataForCo.append('product_id', tempRow.value.product_id);
+    formDataForCo.append('color_name', tempRow.value.color_name);
+    formDataForCo.append('color_code', tempRow.value.color_code);
+    formDataForCo.append('price', tempRow.value.price);
+    formDataForCo.append('enable', tempRow.value.enable);
+
+    console.log(fileList_co.value);
+    if (fileList_co.value.length > 0) {
+        const file = fileList_co.value[0].file;
+        //有傳新圖片時
+        if (file) {
+            formDataForCo.append('image', file);
+        }
+
+    } else {
+        //刪掉現有的圖片
+        if (!tempRow.value.image) {
+            formDataForCo.append('delete_image', true);
+            console.log('delete image');
+        } else {
+            //沒傳圖片，但也沒刪
+            console.log('do not delete_image');
+        }
+    }
+    return formDataForCo;
+}
+
+// 取消子類別編輯模式
+const cancelEdit = () => {
+    editingRow.value = null;
+    fileList_co.value = [];
+};
+
+const fileList_co = ref([]);
+
+const updateCo = async (product_option_id) => {
+    try {
+        const response = await axios.post(`/back/product_options/${product_option_id}/updateProdCo`, formDataForCo, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                '_method': 'patch'
+            },
+        });
+
+        // console.log(response.data);
+        // console.log(tempRow.value);
+
+        if (response.data) {
+            const index = color_options_data.value.findIndex(option => option.id === response.data.id);
+            if (index !== -1) {
+                console.log(color_options_data.value[index]);
+                color_options_data.value[index] = {
+                    ...response.data, // 展開所有其他資料
+                    enable: Number(response.data.enable),
+                    price: Number(response.data.price),
+                }; // 更新數據
+                editingRow.value = null;
+            }
+            showMessage("success", "保存成功");
+        }
+
+    } catch (error) {
+        console.error('提交失败:', error);
+        showMessage("error", "保存失敗");
+    }
+};
+
+
+//顏色管理 - 新增
+const newCoFormRef = ref();
+const newCoRowData = ref({
+    color_name: '',
+    color_code: '',
+    price: '',
+    enable: '',
+    image: ''
+});
+const newCoRowVisible = ref(null);
+
+const fileListAdd_co = ref([]);
+
 //監聽編輯高亮狀態
 watch(
     popoverVisible,
@@ -856,6 +823,4 @@ watch(
 ::v-deep(.el-form-item) {
     margin: auto;
 }
-
-
 </style>
