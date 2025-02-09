@@ -113,8 +113,9 @@
                     @cancel-edit="cancelEdit" ref="colorFormRef" />
 
                 <PorductCoAddForm ref="newCoFormRef" v-model:newCoRowData="newCoRowData"
-                    v-model:newCoRowVisible="newCoRowVisible" v-model:fileListAdd_co="fileListAdd_co"  />
-                    
+                    v-model:newCoRowVisible="newCoRowVisible" v-model:fileListAdd_co="fileListAdd_co"
+                    @toggle-add="toggleAdd" @toggle-add-btn="toggleAddBtn" />
+
             </el-dialog>
         </template>
     </BackendLayout>
@@ -576,10 +577,13 @@ const onSubmitDel = async (id) => {
     }
 }
 
+const productId = ref(null);
 
 //顏色管理 - 編輯
 const dialogColorVisible = ref(false);
 const dialogColorToggle = async (product) => {
+    productId.value = product.id;
+
     product_dialog_title.value = product.name + " 顏色管理";
 
     try {
@@ -702,6 +706,11 @@ const updateCo = async (product_option_id) => {
 };
 
 
+// newCoFormRef.value.colorAddFormValidate()
+// colorAddFormBeforSubmit();
+// addCo(tempRow.value.id);
+
+
 //顏色管理 - 新增
 const newCoFormRef = ref();
 const newCoRowData = ref({
@@ -709,11 +718,94 @@ const newCoRowData = ref({
     color_code: '',
     price: '',
     enable: '',
-    image: ''
+    image: '',
+    product_id: productId,
+    published_status: 1
 });
-const newCoRowVisible = ref(null);
 
+const newCoRowVisible = ref(false);
 const fileListAdd_co = ref([]);
+
+let formDataForCoAdd = new FormData();
+
+const toggleAddBtn = () => {
+    newCoRowVisible.value = !newCoRowVisible.value;
+}
+
+const toggleAdd = async () => {
+    console.log(newCoRowData.value);
+    console.log(fileListAdd_co.value);
+    // console.log(productId.value);
+
+    await newCoFormRef.value.colorAddFormValidate();
+    await colorAddFormBeforSubmit();
+    await addCo();
+    
+}
+
+
+const colorAddFormBeforSubmit = () => {
+    formDataForCoAdd = new FormData();
+    formDataForCoAdd.append('product_id', newCoRowData.value.product_id);
+    formDataForCoAdd.append('color_name', newCoRowData.value.color_name);
+    formDataForCoAdd.append('color_code', newCoRowData.value.color_code);
+    formDataForCoAdd.append('price', newCoRowData.value.price);
+    formDataForCoAdd.append('enable', newCoRowData.value.enable);
+    formDataForCoAdd.append('published_status', newCoRowData.value.published_status);
+
+    console.log(fileListAdd_co.value);
+    if (fileListAdd_co.value.length > 0) {
+        const file = fileListAdd_co.value[0].file;
+        //有傳新圖片時
+        if (file) {
+            formDataForCoAdd.append('image', file);
+        }
+
+    } else {
+        //刪掉現有的圖片
+        if (!newCoRowData.value.image) {
+            formDataForCoAdd.append('delete_image', true);
+            console.log('delete image');
+        } else {
+            //沒傳圖片，但也沒刪
+            console.log('do not delete_image');
+        }
+    }
+
+    // for (const [key, value] of formDataForCoAdd.entries()) {
+    //     console.log(`${key}:`, value);
+    // }
+
+    return formDataForCoAdd;
+}
+
+const addCo = async () => {
+    try {
+        const response = await axios.post(`/back/product_options/addProdCo`, formDataForCoAdd, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        console.log(response.data);
+
+        if (response.data) {
+            color_options_data.value.push({
+                ...response.data, // 展開所有其他資料
+                enable: Number(response.data.enable),
+                price: Number(response.data.price),
+                published_status: 1
+            });
+
+            newCoRowVisible.value = !newCoRowVisible.value;
+            showMessage("success", "新增成功");
+        }
+
+    } catch (error) {
+        console.error('提交失败:', error);
+        showMessage("error", "新增失敗");
+    }
+};
 
 //監聽編輯高亮狀態
 watch(

@@ -372,11 +372,6 @@ class ProductController extends Controller
         $product_option = ProductOption::find($product_option_id);
         $validated = $request->validated();
 
-        // Log::info($product_option);
-        // Log::info($validated);
-
-        // return;
-
         //收到delete_image為true時刪掉，為false時不刪 (例如有某照片誤傳，但又沒有適合的圖時)
         if ($request->has('delete_image') && $request->input('delete_image') == true) {
             $path = str_replace('/storage/', '', $product_option->image);
@@ -416,8 +411,35 @@ class ProductController extends Controller
             $validated['image'] = $path;
         }
 
-       $product_option->update($validated);
+        $product_option->update($validated);
 
         return response()->json($product_option);
+    }
+
+
+    public function addProdCo(ProductOptionRequest $request)
+    {
+        try {
+            $validated = $request->validated();
+            $validated['published_status'] = 1;
+            // return response()->json($validated);
+
+            if ($request->hasFile('image')) {
+                // unset($validated['image']); //刪除驗證的image字段
+
+                $name = time() . '_' . $request->file('image')->getClientOriginalName(); //避免檔名重複
+                $path = '/storage/' . $request->file('image')->storeAs(
+                    'product_options',
+                    $name,
+                    'public'
+                );
+                $validated["image"] = $path;
+            }
+
+            $product_option = ProductOption::create($validated);
+            return response()->json($product_option, 201); // 回傳成功創建的產品資料
+        } catch (QueryException $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        };
     }
 }

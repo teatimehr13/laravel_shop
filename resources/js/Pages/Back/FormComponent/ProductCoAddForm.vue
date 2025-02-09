@@ -1,6 +1,6 @@
 <template>
-    <div v-show="!newCoRowVisible" class="new_co_row">
-        <el-form :model="newCoRowData" ref="newCoFormRef">
+    <div v-show="newCoRowVisible" class="new_co_row">
+        <el-form :model="newCoRowData" ref="newCoFormRef" :rules="rules">
             <el-row>
                 <el-col>
                     <el-form-item prop="color_name">
@@ -30,7 +30,7 @@
 
                 <el-col>
                     <el-form-item prop="image">
-                        <div class="icon_gp" v-if="!newCoRowVisible">
+                        <div class="icon_gp" v-if="newCoRowVisible">
                             <input ref="fileInput" type="file" class="hidden-input" @change="handleFileChange" />
 
                             <div v-if="fileListAdd_co.length > 0" class="custom-file-wrapper">
@@ -59,12 +59,14 @@
 
                 <el-col>
                     <el-form-item>
-                        <el-button size="small" type="success" @click="">
-                            新增
-                        </el-button>
-                        <el-button size="small" @click="">
-                            取消
-                        </el-button>
+                        <div>
+                            <el-button size="small" type="success" @click="toggleAdd">
+                                新增
+                            </el-button>
+                            <el-button size="small" @click="$emit('toggle-add-btn')">
+                                取消
+                            </el-button>
+                        </div>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -72,7 +74,9 @@
     </div>
 
     <el-col>
-        <el-button style="margin: 10px 0;" @click="" v-show="!newCoRowVisible">添加顏色</el-button>
+        <div>
+            <el-button style="margin: 10px 0;" @click="toggleAddbtn" v-show="!newCoRowVisible">添加顏色</el-button>
+        </div>
     </el-col>
 
     <el-dialog v-model="addCoVisible" style="width: max-content;">
@@ -81,20 +85,82 @@
 </template>
 
 <script setup>
-import { reactive, watch, ref, toRef } from "vue";
+import {  computed, reactive, watch, ref, toRef } from "vue";
 
 const props = defineProps({
     newCoRowData: Object,
-    newCoRowVisible: Number,
-    fileListAdd_co: Object
+    newCoRowVisible: Boolean,
+    fileListAdd_co: Array
 })
 
+// 使用 `computed` 來代理 `fileListAdd_co`
+const fileListAdd_co = computed(() => props.fileListAdd_co);
+
 const emit = defineEmits([
+    //v-model綁定的話要加"update:"
     "update:fileListAdd_co",
+    "toggle-add",
+    "toggle-add-btn"
     // "update:tempRow",
     // "toggle-edit",
     // "cancel-edit"
 ]);
+
+const rules = reactive({
+    color_name: [
+        { required: true, message: "顏色名稱為必填項", trigger: "blur" },
+    ],
+    color_code: [
+        { required: true, message: "顏色為必填項", trigger: "blur" },
+    ],
+    price: [
+        { required: true, message: "價格為必填項", trigger: "blur" },
+        { type: 'number', message: "需為數字類型", trigger: "blur" },
+    ],
+    enable: [
+        { required: true, message: "請選擇顯示或隱藏", trigger: "submit" }
+    ],
+    image: [
+        {
+            validator: (rule, value, callback) => {
+                // console.log(fileListAdd_co.value);
+                if (fileListAdd_co.value.length === 0) {
+                    console.log(fileListAdd_co.value);
+                    callback();
+                } else {
+                    const file = fileListAdd_co.value[0].file;
+                    console.log(file);
+                    const validTypes = ["image/jpeg", "image/png", "image/gif"];
+                    if (!validTypes.includes(file.type)) {
+                        callback(new Error("圖片格式僅限 jpg/png/gif"));
+                    } else {
+                        callback();
+                    }
+                }
+            },
+            trigger: "change",
+        },
+    ],
+});
+
+const colorAddFormValidate = () => {
+    return new Promise((resolve, reject) => {
+        if (!newCoFormRef.value) {
+            reject(new Error("newCoFormRef 未綁定"));
+        } else {
+            newCoFormRef.value.validate((isValid) => {
+                if (isValid) {
+                    console.log('true');
+                    resolve(true);
+                } else {
+                    console.log('false');
+                    reject(false);
+                }
+            });
+        }
+    });
+};
+
 
 const addCoImageUrl = ref('');
 const addCoVisible = ref(false);
@@ -113,7 +179,6 @@ const handleFileChange = (event) => {
     }
 };
 
-
 const handleRemove = (file) => {
     emit("update:fileListAdd_co", []);
     // emit("update:tempRow", { ...props.tempRow, image: "" });
@@ -131,7 +196,21 @@ const triggerUpload = () => {
 
 const fileInput = ref(null);
 
+const toggleAdd = () => {
+    // console.log(123);
+    emit("toggle-add");
+}
 
+const toggleAddbtn = () => {
+    emit('toggle-add-btn');
+}
+
+const newCoFormRef = ref();
+
+defineExpose({
+    newCoFormRef,
+    colorAddFormValidate
+})
 
 </script>
 
