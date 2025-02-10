@@ -36,30 +36,27 @@ class ProductOptionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store($id, ProductOptionRequest $request)
+    public function store(ProductOptionRequest $request)
     {
-        //要有id進來
-
         try {
-            // Log::info($id);
             $validated = $request->validated();
+            $validated['published_status'] = 1;
 
             if ($request->hasFile('image')) {
-                $name = time() . '_' . $request->file('image')->getClientOriginalName();
+                $name = time() . '_' . $request->file('image')->getClientOriginalName(); //避免檔名重複
                 $path = '/storage/' . $request->file('image')->storeAs(
                     'product_options',
                     $name,
                     'public'
                 );
-                $validated['image'] = $path;
+                $validated["image"] = $path;
             }
 
-            $productOption = ProductOption::create($validated);
-
-            return response()->json($productOption);
+            $product_option = ProductOption::create($validated);
+            return response()->json($product_option, 201); // 回傳成功創建的產品資料
         } catch (QueryException $e) {
             return response()->json(['error' => $e->getMessage()], 500);
-        }
+        };
     }
 
     /**
@@ -78,56 +75,79 @@ class ProductOptionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update($p_id, $po_id, ProductOptionRequest $request)
+    public function update($po_id, ProductOptionRequest $request)
     {
         try {
             $product_option = ProductOption::find($po_id);
-
-            if (!$product_option) {
-                return response()->json(['error' => 'Product option not found'], 404);
-            }
-
             $validated = $request->validated();
-
-            if ($request->hasFile('image')) {
-                //delete old
-                if ($product_option->image) {
-                    $oldImagePath = str_replace('/storage/', '', $product_option->image);
-                    if (Storage::disk('public')->exists($oldImagePath)) {
-                        Storage::disk('public')->delete($oldImagePath);
-                    }
-                }
-
-                //insert new
-                $name = time() . '_' . $request->file('image')->getClientOriginalName(); // 避免檔名重複
-                $path = $request->file('image')->storeAs('product_options', $name, 'public');
-                $validated['image'] = '/storage/' . $path;
+    
+            //收到delete_image為true時刪掉，為false時不刪 (例如有某照片誤傳，但又沒有適合的圖時)
+            if ($request->has('delete_image') && $request->input('delete_image') == true) {
+                $path = str_replace('/storage/', '', $product_option->image);
+                Storage::disk('public')->delete($path);
+                $validated['image'] = null; // 將 image 字段設為 null
+            } else {
+                unset($validated['image']);
             }
-
+    
+            if (isset($validated['image'])) {
+                unset($validated['image']);
+    
+                Storage::disk('public')->delete(
+                    str_replace(
+                        '/storage/',
+                        '',
+                        $product_option->image
+                    )
+                );
+            }
+    
+    
+            if ($request->hasFile('image')) {
+                //有新圖片一律把舊的刪掉
+                if ($product_option->image) {
+                    $path = str_replace('/storage/', '', $product_option->image);
+                    Storage::disk('public')->delete($path);
+                }
+    
+                //上傳新圖
+                $name = time() . '_' . $request->file('image')->getClientOriginalName();
+                $path = "/storage/" . $request->file('image')->storeAs(
+                    'product_options',
+                    $name,
+                    'public'
+                );
+                $validated['image'] = $path;
+            }
+    
             $product_option->update($validated);
-            return response()->json(['success' => true], 200);
-        } catch (QueryException $e) {
+    
+            return response()->json($product_option);
+            
+        } catch(QueryException $e){
             return response()->json(['error' => $e->getMessage()], 500);
         }
+        
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($p_id, $po_id)
+    public function destroy($po_id)
     {
-        // Log::info($po_id);
-
         $product_option = ProductOption::find($po_id);
         if ($product_option) {
             $image = $product_option->image ? str_replace('/storage/', '', $product_option->image) : '';
             if ($image && Storage::disk('public')->exists($image)) {
                 Storage::disk('public')->delete($image);
             }
-            $product_option->delete();
-            return response()->json(null, 200);
-        }
 
+            if (!$product_option->delete()) {
+                return response()->json(['message' => 'failed'], 200);
+            }
+
+            return response()->json(['message' => 'success'], 200);
+        }
         return response()->json(null, 403);
     }
 

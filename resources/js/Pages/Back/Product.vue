@@ -110,7 +110,7 @@
             <el-dialog v-model="dialogColorVisible" :title="product_dialog_title" width="1000">
                 <ProductCoEditForm v-model:color_options_data="color_options_data" v-model:fileList_co="fileList_co"
                     v-model:tempRow="tempRow" :editingRow="editingRow" @toggle-edit="toggleEdit"
-                    @cancel-edit="cancelEdit" ref="colorFormRef" />
+                    @cancel-edit="cancelEdit" @del-co="delCo" ref="colorFormRef" />
 
                 <PorductCoAddForm ref="newCoFormRef" v-model:newCoRowData="newCoRowData"
                     v-model:newCoRowVisible="newCoRowVisible" v-model:fileListAdd_co="fileListAdd_co"
@@ -643,6 +643,7 @@ const colorFormBeforSubmit = () => {
     formDataForCo.append('color_code', tempRow.value.color_code);
     formDataForCo.append('price', tempRow.value.price);
     formDataForCo.append('enable', tempRow.value.enable);
+    formDataForCo.append('_method', 'PATCH');
 
     console.log(fileList_co.value);
     if (fileList_co.value.length > 0) {
@@ -675,10 +676,10 @@ const fileList_co = ref([]);
 
 const updateCo = async (product_option_id) => {
     try {
-        const response = await axios.post(`/back/product_options/${product_option_id}/updateProdCo`, formDataForCo, {
+        const response = await axios.post(`/back/product_options/${product_option_id}`, formDataForCo, {
             headers: {
                 'Content-Type': 'multipart/form-data',
-                '_method': 'patch'
+                // '_method': 'patch'
             },
         });
 
@@ -781,7 +782,13 @@ const colorAddFormBeforSubmit = () => {
 
 const addCo = async () => {
     try {
-        const response = await axios.post(`/back/product_options/addProdCo`, formDataForCoAdd, {
+        // const response = await axios.post(`/back/product_options/addProdCo`, formDataForCoAdd, {
+        //     headers: {
+        //         'Content-Type': 'multipart/form-data',
+        //     },
+        // });
+
+        const response = await axios.post(`/back/product_options`, formDataForCoAdd, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -806,6 +813,24 @@ const addCo = async () => {
         showMessage("error", "新增失敗");
     }
 };
+
+//顏色管理 - 移除
+const delCo = async (id) => {
+    try{
+        // console.log(id);
+        const response = await axios.delete(`/back/product_options/${id}`);
+        // console.log(response.data);
+        
+        if(response.data.message == 'success'){
+            color_options_data.value = color_options_data.value.filter(e => e.id != id);
+            showMessage('success', '刪除成功');
+            return
+        }
+
+    }catch{
+        showMessage('error', '刪除失敗');
+    }
+}
 
 //監聽編輯高亮狀態
 watch(

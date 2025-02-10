@@ -95,7 +95,7 @@
                 </template>
             </el-table-column>
 
-            <el-table-column label="操作" width="200px">
+            <el-table-column label="操作" width="250px">
                 <template #default="scope">
                     <el-button size="small" type="info" v-show="editingRow !== scope.row.id">
                         附圖管理
@@ -108,18 +108,18 @@
                     <el-button v-show="editingRow === scope.row.id" size="small" @click="$emit('cancel-edit')">
                         取消
                     </el-button>
-                    <!-- <el-popconfirm title="確定移除此筆資料?" @confirm="onSubmitDel(scope.row.id)" :width="170"
-                                    :hide-after="100" v-model:visible="popconfirmVisible[scope.row.id]">
-                                    <template #reference>
-                                        <el-button size="small" type="danger">移除</el-button>
-                                    </template>
-    <template #actions="{ confirm, cancel }">
-                                        <el-button size="small" @click="cancel">沒有</el-button>
-                                        <el-button type="danger" size="small" @click="confirm">
-                                            是
-                                        </el-button>
-                                    </template>
-    </el-popconfirm> -->
+                    <el-popconfirm title="確定移除此筆資料?" @confirm="$emit('del-co', scope.row.id)" :width="170" :hide-after="100"
+                        v-model:visible="popconColfirmVisible[scope.row.id]" >
+                        <template #reference>
+                            <el-button size="small" type="danger" v-show="editingRow !== scope.row.id">移除</el-button>
+                        </template>
+                        <template #actions="{ confirm, cancel }">
+                            <el-button size="small" @click="cancel">沒有</el-button>
+                            <el-button type="danger" size="small" @click="confirm">
+                                是
+                            </el-button>
+                        </template>
+                    </el-popconfirm>
                 </template>
             </el-table-column>
         </el-table>
@@ -251,8 +251,11 @@ const emit = defineEmits([
     "update:fileList_co",
     "update:tempRow",
     "toggle-edit",
-    "cancel-edit"
+    "cancel-edit",
+    "del-co"
 ]);
+
+const popconColfirmVisible = ref({});
 
 </script>
 

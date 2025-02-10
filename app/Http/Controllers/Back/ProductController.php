@@ -73,7 +73,6 @@ class ProductController extends Controller
         ]);
     }
 
-
     /**
      * Show the form for creating a new resource.
      */
@@ -416,7 +415,6 @@ class ProductController extends Controller
         return response()->json($product_option);
     }
 
-
     public function addProdCo(ProductOptionRequest $request)
     {
         try {
@@ -442,4 +440,6 @@ class ProductController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         };
     }
+
+
 }

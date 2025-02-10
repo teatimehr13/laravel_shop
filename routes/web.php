@@ -64,9 +64,12 @@ Route::middleware('auth')->group(function () {
         Route::resource('products', BackProductController::class)->only(['index', 'update', 'destroy','store']);
         Route::post('/categories/{category_id}/subsel', [BackProductController::class, 'getSubSel']);
         Route::get('/products/{product_id}/prod_options', [BackProductController::class, 'prod_options']);
-        Route::post('/product_options/{product_option_id}/updateProdCo', [BackProductController::class, 'updateProdCo']);
-        Route::post('/product_options/addProdCo', [BackProductController::class, 'addProdCo']);
-        
+        // Route::post('/product_options/{product_option_id}/updateProdCo', [BackProductController::class, 'updateProdCo']);
+        // Route::post('/product_options/addProdCo', [BackProductController::class, 'addProdCo']);
+        // Route::post('/product_options/{product_option_id}', [BackProductController::class, 'delProdCo']);
+
+        Route::resource('product_options', BackProductOptionController::class)->only('destroy','store', 'update');
+
         
         Route::resource('stores', BackStoreController::class);
         Route::resource('categories', BackCategoryController::class)->only(['index','update','destroy','store']);
