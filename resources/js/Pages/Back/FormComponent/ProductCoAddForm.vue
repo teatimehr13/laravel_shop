@@ -49,9 +49,14 @@
                             </div>
 
                             <div v-else class="upload-placeholder" @click="triggerUpload">
-                                <el-icon>
-                                    <Plus />
-                                </el-icon>
+                                <el-tooltip class="box-item" effect="dark" content="上傳檔案"
+                                    placement="top-start">
+                                    <el-button> 
+                                        <el-icon>
+                                            <Plus />
+                                        </el-icon>
+                                    </el-button>
+                                </el-tooltip>
                             </div>
                         </div>
                     </el-form-item>
@@ -63,7 +68,7 @@
                             <el-button size="small" type="success" @click="toggleAdd">
                                 新增
                             </el-button>
-                            <el-button size="small" @click="$emit('toggle-add-btn')">
+                            <el-button size="small" @click="toggleAddbtn">
                                 取消
                             </el-button>
                         </div>
@@ -85,7 +90,7 @@
 </template>
 
 <script setup>
-import {  computed, reactive, watch, ref, toRef } from "vue";
+import { computed, reactive, watch, ref, toRef } from "vue";
 
 const props = defineProps({
     newCoRowData: Object,
@@ -203,14 +208,23 @@ const toggleAdd = () => {
 
 const toggleAddbtn = () => {
     emit('toggle-add-btn');
+    
+    
 }
 
 const newCoFormRef = ref();
 
+
+const resetFields = () => {
+    newCoFormRef.value.resetFields();
+}
+
 defineExpose({
     newCoFormRef,
-    colorAddFormValidate
+    colorAddFormValidate,
+    resetFields
 })
+
 
 </script>
 
@@ -253,6 +267,18 @@ defineExpose({
     height: 100%;
     object-fit: cover;
     max-width: 50px;
+}
+
+.upload-placeholder {
+    height: 50px;
+    width: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.upload-placeholder .el-button:hover {
+    cursor: pointer;
 }
 
 .file-actions {

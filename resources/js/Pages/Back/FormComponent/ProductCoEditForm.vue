@@ -87,9 +87,16 @@
                         </div>
 
                         <div v-else class="upload-placeholder" @click="triggerUpload">
-                            <el-icon>
+                            <!-- <el-icon>
                                 <Plus />
-                            </el-icon>
+                            </el-icon> -->
+                            <el-tooltip class="box-item" effect="dark" content="上傳檔案" placement="top-start">
+                                <el-button>
+                                    <el-icon>
+                                        <Plus />
+                                    </el-icon>
+                                </el-button>
+                            </el-tooltip>
                         </div>
                     </div>
                 </template>
@@ -108,8 +115,8 @@
                     <el-button v-show="editingRow === scope.row.id" size="small" @click="$emit('cancel-edit')">
                         取消
                     </el-button>
-                    <el-popconfirm title="確定移除此筆資料?" @confirm="$emit('del-co', scope.row.id)" :width="170" :hide-after="100"
-                        v-model:visible="popconColfirmVisible[scope.row.id]" >
+                    <el-popconfirm title="確定移除此筆資料?" @confirm="$emit('del-co', scope.row.id)" :width="170"
+                        :hide-after="100" v-model:visible="popconColfirmVisible[scope.row.id]">
                         <template #reference>
                             <el-button size="small" type="danger" v-show="editingRow !== scope.row.id">移除</el-button>
                         </template>
@@ -322,5 +329,17 @@ const popconColfirmVisible = ref({});
 
 ::v-deep(.colorForm .el-form-item__error) {
     top: 70%;
+}
+
+.upload-placeholder {
+    height: 50px;
+    width: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.upload-placeholder .el-button:hover {
+    cursor: pointer;
 }
 </style>

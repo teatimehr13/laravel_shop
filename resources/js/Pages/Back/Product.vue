@@ -731,11 +731,13 @@ let formDataForCoAdd = new FormData();
 
 const toggleAddBtn = () => {
     newCoRowVisible.value = !newCoRowVisible.value;
-}
+    newCoFormRef.value.resetFields();
+    fileListAdd_co.value = [];    
+    }
 
 const toggleAdd = async () => {
-    console.log(newCoRowData.value);
-    console.log(fileListAdd_co.value);
+    // console.log(newCoRowData.value);
+    // console.log(fileListAdd_co.value);
     // console.log(productId.value);
 
     await newCoFormRef.value.colorAddFormValidate();
@@ -782,12 +784,6 @@ const colorAddFormBeforSubmit = () => {
 
 const addCo = async () => {
     try {
-        // const response = await axios.post(`/back/product_options/addProdCo`, formDataForCoAdd, {
-        //     headers: {
-        //         'Content-Type': 'multipart/form-data',
-        //     },
-        // });
-
         const response = await axios.post(`/back/product_options`, formDataForCoAdd, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -805,6 +801,8 @@ const addCo = async () => {
             });
 
             newCoRowVisible.value = !newCoRowVisible.value;
+            newCoFormRef.value.resetFields();
+            fileListAdd_co.value = [];
             showMessage("success", "新增成功");
         }
 
