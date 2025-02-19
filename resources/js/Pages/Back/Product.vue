@@ -112,10 +112,11 @@
                     v-model:tempRow="tempRow" :editingRow="editingRow" @toggle-edit="toggleEdit"
                     @cancel-edit="cancelEdit" @del-co="delCo" ref="colorFormRef" />
 
-                <PorductCoAddForm ref="newCoFormRef" v-model:newCoRowData="newCoRowData"
+                <ProductCoAddForm ref="newCoFormRef" v-model:newCoRowData="newCoRowData"
                     v-model:newCoRowVisible="newCoRowVisible" v-model:fileListAdd_co="fileListAdd_co"
                     @toggle-add="toggleAdd" @toggle-add-btn="toggleAddBtn" />
 
+                <ProductCoAttPicForm :colorOptions="color_options_data" :productId="productId"  />
             </el-dialog>
         </template>
     </BackendLayout>
@@ -128,9 +129,11 @@ import axios from "axios";
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import ProductForm from "./FormComponent/ProductForm.vue";
 import ProductCoEditForm from "./FormComponent/ProductCoEditForm.vue";
-import PorductCoAddForm from "./FormComponent/ProductCoAddForm.vue";
+import ProductCoAddForm from "./FormComponent/ProductCoAddForm.vue";
+import ProductCoAttPicForm from "./FormComponent/ProductCoAttPicForm.vue";
 import debounce from "lodash.debounce";
 import { genFileId } from 'element-plus'
+
 
 
 const props = defineProps({
@@ -706,12 +709,6 @@ const updateCo = async (product_option_id) => {
     }
 };
 
-
-// newCoFormRef.value.colorAddFormValidate()
-// colorAddFormBeforSubmit();
-// addCo(tempRow.value.id);
-
-
 //顏色管理 - 新增
 const newCoFormRef = ref();
 const newCoRowData = ref({
@@ -732,8 +729,8 @@ let formDataForCoAdd = new FormData();
 const toggleAddBtn = () => {
     newCoRowVisible.value = !newCoRowVisible.value;
     newCoFormRef.value.resetFields();
-    fileListAdd_co.value = [];    
-    }
+    fileListAdd_co.value = [];
+}
 
 const toggleAdd = async () => {
     // console.log(newCoRowData.value);
@@ -743,7 +740,7 @@ const toggleAdd = async () => {
     await newCoFormRef.value.colorAddFormValidate();
     await colorAddFormBeforSubmit();
     await addCo();
-    
+
 }
 
 
@@ -814,18 +811,18 @@ const addCo = async () => {
 
 //顏色管理 - 移除
 const delCo = async (id) => {
-    try{
+    try {
         // console.log(id);
         const response = await axios.delete(`/back/product_options/${id}`);
         // console.log(response.data);
-        
-        if(response.data.message == 'success'){
+
+        if (response.data.message == 'success') {
             color_options_data.value = color_options_data.value.filter(e => e.id != id);
             showMessage('success', '刪除成功');
             return
         }
 
-    }catch{
+    } catch {
         showMessage('error', '刪除失敗');
     }
 }

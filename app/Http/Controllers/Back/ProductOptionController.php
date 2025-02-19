@@ -154,31 +154,47 @@ class ProductOptionController extends Controller
     //取值拿到產品圖片
     public function product_images(Request $request)
     {
-        // Log::info(json_encode($request->all()));
-        // Log::info($product_id);
-        // if($request->input('po_id') && $request->input('pr_id')){
-        //     $productOption_id = $request->input('po_id');
-        //     $product_id = $request->input('pr_id');
-        //     $productOption = ProductOption::where('product_id',$product_id)->where('id',$productOption_id)->first();
-        //     Log::info($productOption->productImages);
+        // if ($request->input('po_id')) {
+        //     $productOptionId = $request->input('po_id');
+
+        //     // 根據 productOptionId 獲取相應的產品選項數據
+        //     $productImages = ProductOption::find($productOptionId)->productImages()->get();
+
+        //     $formattedProductImages = $productImages->map(function ($image) {
+        //         return [
+        //             'id' => $image->id,
+        //             'alt_text' => $image->alt_text,
+        //             'image' => $image->image,
+        //             'order' => $image->order,
+        //         ];
+        //     });
+
+        //     // 返回數據給前端
+        //     return response()->json($formattedProductImages);
         // }
-        if ($request->input('po_id')) {
-            $productOptionId = $request->input('po_id');
+
+        if ($request->input('pr_id')) {
+            $productId = $request->input('pr_id');
+            // $productId = 2;
 
             // 根據 productOptionId 獲取相應的產品選項數據
-            $productImages = ProductOption::find($productOptionId)->productImages()->get();
+            // $productImages = Product::find($productId)->product_images()->get();
+            // $productImages = Product::find($productId)->product_images()->get();
+            $productImages = ProductOption::with('productImages')->where('product_id', $productId)->get();
 
-            $formattedProductImages = $productImages->map(function ($image) {
-                return [
-                    'id' => $image->id,
-                    'alt_text' => $image->alt_text,
-                    'image' => $image->image,
-                    'order' => $image->order,
-                ];
-            });
+            // $formattedProductImages = $productImages->map(function ($image) {
+            //     return [
+            //         'id' => $image->id,
+            //         // 'alt_text' => $image->alt_text,
+            //         'image' => $image->image,
+            //         'order' => $image->order,
+            //         // 'is_combination' => $image->is_combination,
+            //         'product_option_id' => $image->pivot->product_option_id
+            //     ];
+            // });
 
             // 返回數據給前端
-            return response()->json($formattedProductImages);
+            return response()->json($productImages);
         }
     }
 
@@ -268,78 +284,175 @@ class ProductOptionController extends Controller
     //     DB::table('product_images')->whereIn('id', $productImagesIdsShouldBeRemove)->delete();
     // }
 
+    // public function updateProductImages(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'po_id' => 'required|integer|exists:product_options,id',
+    //         'product_images' => 'required|array',
+    //         'product_images.*.id' => 'nullable|integer|exists:product_images,id',
+    //         'product_images.*.alt_text' => 'nullable|string|max:255',
+    //         'product_images.*.is_combination' => 'required|boolean',
+    //         'product_images.*.image' => 'nullable|image',
+    //         'product_images.*._delete' => 'nullable|boolean',
+    //     ]);
+
+    //     Log::info($validated);
+    //     return;
+
+    //     // 找到對應的 Product Option
+    //     $productOption = ProductOption::findOrFail($validated['po_id']);
+
+    //     // 拿到所有的 product_images 並刪除未被更新的項目
+    //     $currentMaxOrder = ProductImage::where('product_id', $productOption->product_id)->max('order') ?? 0;
+
+    //     // product_images 進行新增/更新/刪除
+    //     foreach ($validated['product_images'] as $productImage) {
+    //         if (!empty($productImage['_delete']) && isset($productImage['id'])) {
+    //             // 刪除圖片資料
+    //             $existingImage = ProductImage::findOrFail($productImage['id']);
+    //             $path = str_replace('/storage/', '', $existingImage->image);
+    //             if (Storage::disk('public')->exists($path)) {
+    //                 Storage::disk('public')->delete($path);
+    //             }
+    //             $existingImage->delete();
+    //         } elseif (isset($productImage['id'])) {
+    //             // 更新圖片資料
+    //             $existingImage = ProductImage::findOrFail($productImage['id']);
+    //             $existingImage->update([
+    //                 'alt_text' => $productImage['alt_text'],
+    //                 'is_combination' => $productImage['is_combination'],
+    //             ]);
+
+    //             if (isset($productImage['image'])) {
+    //                 // 刪除舊圖片並更新新圖片
+    //                 $path = str_replace('/storage/', '', $existingImage->image);
+    //                 if (Storage::disk('public')->exists($path)) {
+    //                     Storage::disk('public')->delete($path);
+    //                 }
+
+    //                 $name = mt_rand() . '_' . $productImage['image']->getClientOriginalName();
+    //                 $path = '/storage/' . $productImage['image']->storeAs(
+    //                     'product_options',
+    //                     $name,
+    //                     'public'
+    //                 );
+    //                 $existingImage->update(['image' => $path]);
+    //             }
+    //         } else {
+    //             // 新增圖片
+    //             $path = null;
+    //             if (isset($productImage['image'])) {
+    //                 $name = mt_rand() . '_' . $productImage['image']->getClientOriginalName();
+    //                 $path = '/storage/' . $productImage['image']->storeAs(
+    //                     'product_options',
+    //                     $name,
+    //                     'public'
+    //                 );
+    //             }
+
+    //             $currentMaxOrder++;
+    //             $productOption->productImages()->create([
+    //                 'product_option_id' => $productOption->id,
+    //                 'product_id' => $productOption->product_id,
+    //                 'alt_text' => $productImage['alt_text'],
+    //                 'is_combination' => $productImage['is_combination'],
+    //                 'image' => $path,
+    //                 'order' => $currentMaxOrder,
+    //             ]);
+    //         }
+    //     }
+
+    //     return response()->json(['message' => 'Product images updated successfully.']);
+    // }
+
+
+    //增刪改版本
     public function updateProductImages(Request $request)
     {
         $validated = $request->validate([
-            'po_id' => 'required|integer|exists:product_options,id',
-            'product_images' => 'required|array',
-            'product_images.*.id' => 'nullable|integer|exists:product_images,id',
-            'product_images.*.alt_text' => 'required|string|max:255',
-            'product_images.*.is_combination' => 'required|boolean',
-            'product_images.*.image' => 'nullable|image',
-            'product_images.*._delete' => 'nullable|boolean',
+            'product_options' => 'required|array', //支援多個顏色圖片
+            'product_options.*.po_id' => 'required|integer|exists:product_options,id',
+            'product_options.*.product_images' => 'required|array',
+            'product_options.*.product_images.*.id' => 'nullable|integer|exists:product_images,id',
+            'product_options.*.product_images.*.alt_text' => 'nullable|string|max:255',
+            'product_options.*.product_images.*.is_combination' => 'required|boolean',
+            'product_options.*.product_images.*.image' => 'nullable|image',
+            'product_options.*.product_images.*._delete' => 'nullable|boolean',
         ]);
 
-        // 找到對應的 Product Option
-        $productOption = ProductOption::findOrFail($validated['po_id']);
+        // $validated = [
+        //     'product_options' => [
+        //         'po_id' => '',
+        //         'product_images' => [
+        //             'id' => '',
+        //             'alt_text' => '',
+        //             'is_combination' => ''
+        //         ]
+        //     ],
+        // ];
+        // Log::info($request->all(), $request->file());
 
-        // 拿到所有的 product_images 並刪除未被更新的項目
-        $currentMaxOrder = ProductImage::where('product_id', $productOption->product_id)->max('order') ?? 0;
-
-        // product_images 進行新增/更新/刪除
-        foreach ($validated['product_images'] as $productImage) {
-            if (!empty($productImage['_delete']) && isset($productImage['id'])) {
-                // 刪除圖片資料
-                $existingImage = ProductImage::findOrFail($productImage['id']);
-                $path = str_replace('/storage/', '', $existingImage->image);
-                if (Storage::disk('public')->exists($path)) {
-                    Storage::disk('public')->delete($path);
-                }
-                $existingImage->delete();
-            } elseif (isset($productImage['id'])) {
-                // 更新圖片資料
-                $existingImage = ProductImage::findOrFail($productImage['id']);
-                $existingImage->update([
-                    'alt_text' => $productImage['alt_text'],
-                    'is_combination' => $productImage['is_combination'],
-                ]);
-
-                if (isset($productImage['image'])) {
-                    // 刪除舊圖片並更新新圖片
+        foreach ($validated['product_options'] as $productOptionData) {
+            // 找到對應的 Product Option
+            $productOption = ProductOption::findOrFail($productOptionData['po_id']);
+            $currentMaxOrder = ProductImage::where('product_id', $productOption->product_id)->max('order') ?? 0;
+        
+            // Log::info($productOptionData);
+            foreach ($productOptionData['product_images'] as $productImage) {
+                if (!empty($productImage['_delete']) && isset($productImage['id'])) {
+                    // 刪除圖片
+                    $existingImage = ProductImage::findOrFail($productImage['id']);
                     $path = str_replace('/storage/', '', $existingImage->image);
                     if (Storage::disk('public')->exists($path)) {
                         Storage::disk('public')->delete($path);
                     }
-
-                    $name = mt_rand() . '_' . $productImage['image']->getClientOriginalName();
-                    $path = '/storage/' . $productImage['image']->storeAs(
-                        'product_options',
-                        $name,
-                        'public'
-                    );
-                    $existingImage->update(['image' => $path]);
+                    $existingImage->delete();
+                } elseif (isset($productImage['id'])) {
+                    // 更新圖片
+                    $existingImage = ProductImage::findOrFail($productImage['id']);
+                    $existingImage->update([
+                        'alt_text' => $productImage['alt_text'],
+                        'is_combination' => $productImage['is_combination'],
+                    ]);
+        
+                    if (isset($productImage['image'])) {
+                        
+                        // 更新圖片
+                        $path = str_replace('/storage/', '', $existingImage->image);
+                        if (Storage::disk('public')->exists($path)) {
+                            Storage::disk('public')->delete($path);
+                        }
+        
+                        $name = mt_rand() . '_' . $productImage['image']->getClientOriginalName();
+                        $path = '/storage/' . $productImage['image']->storeAs(
+                            'product_options',
+                            $name,
+                            'public'
+                        );
+                        $existingImage->update(['image' => $path]);
+                    }
+                } else {
+                    // 新增圖片
+                    $path = null;
+                    if (isset($productImage['image'])) {
+                        $name = mt_rand() . '_' . $productImage['image']->getClientOriginalName();
+                        $path = '/storage/' . $productImage['image']->storeAs(
+                            'product_options',
+                            $name,
+                            'public'
+                        );
+                    }
+        
+                    $currentMaxOrder++;
+                    $productOption->productImages()->create([
+                        'product_option_id' => $productOption->id,
+                        'product_id' => $productOption->product_id,
+                        'alt_text' => $productImage['alt_text'],
+                        'is_combination' => $productImage['is_combination'],
+                        'image' => $path,
+                        'order' => $currentMaxOrder,
+                    ]);
                 }
-            } else {
-                // 新增圖片
-                $path = null;
-                if (isset($productImage['image'])) {
-                    $name = mt_rand() . '_' . $productImage['image']->getClientOriginalName();
-                    $path = '/storage/' . $productImage['image']->storeAs(
-                        'product_options',
-                        $name,
-                        'public'
-                    );
-                }
-
-                $currentMaxOrder++;
-                $productOption->productImages()->create([
-                    'product_option_id' => $productOption->id,
-                    'product_id' => $productOption->product_id,
-                    'alt_text' => $productImage['alt_text'],
-                    'is_combination' => $productImage['is_combination'],
-                    'image' => $path,
-                    'order' => $currentMaxOrder,
-                ]);
             }
         }
 

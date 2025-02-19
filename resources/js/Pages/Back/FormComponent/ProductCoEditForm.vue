@@ -87,9 +87,6 @@
                         </div>
 
                         <div v-else class="upload-placeholder" @click="triggerUpload">
-                            <!-- <el-icon>
-                                <Plus />
-                            </el-icon> -->
                             <el-tooltip class="box-item" effect="dark" content="上傳檔案" placement="top-start">
                                 <el-button>
                                     <el-icon>
@@ -104,10 +101,6 @@
 
             <el-table-column label="操作" width="250px">
                 <template #default="scope">
-                    <el-button size="small" type="info" v-show="editingRow !== scope.row.id">
-                        附圖管理
-                    </el-button>
-
                     <el-button :type="editingRow === scope.row.id ? 'primary' : ''" size="small"
                         @click="$emit('toggle-edit', scope.row)">
                         {{ editingRow === scope.row.id ? "儲存" : "編輯" }}
@@ -135,6 +128,27 @@
     <el-dialog v-model="uploadCoVisible" style="width: max-content;">
         <img w-full :src="uploadCoImageUrl" alt="Preview Image" />
     </el-dialog>
+
+    <!-- <el-dialog v-model="uploadCoAttVisible" title="上傳項目">
+        <el-upload v-model:file-list="coAttList" :auto-upload="false"
+            list-type="picture-card" :on-preview="coAttPreview" :on-remove="coAttRemove" multiple>
+            <el-icon>
+                <Plus />
+            </el-icon>
+        </el-upload>
+
+        <el-dialog v-model="coAttVisible">
+            <img w-full :src="coAttImageUrl" alt="Preview Image" />
+        </el-dialog>
+    </el-dialog>
+
+    <el-dialog v-model="coImgVisible" title="附圖管理">
+        <el-dialog v-model="coAttVisible">
+            <img w-full :src="coAttImageUrl" alt="Preview Image" />
+        </el-dialog>
+    </el-dialog> -->
+
+
 </template>
 
 <script setup>
@@ -148,8 +162,6 @@ const props = defineProps({
     tempRow: Object,
     editingRow: Number,
 });
-
-
 
 const uploadCoImageUrl = ref('');
 const uploadCoVisible = ref(false);
@@ -263,6 +275,35 @@ const emit = defineEmits([
 ]);
 
 const popconColfirmVisible = ref({});
+
+// const uploadCoAttVisible = ref(false);
+// // const color_name_title = ref('');
+// const toggleCoAtt = (row) => {
+//     uploadCoAttVisible.value = !uploadCoAttVisible.value;
+//     // color_name_title.value = row.color_name;
+// }
+
+
+// const coAttList = ref([]);
+// const coAttPreview = (file) => {
+//     coAttVisible.value = true;
+//     coAttImageUrl.value = file.url;
+// };
+// const coAttRemove = (uploadFile, uploadFiles) => {
+//     console.log(uploadFile, uploadFiles);
+//     //這裡的fileList會有多個
+// }
+
+// const coAttVisible = ref(false);
+// const coAttImageUrl = ref('');
+
+// const coImgVisible = ref(false);
+// const toggleCoImg = (row) => {
+//     coImgVisible.value = !coImgVisible.value;
+//     // color_name_title.value = row.color_name;
+//     //這裡在點下時，應要去後端撈相關圖片回來擺上
+    
+// }
 
 </script>
 
