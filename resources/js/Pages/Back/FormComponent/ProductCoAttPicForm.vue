@@ -237,69 +237,94 @@ const test_form = {
 //上傳試測
 const submitData = () => {
     const formData = new FormData();
-    // const productOptionsData = product_options.map(option => ({
-    //     po_id: option.id,
-    //     product_images: option.product_images.map(image => ({
-    //         id: image.id ?? null,
-    //         alt_text: image.alt_text,
-    //         is_combination: image.is_combination,
-    //         _delete: image._delete ?? false,
-    //         image: image.id ? image.image : image.file , // 新增的圖片
-    //     }))
-    // }));  
-    const getUpdatedProductOptions = () => {
-        return product_options.map(option => {
-            const originalOption = original_product_options.find(o => o.id === option.id);
-
-            return {
-                po_id: option.id,
-                product_images: option.product_images
-                    .filter(img => {
-                        // 找出原始的圖片
-                        const originalImg = originalOption?.product_images?.find(oImg => oImg.id === img.id);
-
-                        // 檢查 alt_text 是否變更
-                        const altTextChanged = originalImg && originalImg.alt_text !== img.alt_text;
-
-                        // 檢查是否標記刪除
-                        const isDeleted = img._delete;
-
-                        // 檢查是否是新上傳的圖片
-                        const isNew = img.id === null;
-
-                        return altTextChanged || isDeleted || isNew;
-                    })
-                    .map(img => ({
-                        id: img.id ?? null,
-                        alt_text: img.alt_text,
-                        is_combination: img.is_combination,
-                        _delete: img._delete ?? false,
-                        image: img.id ? img.image : img.file, // 新圖片才帶 `file`
-                    }))
-            };
-        }).filter(option => option.product_images.length > 0); // 過濾掉沒有改變的 product_options
-    }
-
-
-    console.log(getUpdatedProductOptions());
-
     // console.log(product_options);
+    // console.log(props.productId);
     // console.log(original_product_options);
 
-    // formData.append("product_options", JSON.stringify(productOptionsData));
+    const updatedOptions = getUpdatedProductOptions();
+    console.log(updatedOptions);
+    let product_id = props.productId;
 
-    for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
+    updatedOptions.forEach((option, optionIndex) => {
+        formData.append(`product_options[${optionIndex}][po_id]`, option.po_id);
+
+        option.product_images.forEach((image, imageIndex) => {
+            formData.append(`product_options[${optionIndex}][product_images][${imageIndex}][id]`, image.id ?? '');
+            formData.append(`product_options[${optionIndex}][product_images][${imageIndex}][alt_text]`, image.alt_text);
+            formData.append(`product_options[${optionIndex}][product_images][${imageIndex}][is_combination]`, image.is_combination);
+            formData.append(`product_options[${optionIndex}][product_images][${imageIndex}][_delete]`, image._delete ? 1 : 0);
+
+            if (image.id === null && image.image instanceof File) {
+                formData.append(`product_options[${optionIndex}][product_images][${imageIndex}][image]`, image.image);
+            }
+        });
+    });
+
+    // for (const [key, value] of formData.entries()) {
+    //     console.log(`${key}:`, value);
+    // }
+
+    //檢查formData有沒有東西，沒有的話不上傳
+    if (formData.entries().next().done) {
+        return;
     }
 
-    return
+    formData.append("product_id", product_id);
 
-    axios.post("/back/products/update-product-images", formData, {
+    axios.post("/back/products/updateProductImages", formData, {
         headers: { "Content-Type": "multipart/form-data" }
     }).then(response => {
         console.log(response.data);
+        Object.assign(product_options, response.data.updated_product_options || []);
+        original_product_options = JSON.parse(JSON.stringify(response.data.updated_product_options) || []);
+        if(response.data){
+            showMessage('success', '更新成功');
+        }
     });
 }
+
+//整理成要上傳的資料
+const getUpdatedProductOptions = () => {
+    return product_options.map(option => {
+        const originalOption = original_product_options.find(o => o.id === option.id);
+
+        return {
+            po_id: option.id,
+            product_images: option.product_images
+                .filter(img => {
+                    // 找出原始的圖片
+                    const originalImg = originalOption?.product_images?.find(oImg => oImg.id === img.id);
+
+                    // 檢查 alt_text 是否變更
+                    const altTextChanged = originalImg && originalImg.alt_text !== img.alt_text;
+
+                    // 檢查是否標記刪除
+                    const isDeleted = img._delete;
+
+                    // 檢查是否是新上傳的圖片
+                    const isNew = img.id === null;
+
+                    return altTextChanged || isDeleted || isNew;
+                })
+                .map(img => ({
+                    //重新整理數據結構
+                    id: img.id ?? null,
+                    alt_text: img.alt_text,
+                    is_combination: img.is_combination,
+                    _delete: img._delete ?? false,
+                    image: img.id ? img.image : img.file, // 新圖片才帶 `file`
+                }))
+        };
+    }).filter(option => option.product_images.length > 0); // 過濾掉沒有改變的 product_options
+}
+
+const showMessage = (type, title) => {
+    ElNotification({
+        type, // "success" 或 "error"
+        title,
+        position: 'bottom-left',
+    });
+};
 
 </script>
 
