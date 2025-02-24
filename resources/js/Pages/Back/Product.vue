@@ -107,7 +107,7 @@
             </el-dialog>
 
             <!-- 增刪改查product color -->
-            <el-dialog v-model="dialogColorVisible" :title="product_dialog_title" width="1000">
+            <el-dialog v-model="dialogColorVisible" :title="product_dialog_title" width="1000" >
                 <ProductCoEditForm v-model:color_options_data="color_options_data" v-model:fileList_co="fileList_co"
                     v-model:tempRow="tempRow" :editingRow="editingRow" @toggle-edit="toggleEdit"
                     @cancel-edit="cancelEdit" @del-co="delCo" ref="colorFormRef" />
@@ -116,7 +116,9 @@
                     v-model:newCoRowVisible="newCoRowVisible" v-model:fileListAdd_co="fileListAdd_co"
                     @toggle-add="toggleAdd" @toggle-add-btn="toggleAddBtn" />
 
-                <ProductCoAttPicForm :colorOptions="color_options_data" :productId="productId"  />
+                <ProductCoAttPicForm :colorOptions="color_options_data" :productId="productId"
+                    v-model:dialogColorVisible="dialogColorVisible"
+                 />
             </el-dialog>
         </template>
     </BackendLayout>
@@ -586,7 +588,6 @@ const productId = ref(null);
 const dialogColorVisible = ref(false);
 const dialogColorToggle = async (product) => {
     productId.value = product.id;
-
     product_dialog_title.value = product.name + " 顏色管理";
 
     try {
@@ -600,6 +601,8 @@ const dialogColorToggle = async (product) => {
         console.error("載入產品顏色資料失敗：", error);
     }
 };
+
+
 
 let formDataForCo = new FormData();
 
@@ -743,7 +746,6 @@ const toggleAdd = async () => {
 
 }
 
-
 const colorAddFormBeforSubmit = () => {
     formDataForCoAdd = new FormData();
     formDataForCoAdd.append('product_id', newCoRowData.value.product_id);
@@ -826,6 +828,9 @@ const delCo = async (id) => {
         showMessage('error', '刪除失敗');
     }
 }
+
+
+
 
 //監聽編輯高亮狀態
 watch(

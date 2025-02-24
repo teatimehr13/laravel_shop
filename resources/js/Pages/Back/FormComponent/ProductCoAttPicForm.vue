@@ -16,52 +16,78 @@
         </el-dialog>
     </el-dialog>
 
-    <el-dialog v-model="coImgVisible" title="產品附圖管理" style="min-width: 600px; width: 1100px; max-width: 1500px;">
-        <div>
-            <div v-for="(product_option, idx) in product_options" :key="product_option.id">
-                <h1>{{ product_option.color_code }}</h1>
+    <Teleport to="body">
+        <el-dialog v-model="coImgVisible" title="產品附圖管理" style="min-width: 600px; width: 1100px; max-width: 1500px;"
+            :before-close="toggleCv">
+            <div>
+                <div v-for="(product_option, idx) in product_options" :key="product_option.id">
+                    <h1>{{ product_option.color_code }}</h1>
 
-                <div class="images" style="display: flex; flex-wrap: wrap;">
+                    <div class="images">
 
-                    <div v-for="image in product_option.product_images" :key="image.uid || image.id"
-                        class="image-wrapper">
-                        <!-- 圖片 -->
-                        <div class="image-container" :class="{ 'image-deleted': image._delete }">
-                            <img :src="image.image" class="image-item" />
-                            <!-- 浮水印，只有當 `_delete: true` 才顯示 -->
-                            <div v-if="image._delete" class="watermark">刪除</div>
+                        <div v-for="image in product_option.product_images" :key="image.uid || image.id"
+                            class="image-wrapper">
+                            <!-- 圖片 -->
+                            <div class="image-container" :class="{ 'image-deleted': image._delete }">
+                                <!-- <img :src="image.image" class="image-item" /> -->
+                                <div class="demo-image__preview">
+                                    <el-image v-if="product_option.product_images.length"
+                                        style="width: 100px; height: 100px" :src="image.image"
+                                        :preview-src-list="getPreviewList(product_option.product_images)" show-progress
+                                        fit="cover" />
+                                </div>
+                                <!-- 浮水印，只有當 `_delete: true` 才顯示 -->
+                                <div v-if="image._delete" class="watermark">
+                                    <!-- <el-icon>
+                                        <CloseBold />
+                                    </el-icon> -->
+                                    <span>刪除</span>
+                                </div>
+                            </div>
+
+                            <!-- Alt Text -->
+                            <!-- <input type="text" v-model="image.alt_text" placeholder="Alt Text" /> -->
+                            <el-input v-model="image.alt_text" style="width: 200px" placeholder="Alt Text" />
+
+                            <!-- 刪除 & 還原按鈕 -->
+                            <div class="toggle_btn">
+                                <el-button v-if="image.id === null"
+                                    @click="removeImage(product_option.id, null, image.uid)">刪除</el-button>
+                                <el-button v-else-if="!image._delete"
+                                    @click="removeImage(product_option.id, image.id)">標記刪除</el-button>
+                                <el-button v-else @click="restoreImage(product_option.id, image.id)" type="danger" plain
+                                    class="del_btn">還原</el-button>
+                            </div>
                         </div>
 
-                        <!-- Alt Text -->
-                        <input type="text" v-model="image.alt_text" placeholder="Alt Text" />
+                        <input type="file" multiple class="hidden-input" :ref="el => fileInputs[product_option.id] = el"
+                            @change="handleFileUpload($event, product_option.id)" />
 
-                        <!-- 刪除 & 還原按鈕 -->
-                        <button v-if="image.id === null"
-                            @click="removeImage(product_option.id, null, image.uid)">刪除</button>
-                        <button v-else-if="!image._delete"
-                            @click="removeImage(product_option.id, image.id)">標記刪除</button>
-                        <button v-else @click="restoreImage(product_option.id, image.id)">還原</button>
-                    </div>
-
-                    <input type="file" multiple class="hidden-input" :ref="el => fileInputs[product_option.id] = el"
-                        @change="handleFileUpload($event, product_option.id)" />
-
-                    <div class="upload-placeholder" @click="triggerUpload(product_option.id)">
-                        <el-tooltip class="box-item" effect="dark" content="新增檔案" placement="top-start">
-                            <el-button>
-                                <el-icon>
-                                    <Plus />
-                                </el-icon>
-                            </el-button>
-                        </el-tooltip>
+                        <div class="upload-placeholder" @click="triggerUpload(product_option.id)">
+                            <el-tooltip class="box-item" effect="dark" content="新增檔案" placement="top">
+                                <el-button>
+                                    <el-icon>
+                                        <Plus />
+                                    </el-icon>
+                                </el-button>
+                            </el-tooltip>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <button @click="submitData">更新</button>
 
-    </el-dialog>
+            <template #footer>
+                <div class="dialog-footer">
+                    <!-- <el-button @click="dialogVisible = false">Cancel</el-button>
+                    <el-button type="primary" @click="dialogVisible = false">
+                        Confirm
+                    </el-button> -->
+                    <el-button type="danger" @click="submitData">更新</el-button>
+                </div>
+            </template>
+        </el-dialog>
+    </Teleport>
 </template>
 
 <script setup>
@@ -71,9 +97,11 @@ import axios from "axios";
 
 const props = defineProps({
     colorOptions: Array,
-    productId: Number
+    productId: Number,
+    dialogColorVisible: Boolean
 })
 
+const emit = defineEmits(["update:dialogColorVisible"]);
 
 const uploadCoAttVisible = ref(false);
 // const color_name_title = ref('');
@@ -81,6 +109,7 @@ const toggleCoAtt = (row) => {
     uploadCoAttVisible.value = !uploadCoAttVisible.value;
     // color_name_title.value = row.color_name;
 }
+// console.log(props.dialogColorVisible);
 
 
 const coAttList = ref([]);
@@ -100,14 +129,14 @@ const coImgVisible = ref(false);
 const toggleCoImg = async () => {
     await productImages();
     coImgVisible.value = !coImgVisible.value;
+    emit("update:dialogColorVisible", false);
+    // props.dialogColorVisible = !props.dialogColorVisible;
 }
 
 const product_options = reactive([]);
 
 //原始數據，用來比對更改過的數據
 let original_product_options = [];
-
-
 
 const productImages = async () => {
     let obj = {
@@ -277,7 +306,7 @@ const submitData = () => {
         console.log(response.data);
         Object.assign(product_options, response.data.updated_product_options || []);
         original_product_options = JSON.parse(JSON.stringify(response.data.updated_product_options) || []);
-        if(response.data){
+        if (response.data) {
             showMessage('success', '更新成功');
         }
     });
@@ -318,6 +347,11 @@ const getUpdatedProductOptions = () => {
     }).filter(option => option.product_images.length > 0); // 過濾掉沒有改變的 product_options
 }
 
+// 取得圖片預覽列表
+const getPreviewList = (images) => {
+    return images.map((img) => img.image);
+};
+
 const showMessage = (type, title) => {
     ElNotification({
         type, // "success" 或 "error"
@@ -326,9 +360,15 @@ const showMessage = (type, title) => {
     });
 };
 
+const toggleCv = () => {
+    console.log(123);
+    coImgVisible.value = !coImgVisible.value;
+    emit("update:dialogColorVisible", true);
+}
+
 </script>
 
-<style>
+<style scoped>
 .image-item {
     max-width: 100px;
 }
@@ -345,12 +385,22 @@ const showMessage = (type, title) => {
 }
 
 /* 當 _delete: true 時，讓圖片變成灰階 & 透明度變低 */
-.image-deleted img {
+::v-deep(.image-deleted img) {
     filter: grayscale(100%) opacity(50%);
 }
 
+
+.image-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    margin: 10px;
+    padding: 5px;
+}
+
 /* 浮水印 */
-.watermark {
+::v-deep(.watermark) {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -364,12 +414,24 @@ const showMessage = (type, title) => {
     width: max-content;
 }
 
+::v-deep(.watermark > .el-icon) {
+    vertical-align: middle;
+}
+
 .upload-placeholder {
-    height: 50px;
-    width: 50px;
+    /* height: 50px; */
+    width: 200px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    margin: 10px;
+    padding: 5px;
+}
+
+.upload-placeholder .el-button {
+    width: 100px;
+    height: 100px;
+    margin: auto;
 }
 
 .upload-placeholder .el-button:hover {
@@ -379,4 +441,75 @@ const showMessage = (type, title) => {
 .hidden-input {
     display: none;
 }
+
+
+.demo-image__error .image-slot {
+    font-size: 30px;
+}
+
+.demo-image__error .image-slot .el-icon {
+    font-size: 30px;
+}
+
+.demo-image__error .el-image {
+    width: 100%;
+    height: 200px;
+}
+
+::v-deep(.el-input__inner:focus) {
+    outline: none;
+    box-shadow: none;
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin: 10px;
+    /* color:#172B4D; */
+}
+
+::v-deep(.toggle_btn > button) {
+    width: 200px;
+}
+
+::v-deep(.toggle_btn > button:not(.del_btn)) {
+    color: #172B4D;
+    background: #091E420F;
+}
+
+.images {
+    display: flex; 
+    overflow-x: auto;
+    /* flex-wrap: wrap; */
+}
+
+/* 限定 .scroll-container 內部的滾動條 */
+.images::-webkit-scrollbar {
+    height: 6px;
+}
+
+/* .images:hover ~ .images::-webkit-scrollbar-thumb {
+    display: block;
+} */
+
+/* 滾動條軌道 */
+.images::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+    
+}
+
+/* 滾動條本體 */
+.images::-webkit-scrollbar-thumb {
+    background: #b1c3dc;
+    border-radius: 10px;
+    transition: background 0.3s;
+}
+
+/* 滑鼠懸停時的滾動條效果 */
+.images::-webkit-scrollbar-thumb:hover {
+    /* background: #8d8d8d; */
+    background: #6c92c8;
+}
+
+
 </style>
