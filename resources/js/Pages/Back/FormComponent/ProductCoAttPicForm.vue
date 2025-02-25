@@ -5,7 +5,7 @@
 
     <el-dialog v-model="uploadCoAttVisible" title="上傳項目">
         <el-upload v-model:file-list="coAttList" :auto-upload="false" list-type="picture-card"
-            :on-preview="coAttPreview" :on-remove="coAttRemove" multiple>
+            :on-preview="coAttPreview" :on-remove="coAttRemove" multiple >
             <el-icon>
                 <Plus />
             </el-icon>
@@ -18,14 +18,13 @@
 
     <Teleport to="body">
         <el-dialog v-model="coImgVisible" title="產品附圖管理" style="min-width: 600px; width: 1100px; max-width: 1500px;"
-            :before-close="toggleCv">
+            :before-close="toggleCv" align-center>
             <div>
-                <div v-for="(product_option, idx) in product_options" :key="product_option.id">
+                <div v-for="(product_option, idx) in product_options" :key="product_option.id" class="images-outside">
                     <h1>{{ product_option.color_code }}</h1>
 
                     <div class="images">
-
-                        <div v-for="image in product_option.product_images" :key="image.uid || image.id"
+                        <div v-for="(image, index) in product_option.product_images" :key="image.uid || image.id"
                             class="image-wrapper">
                             <!-- 圖片 -->
                             <div class="image-container" :class="{ 'image-deleted': image._delete }">
@@ -34,7 +33,7 @@
                                     <el-image v-if="product_option.product_images.length"
                                         style="width: 100px; height: 100px" :src="image.image"
                                         :preview-src-list="getPreviewList(product_option.product_images)" show-progress
-                                        fit="cover" />
+                                        fit="cover"  :initial-index="index" />
                                 </div>
                                 <!-- 浮水印，只有當 `_delete: true` 才顯示 -->
                                 <div v-if="image._delete" class="watermark">
@@ -476,39 +475,41 @@ h1 {
     background: #091E420F;
 }
 
-.images {
+::v-deep(.images) {
     display: flex; 
+    overflow-x: hidden;
+}
+
+.images-outside{
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ededed;
+}
+
+.images-outside:hover .images{
     overflow-x: auto;
-    /* flex-wrap: wrap; */
 }
 
 /* 限定 .scroll-container 內部的滾動條 */
-.images::-webkit-scrollbar {
+.images::-webkit-scrollbar{
     height: 6px;
 }
 
-/* .images:hover ~ .images::-webkit-scrollbar-thumb {
-    display: block;
-} */
-
 /* 滾動條軌道 */
-.images::-webkit-scrollbar-track {
+/* .images::-webkit-scrollbar-track{
     background: #f1f1f1;
     border-radius: 10px;
-    
-}
+} */
 
 /* 滾動條本體 */
 .images::-webkit-scrollbar-thumb {
-    background: #b1c3dc;
+    background: #e2e2e2;
     border-radius: 10px;
-    transition: background 0.3s;
 }
 
 /* 滑鼠懸停時的滾動條效果 */
 .images::-webkit-scrollbar-thumb:hover {
-    /* background: #8d8d8d; */
-    background: #6c92c8;
+    background: #c1c1c1;
+    cursor: pointer;
 }
 
 
