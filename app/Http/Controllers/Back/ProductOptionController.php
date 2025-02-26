@@ -198,6 +198,24 @@ class ProductOptionController extends Controller
         }
     }
 
+
+    //刪除前確認產品選項的附圖
+    public function checkProductOptionImages($po_id){
+        // $productOption = ProductOption::with('productImages')->find($po_id);
+        $productOption = ProductOption::withCount('productImages')->find($po_id);
+
+        if(!$productOption){
+            return response()->json(['message' => 'Product Option not found']);
+        }
+
+        // $imageCount = $productOption->productImages->count();
+
+        return response()->json([
+            'image_count' => $productOption->product_images_count
+            // 'image_count' => $imageCount
+        ]);
+    }
+
     //增刪改產品選項對應的圖片
     // public function updateProductImages(Request $request)
     // {

@@ -5,7 +5,7 @@
 
     <el-dialog v-model="uploadCoAttVisible" title="上傳項目">
         <el-upload v-model:file-list="coAttList" :auto-upload="false" list-type="picture-card"
-            :on-preview="coAttPreview" :on-remove="coAttRemove" multiple >
+            :on-preview="coAttPreview" :on-remove="coAttRemove" multiple>
             <el-icon>
                 <Plus />
             </el-icon>
@@ -19,11 +19,11 @@
     <Teleport to="body">
         <el-dialog v-model="coImgVisible" title="產品附圖管理" style="min-width: 600px; width: 1100px; max-width: 1500px;"
             :before-close="toggleCv" align-center>
-            <div>
-                <div v-for="(product_option, idx) in product_options" :key="product_option.id" class="images-outside">
-                    <h1>{{ product_option.color_code }}</h1>
 
-                    <div class="images">
+            <div v-for="(product_option, idx) in product_options" :key="product_option.id" class="images-outside">
+                <h1>{{ product_option.color_code }}</h1>
+                <el-scrollbar >
+                    <div class="images scrollbar-flex-content">
                         <div v-for="(image, index) in product_option.product_images" :key="image.uid || image.id"
                             class="image-wrapper">
                             <!-- 圖片 -->
@@ -33,7 +33,7 @@
                                     <el-image v-if="product_option.product_images.length"
                                         style="width: 100px; height: 100px" :src="image.image"
                                         :preview-src-list="getPreviewList(product_option.product_images)" show-progress
-                                        fit="cover"  :initial-index="index" />
+                                        fit="cover" :initial-index="index" />
                                 </div>
                                 <!-- 浮水印，只有當 `_delete: true` 才顯示 -->
                                 <div v-if="image._delete" class="watermark">
@@ -72,9 +72,10 @@
                             </el-tooltip>
                         </div>
                     </div>
-                </div>
+                </el-scrollbar>
             </div>
-
+            <div>
+            </div>
 
             <template #footer>
                 <div class="dialog-footer">
@@ -83,6 +84,7 @@
                         Confirm
                     </el-button> -->
                     <el-button type="danger" @click="submitData">更新</el-button>
+                    <el-button @click="toggleCv" type="info">退出</el-button>
                 </div>
             </template>
         </el-dialog>
@@ -475,24 +477,23 @@ h1 {
     background: #091E420F;
 }
 
-::v-deep(.images) {
-    display: flex; 
-    overflow-x: hidden;
+.images {
+    padding-bottom: 5px;
 }
 
-.images-outside{
-    padding-bottom: 20px;
+.images-outside {
     border-bottom: 1px solid #ededed;
+    padding-bottom: 5px;
 }
 
-.images-outside:hover .images{
+/* .images-outside:hover .images {
     overflow-x: auto;
-}
+} */
 
 /* 限定 .scroll-container 內部的滾動條 */
-.images::-webkit-scrollbar{
+/* .images::-webkit-scrollbar {
     height: 6px;
-}
+} */
 
 /* 滾動條軌道 */
 /* .images::-webkit-scrollbar-track{
@@ -501,16 +502,19 @@ h1 {
 } */
 
 /* 滾動條本體 */
-.images::-webkit-scrollbar-thumb {
+/* .images::-webkit-scrollbar-thumb {
     background: #e2e2e2;
     border-radius: 10px;
-}
+} */
 
 /* 滑鼠懸停時的滾動條效果 */
-.images::-webkit-scrollbar-thumb:hover {
+/* .images::-webkit-scrollbar-thumb:hover {
     background: #c1c1c1;
     cursor: pointer;
+} */
+
+
+.scrollbar-flex-content {
+    display: flex;
 }
-
-
 </style>

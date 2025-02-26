@@ -71,7 +71,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('product_options', BackProductOptionController::class)->only('destroy','store', 'update');
         Route::post('/products/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
         Route::post('/products/updateProductImages', [BackProductOptionController::class, 'updateProductImages'])->name('updateProductImages');
-
+        // checkProductOptionImages
+        Route::get('/product_options/{id}/checkImgs', [BackProductOptionController::class, 'checkProductOptionImages'])->name('checkProductOptionImages');
         
         Route::resource('stores', BackStoreController::class);
         Route::resource('categories', BackCategoryController::class)->only(['index','update','destroy','store']);

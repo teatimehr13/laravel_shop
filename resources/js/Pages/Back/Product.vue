@@ -107,18 +107,17 @@
             </el-dialog>
 
             <!-- 增刪改查product color -->
-            <el-dialog v-model="dialogColorVisible" :title="product_dialog_title" width="1000" >
+            <el-dialog v-model="dialogColorVisible" :title="product_dialog_title" width="1000">
                 <ProductCoEditForm v-model:color_options_data="color_options_data" v-model:fileList_co="fileList_co"
                     v-model:tempRow="tempRow" :editingRow="editingRow" @toggle-edit="toggleEdit"
-                    @cancel-edit="cancelEdit" @del-co="delCo" ref="colorFormRef" />
+                    @cancel-edit="cancelEdit" @del-co="chkCoImgs" ref="colorFormRef" />
 
                 <ProductCoAddForm ref="newCoFormRef" v-model:newCoRowData="newCoRowData"
                     v-model:newCoRowVisible="newCoRowVisible" v-model:fileListAdd_co="fileListAdd_co"
                     @toggle-add="toggleAdd" @toggle-add-btn="toggleAddBtn" />
 
                 <ProductCoAttPicForm :colorOptions="color_options_data" :productId="productId"
-                    v-model:dialogColorVisible="dialogColorVisible"
-                 />
+                    v-model:dialogColorVisible="dialogColorVisible" />
             </el-dialog>
         </template>
     </BackendLayout>
@@ -829,7 +828,39 @@ const delCo = async (id) => {
     }
 }
 
+//顏色管理 - 移除前確認附圖
+const chkCoImgs = async (id) => {
+    try {
+        const response = await axios.get(`/back/product_options/${id}/checkImgs`);
+        const imageCount = response.data.image_count;
+        console.log(imageCount);
 
+        if (imageCount > 0) {
+            // const confirmed = window.confirm(`該產品顏色尚有${imageCount}張附圖，是否刪除?`);
+            // if(!confirmed) return;
+            let msg = `該產品顏色尚有 ${imageCount} 張產品附圖，是否確認刪除?`
+            chkCoImgsMsg(msg,id);
+        } else{
+            delCo(id);
+        }
+
+        // delCo(id);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+const chkCoImgsMsg = (msg,id) => {
+    ElMessageBox.alert(msg, '刪除確認', {
+        // if you want to disable its autofocus
+        // autofocus: false,
+        confirmButtonText: 'OK',
+        callback: () => {
+            //   console.log(123);
+            delCo(id);
+        },
+    })
+}
 
 
 //監聽編輯高亮狀態

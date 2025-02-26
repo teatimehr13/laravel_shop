@@ -2,10 +2,14 @@
     <div v-show="newCoRowVisible" class="new_co_row">
         <el-form :model="newCoRowData" ref="newCoFormRef" :rules="rules">
             <el-row>
-                <el-col>
+                <el-col class="custom-color_name">
                     <el-form-item prop="color_name">
-                        <el-input v-model="newCoRowData.color_name" placeholder="輸入顏色" size="small" />
+                        <el-input v-model="newCoRowData.color_name" placeholder="輸入顏色名稱" size="small" :disabled="isCombination"
+                        @input="(val) => emit('update:newCoRowData', { ...props.newCoRowData, color_name: val })" />
                     </el-form-item>
+                    <el-checkbox v-model="isCombination" @change="handleCombinationChange">
+                        組合色
+                    </el-checkbox>
                 </el-col>
                 <el-col>
                     <el-form-item prop="color_code">
@@ -49,9 +53,8 @@
                             </div>
 
                             <div v-else class="upload-placeholder" @click="triggerUpload">
-                                <el-tooltip class="box-item" effect="dark" content="上傳檔案"
-                                    placement="top-start">
-                                    <el-button> 
+                                <el-tooltip class="box-item" effect="dark" content="上傳檔案" placement="top-start">
+                                    <el-button>
                                         <el-icon>
                                             <Plus />
                                         </el-icon>
@@ -78,9 +81,9 @@
         </el-form>
     </div>
 
-    <el-col>
-        <div>
-            <el-button style="margin: 10px 0;" @click="toggleAddbtn" v-show="!newCoRowVisible">添加顏色</el-button>
+    <el-col style="margin-right: 10px; display: inline-block;">
+        <div style="margin: 10px 0;">
+            <el-button @click="toggleAddbtn" v-show="!newCoRowVisible">添加顏色</el-button>
         </div>
     </el-col>
 
@@ -104,6 +107,7 @@ const fileListAdd_co = computed(() => props.fileListAdd_co);
 const emit = defineEmits([
     //v-model綁定的話要加"update:"
     "update:fileListAdd_co",
+    "update:newCoRowData",
     "toggle-add",
     "toggle-add-btn"
     // "update:tempRow",
@@ -208,8 +212,6 @@ const toggleAdd = () => {
 
 const toggleAddbtn = () => {
     emit('toggle-add-btn');
-    
-    
 }
 
 const newCoFormRef = ref();
@@ -219,19 +221,35 @@ const resetFields = () => {
     newCoFormRef.value.resetFields();
 }
 
+const isCombination = ref(false); // 是否為組合色
+
+const handleCombinationChange = () => {
+  if (isCombination.value) {
+    newCoRowData.value.color_name = "組合色"; // 勾選時自動填入「組合色」
+    // newCoFormRef.value.resetFields();
+  } else {
+    newCoRowData.value.color_name = ""; // 取消勾選時，清空輸入框
+  }
+};
+
 defineExpose({
     newCoFormRef,
     colorAddFormValidate,
     resetFields
 })
 
-
+watch(isCombination, (newVal) => {
+  emit("update:newCoRowData", {
+    ...props.newCoRowData,
+    color_name: newVal ? "組合色" : "",
+  });
+});
 </script>
 
 <style scoped>
 ::v-deep(.el-row) {
     display: grid;
-    grid-template-columns: 130px 130px 130px 200px 178px 200px;
+    grid-template-columns: 130px 130px 130px 200px 130px 200px;
     align-items: center;
     padding: 8px 0;
     /* margin-top: 10px; */
@@ -318,5 +336,14 @@ defineExpose({
 .icon_gp .el-icon:hover {
     transform: scale(1.3);
     transition: linear .15s;
+}
+
+
+::v-deep(.custom-color_name){
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transform: translateY(23px);
+    margin-bottom: 15px;
 }
 </style>
