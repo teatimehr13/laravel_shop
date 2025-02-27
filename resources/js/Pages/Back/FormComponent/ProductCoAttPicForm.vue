@@ -20,7 +20,7 @@
         <el-dialog v-model="coImgVisible" title="產品附圖管理" style="min-width: 600px; width: 1100px; max-width: 1500px;"
             :before-close="toggleCv" align-center>
 
-            <div v-for="(product_option, idx) in product_options" :key="product_option.id" class="images-outside">
+            <div v-for="(product_option, idx) in sort_product_options" :key="product_option.id" class="images-outside">
                 <h1>{{ product_option.color_code }}</h1>
                 <el-scrollbar >
                     <div class="images scrollbar-flex-content">
@@ -154,6 +154,12 @@ const productImages = async () => {
     console.log(product_options);
 }
 
+const sort_product_options = computed(() => {
+    return [...product_options].sort((a, b) => {
+        return a.color_code === "combo" ? 1 : b.color_code === "combo" ? -1 : 0;
+      });
+})
+
 // 上傳圖片
 const handleFileUpload = (event, optionId) => {
     const files = event.target.files;
@@ -176,6 +182,8 @@ const handleFileUpload = (event, optionId) => {
     // });
 
     // console.log(Array.from(files));
+    console.log(option);
+    
 
     Array.from(files).forEach(file => {
         const newImage = {
@@ -184,8 +192,8 @@ const handleFileUpload = (event, optionId) => {
             product_id: option.product_id,
             image: URL.createObjectURL(file), //預覽圖片
             alt_text: "",
-            is_combination: 0,
-            file: file, //用於上傳
+            is_combination: option.color_name === "組合色" ? 1 : 0,
+            file: file, //用於上傳,
         };
         option.product_images.push(newImage);
     });
@@ -274,6 +282,7 @@ const submitData = () => {
     const updatedOptions = getUpdatedProductOptions();
     console.log(updatedOptions);
     let product_id = props.productId;
+    // return
 
     updatedOptions.forEach((option, optionIndex) => {
         formData.append(`product_options[${optionIndex}][po_id]`, option.po_id);
@@ -290,9 +299,11 @@ const submitData = () => {
         });
     });
 
-    // for (const [key, value] of formData.entries()) {
-    //     console.log(`${key}:`, value);
-    // }
+    for (const [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+    }
+
+    // return
 
     //檢查formData有沒有東西，沒有的話不上傳
     if (formData.entries().next().done) {

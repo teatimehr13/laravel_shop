@@ -4,16 +4,28 @@
             <el-row>
                 <el-col class="custom-color_name">
                     <el-form-item prop="color_name">
-                        <el-input v-model="newCoRowData.color_name" placeholder="輸入顏色名稱" size="small" :disabled="isCombination"
-                        @input="(val) => emit('update:newCoRowData', { ...props.newCoRowData, color_name: val })" />
+                        <el-input v-model="newCoRowData.color_name" placeholder="輸入顏色名稱" size="small"
+                            :disabled="isCombination"
+                            @input="(val) => emit('update:newCoRowData', { ...props.newCoRowData, color_name: val })" />
                     </el-form-item>
-                    <el-checkbox v-model="isCombination" @change="handleCombinationChange">
+                    <el-tooltip v-if="hasCombination" content="組合色已存在，無法再新增" placement="top">
+                        <span>
+                            <el-checkbox v-model="isCombination" :disabled="hasCombination">
+                                組合色
+                            </el-checkbox>
+                        </span>
+                    </el-tooltip>
+
+                    <el-checkbox v-else v-model="isCombination" :disabled="hasCombination">
                         組合色
                     </el-checkbox>
+
                 </el-col>
                 <el-col>
                     <el-form-item prop="color_code">
-                        <el-input v-model="newCoRowData.color_code" placeholder="輸入顏色" size="small" />
+                        <el-input v-model="newCoRowData.color_code" placeholder="輸入顏色" size="small"
+                            :disabled="isCombination"
+                            @input="(val) => emit('update:newCoRowData', { ...props.newCoRowData, color_code: val })" />
                     </el-form-item>
                 </el-col>
 
@@ -98,7 +110,8 @@ import { computed, reactive, watch, ref, toRef } from "vue";
 const props = defineProps({
     newCoRowData: Object,
     newCoRowVisible: Boolean,
-    fileListAdd_co: Array
+    fileListAdd_co: Array,
+    color_options_data: Array
 })
 
 // 使用 `computed` 來代理 `fileListAdd_co`
@@ -109,11 +122,16 @@ const emit = defineEmits([
     "update:fileListAdd_co",
     "update:newCoRowData",
     "toggle-add",
-    "toggle-add-btn"
+    "toggle-add-btn",
+    "remove-verify"
     // "update:tempRow",
     // "toggle-edit",
     // "cancel-edit"
 ]);
+
+const hasCombination = computed(() => {
+    return props.color_options_data.some(option => option.color_name === "組合色");
+});
 
 const rules = reactive({
     color_name: [
@@ -208,10 +226,12 @@ const fileInput = ref(null);
 const toggleAdd = () => {
     // console.log(123);
     emit("toggle-add");
+    // isCombination.value = false;
 }
 
 const toggleAddbtn = () => {
     emit('toggle-add-btn');
+    isCombination.value = false;
 }
 
 const newCoFormRef = ref();
@@ -223,14 +243,13 @@ const resetFields = () => {
 
 const isCombination = ref(false); // 是否為組合色
 
-const handleCombinationChange = () => {
-  if (isCombination.value) {
-    newCoRowData.value.color_name = "組合色"; // 勾選時自動填入「組合色」
-    // newCoFormRef.value.resetFields();
-  } else {
-    newCoRowData.value.color_name = ""; // 取消勾選時，清空輸入框
-  }
-};
+// const handleCombinationChange = (newVal) => {
+//     emit("update:newCoRowData", {
+//         ...props.newCoRowData,
+//         color_name: newVal ? "組合色" : "",
+//     });
+//     emit('remove-verify');
+// };
 
 defineExpose({
     newCoFormRef,
@@ -239,10 +258,14 @@ defineExpose({
 })
 
 watch(isCombination, (newVal) => {
-  emit("update:newCoRowData", {
-    ...props.newCoRowData,
-    color_name: newVal ? "組合色" : "",
-  });
+    emit("update:newCoRowData", {
+        ...props.newCoRowData,
+        color_name: newVal ? "組合色" : "",
+        color_code: newVal ? "combo" : "",
+    });
+    emit('remove-verify');
+    console.log(props.newCoRowData);
+
 });
 </script>
 
@@ -339,7 +362,7 @@ watch(isCombination, (newVal) => {
 }
 
 
-::v-deep(.custom-color_name){
+::v-deep(.custom-color_name) {
     display: flex;
     flex-direction: column;
     justify-content: center;

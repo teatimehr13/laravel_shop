@@ -1,6 +1,6 @@
 <template>
     <el-form :model="tempRow" :rules="rules" ref="colorFormRef" class="colorForm">
-        <el-table :data="color_options_data">
+        <el-table :data="sort_color_options">
             <el-table-column label="顏色名稱" width="130">
                 <template #default="scope">
                     <div v-if="editingRow !== scope.row.id">
@@ -152,7 +152,7 @@
 </template>
 
 <script setup>
-import { reactive, watch, ref, toRef } from "vue";
+import { reactive, watch, ref, toRef, computed } from "vue";
 
 
 //拿到父組件的資料
@@ -162,6 +162,12 @@ const props = defineProps({
     tempRow: Object,
     editingRow: Number,
 });
+
+const sort_color_options = computed(() => {
+    return [...props.color_options_data].sort((a, b) => {
+        return a.color_code === "combo" ? 1 : b.color_code === "combo" ? -1 : 0;
+      });
+})
 
 const uploadCoImageUrl = ref('');
 const uploadCoVisible = ref(false);

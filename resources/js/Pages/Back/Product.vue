@@ -114,7 +114,8 @@
 
                 <ProductCoAddForm ref="newCoFormRef" v-model:newCoRowData="newCoRowData"
                     v-model:newCoRowVisible="newCoRowVisible" v-model:fileListAdd_co="fileListAdd_co"
-                    @toggle-add="toggleAdd" @toggle-add-btn="toggleAddBtn" />
+                    :color_options_data="color_options_data" @toggle-add="toggleAdd" @toggle-add-btn="toggleAddBtn"
+                    @remove-verify="removeVerify" />
 
                 <ProductCoAttPicForm :colorOptions="color_options_data" :productId="productId"
                     v-model:dialogColorVisible="dialogColorVisible" />
@@ -728,6 +729,10 @@ const fileListAdd_co = ref([]);
 
 let formDataForCoAdd = new FormData();
 
+const removeVerify = () => {
+    newCoFormRef.value.resetFields();
+}
+
 const toggleAddBtn = () => {
     newCoRowVisible.value = !newCoRowVisible.value;
     newCoFormRef.value.resetFields();
@@ -805,8 +810,14 @@ const addCo = async () => {
         }
 
     } catch (error) {
+        if (error.response.data['comboExist']) {
+            showMessage("error", error.response.data['message']);
+            return
+        }
         console.error('提交失败:', error);
         showMessage("error", "新增失敗");
+        // console.log(error.response.data['message']);
+
     }
 };
 
@@ -839,8 +850,8 @@ const chkCoImgs = async (id) => {
             // const confirmed = window.confirm(`該產品顏色尚有${imageCount}張附圖，是否刪除?`);
             // if(!confirmed) return;
             let msg = `該產品顏色尚有 ${imageCount} 張產品附圖，是否確認刪除?`
-            chkCoImgsMsg(msg,id);
-        } else{
+            chkCoImgsMsg(msg, id);
+        } else {
             delCo(id);
         }
 
@@ -850,16 +861,17 @@ const chkCoImgs = async (id) => {
     }
 }
 
-const chkCoImgsMsg = (msg,id) => {
-    ElMessageBox.alert(msg, '刪除確認', {
-        // if you want to disable its autofocus
-        // autofocus: false,
-        confirmButtonText: 'OK',
-        callback: () => {
-            //   console.log(123);
+const chkCoImgsMsg = (msg, id) => {
+    ElMessageBox.confirm(
+        msg,
+        {
+            confirmButtonText: '是',
+            cancelButtonText: '沒有',
+        }
+    )
+        .then(() => {
             delCo(id);
-        },
-    })
+        })
 }
 
 
