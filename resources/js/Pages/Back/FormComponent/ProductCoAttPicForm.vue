@@ -83,7 +83,7 @@
                     <el-button type="primary" @click="dialogVisible = false">
                         Confirm
                     </el-button> -->
-                    <el-button type="danger" @click="submitData">更新</el-button>
+                    <el-button type="danger" @click="submitData" :loading="loading_status">更新</el-button>
                     <el-button @click="toggleCv" type="info">退出</el-button>
                 </div>
             </template>
@@ -311,9 +311,10 @@ const submitData = () => {
     }
 
     formData.append("product_id", product_id);
+    loading_status.value = true;
 
     axios.post("/back/products/updateProductImages", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
+        headers: { "Content-Type": "multipart/form-data" }  
     }).then(response => {
         console.log(response.data);
         Object.assign(product_options, response.data.updated_product_options || []);
@@ -321,6 +322,7 @@ const submitData = () => {
         if (response.data) {
             showMessage('success', '更新成功');
         }
+        loading_status.value = false;
     });
 }
 
@@ -377,6 +379,8 @@ const toggleCv = () => {
     coImgVisible.value = !coImgVisible.value;
     emit("update:dialogColorVisible", true);
 }
+
+const loading_status = ref(false);
 
 </script>
 
