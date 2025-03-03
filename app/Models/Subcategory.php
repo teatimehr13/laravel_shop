@@ -18,4 +18,8 @@ class Subcategory extends Model
     public function category(){
         return $this->belongsTo(Category::class);
     }
+
+    public function firstProductImage(){
+        return $this->hasOne(Product::class)->select('id', 'subcategory_id', 'image')->orderBy('id');
+    }
 }

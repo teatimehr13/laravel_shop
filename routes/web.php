@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Front\ProductController;
+
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Back\ProductController as BackProductController;
 use App\Http\Controllers\Back\SubcategoryController as BackSubcategoryController;
@@ -47,6 +49,8 @@ Route::get('/cart', function () {
 Route::get('/product_show', function () {
     return Inertia::render('Front/Product_show');
 })->name('product_show');
+
+Route::get('/products', [ProductController::class, 'index'])->name('products.front.index');
 
 
 Route::middleware('auth')->group(function () {
