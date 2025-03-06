@@ -5,39 +5,49 @@ namespace App\Http\Controllers\Front;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductImage;
+use App\Models\ProductOption;
+use App\Models\Subcategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index($search_key)
     {
-        $products = Product::all();
-        // $categories = Category::with('subcategories.firstProductImage')->get();
+        $subcategory = Subcategory::where('search_key', $search_key)->first();
+        if(!$subcategory){
+            return;
+        }
 
-        $categories = Category::with('subcategories.firstProductImage')
-            ->get() //將結果轉為 Eloquent Collection
-            ->map(function ($category) {
-                return [
-                    'id' => $category->id,
-                    'name' => $category->name,
-                    //map() 作用於 get() 後，Eloquent Collection 變成普通 Collection
-                    //如果 subcategories 為 null，直接訪問 $category->subcategories->map() 會報錯
-                    //使用 collect($category->subcategories)，確保即使 subcategories 為 null，它也會變成空 Collection
-                    'subcategories' => collect($category->subcategories)->map(function ($subcategory) {
-                        return [
-                            'id' => $subcategory->id,
-                            'name' => $subcategory->name,
-                            'image' => optional($subcategory->firstProductImage)->image, // optional接受null 避免報錯
-                        ];
-                    })->values()
-                ];
-            });
+        $subcategory_id = $subcategory->id;
+        $subcategory_name = $subcategory->name; 
 
+        $productLists = Product::where('subcategory_id', $subcategory_id)->get();
 
-        return Inertia::render('Front/Product', [
-            'products' => $products,
-            'categories' => $categories
+        // Log::info($productLists);
+
+        return Inertia::render('Front/ProductList', [
+            'productLists' => $productLists,
+            'subcategory_name' => $subcategory_name
+
         ]);
     }
+
+    public function show(string $productId){
+        $product = Product::find($productId);
+        // $productOptions = ProductOption::where('product_id', $productId)->get();
+        // $productImages = ProductOption::with('productImages')->where('product_id', $productId)->get();
+        // $productImages = ProductImage::where('product_id', $productId)->get();
+        $productOptions = ProductOption::with('productImages')->where('product_id', $productId)->get();
+
+        return Inertia::render('Front/ProductShow', [
+            'product' => $product,
+            'productOptions' => $productOptions,
+            // 'productImages' => $productImages
+        ]);
+    }
+
+    
 }

@@ -1,51 +1,49 @@
 <template>
-    <div class="layout">
-        <header>
+    <el-container>
+        <!-- Header 固定 -->
+        <el-header>
             <Header />
-        </header>
 
-        <!-- <aside> -->
-            <!-- <Sidebar /> -->
-        <!-- </aside> -->
-
-        <!-- <main>
-            <slot />
-        </main> -->
-    </div>
+        </el-header>
+            <!-- Main 動態插槽 -->
+            <el-main>
+                <slot name="switch" />
+                <!-- <slot /> -->
+            </el-main>
+    </el-container>
 </template>
 
 <script setup>
 import Header from '@/Components/Front/Header.vue';
-// import Sidebar from '@/Components/Sidebar.vue';
+
+
 </script>
 
-<style scoped>
-.layout {
-    display: flex;
-    flex-direction: row;
+<style>
+
+ 
+.el-header {
+    background-color: #ffffff;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
 }
-header {
-    width: 100%;
-    height: 60px;
-    background-color: #333;
-    color: white;
-    /* 可以根據設計需求自定義樣式 */
+
+.el-main {
+    /* background-color: rgb(238, 241, 248);
+    color: #333;
+    border-top: 1px solid rgb(237, 240, 247);
+    padding: 20px; */
 }
-aside {
-    width: 250px;
-    background-color: #f8f9fa;
-    /* 可以根據設計需求自定義樣式 */
+
+/* .el-main>div:first-of-type {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px 0 rgba(74, 91, 109, .1);
+    padding: 16px 24px 24px;
 }
-main {
-    flex-grow: 1;
-    padding: 20px;
-}
+
+body>.el-container {
+    margin-bottom: 40px;
+} */
 </style>
-
-
-<!-- 在子頁面引入以下 -->
-<!-- import BackendLayout from '@/Layouts/BackendLayout.vue';
-
-defineProps({
-    layout: BackendLayout,
-}); -->
