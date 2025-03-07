@@ -1,9 +1,10 @@
 <template>
     <FrontendLayout>
         <template #switch>
+            <Breadcrumb :category="category" />
+
             <section>
                 <div style="max-width: 1200px; margin: auto;">
-
                     <div>
                         <h1>所有產品類別</h1>
                     </div>
@@ -38,6 +39,7 @@
 
 <script setup>
 import FrontendLayout from '@/Layouts/FrontendLayout.vue';
+import Breadcrumb from './Component/Breadcrumb.vue';
 
 const props = defineProps({
     products: {
@@ -54,6 +56,9 @@ const categories = props.categories;
 // console.log(props.categories);
 console.log(categories);
 
+const category = {
+    name: '所有產品類別'
+}
 
 </script>
 

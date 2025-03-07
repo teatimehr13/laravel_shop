@@ -16,13 +16,17 @@ class ProductController extends Controller
 {
     public function index($search_key)
     {
-        $subcategory = Subcategory::where('search_key', $search_key)->first();
-        if(!$subcategory){
+        // $subcategory = Subcategory::where('search_key', $search_key)->first();
+        $subcategory = Subcategory::where('search_key', $search_key)
+            ->with('category') // 取得上級分類
+            ->firstOrFail();
+
+        if (!$subcategory) {
             return;
         }
 
         $subcategory_id = $subcategory->id;
-        $subcategory_name = $subcategory->name; 
+        $subcategory_name = $subcategory->name;
 
         $productLists = Product::where('subcategory_id', $subcategory_id)->get();
 
@@ -30,13 +34,22 @@ class ProductController extends Controller
 
         return Inertia::render('Front/ProductList', [
             'productLists' => $productLists,
-            'subcategory_name' => $subcategory_name
+            'subcategory_name' => $subcategory_name,
+            'category' => $subcategory->category,
+            'subcategory' => $subcategory
 
         ]);
     }
 
-    public function show(string $productId){
-        $product = Product::find($productId);
+    public function show(string $slug)
+    {
+        // $product = Product::find($productId);
+        // $product = Product::where('slug', $slug)->firstOrFail();
+        $product = Product::where('slug', $slug)
+            ->with(['subcategory.category']) // 取得分類 & 子分類
+            ->firstOrFail();
+
+        $productId = $product->id;
         // $productOptions = ProductOption::where('product_id', $productId)->get();
         // $productImages = ProductOption::with('productImages')->where('product_id', $productId)->get();
         // $productImages = ProductImage::where('product_id', $productId)->get();
@@ -45,9 +58,9 @@ class ProductController extends Controller
         return Inertia::render('Front/ProductShow', [
             'product' => $product,
             'productOptions' => $productOptions,
+            'category' => $product->subcategory->category, // 上級分類
+            'subcategory' => $product->subcategory, // 當前子分類
             // 'productImages' => $productImages
         ]);
     }
-
-    
 }

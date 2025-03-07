@@ -54,7 +54,7 @@ Route::get('/product_show', function () {
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.front.index');
 
 Route::get('/product/list/{search_key}', [ProductController::class, 'index'])->name('product.front.index');
-Route::get('/product/show/{id}', [ProductController::class, 'show'])->name('product.front.show');
+Route::get('/product/show/{slug}', [ProductController::class, 'show'])->name('product.front.show');
 
 
 Route::middleware('auth')->group(function () {

@@ -1,6 +1,8 @@
 <template>
     <FrontendLayout>
         <template #switch>
+            <Breadcrumb :category="category" :subcategory="subcategory" />
+
             <section>
                 <div style="max-width: 1200px; margin: auto;">
 
@@ -26,7 +28,7 @@
                                     <el-image style="width: 100px; height: 100px;" :src="productList.image"
                                         fit="fill" />
                                 </div>
-                                <a :href="`/product/show/${productList.id}`">
+                                <a :href="`/product/show/${productList.slug}`">
                                     <span class="demonstration">{{ productList.name }}</span>
                                 </a>
                             </div>
@@ -42,6 +44,10 @@
 
 <script setup>
 import FrontendLayout from '@/Layouts/FrontendLayout.vue';
+import { ref, onMounted } from "vue";
+import Breadcrumb from './Component/Breadcrumb.vue';
+
+
 
 const props = defineProps({
     productLists: {
@@ -51,15 +57,24 @@ const props = defineProps({
     subcategory_name: {
         type: String,
         required: true
+    },
+    category:{
+        type: Object
+    },
+    subcategory:{
+        type: Object
     }
-
 })
+
 
 const productLists = props.productLists;
 const subcategory_name = props.subcategory_name;
 // console.log(props.categories);
 console.log(productLists);
 console.log(subcategory_name);
+console.log(props.category);
+console.log(props.subcategory);
+
 
 
 

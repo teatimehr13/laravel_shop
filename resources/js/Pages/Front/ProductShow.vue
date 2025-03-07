@@ -1,6 +1,8 @@
 <template>
     <FrontendLayout>
         <template #switch>
+            <Breadcrumb :category="category" :subcategory="subcategory" :product="product" />
+
             <section>
                 <div style="max-width: 1200px; margin: auto;">
 
@@ -11,7 +13,8 @@
                         <!-- 縮圖列表 -->
                         <div class="thumbnail-container">
                             <img v-for="(image, index) in filteredThumbnails" :key="index" :src="image.image"
-                                class="thumbnail" @click="selectedImage = image.image">
+                                class="thumbnail" @click="selectedImage = image.image"
+                                :class="{ active: selectedImage === image.image }">
                         </div>
 
                         <!-- 顏色選擇 -->
@@ -31,7 +34,8 @@
 
 <script setup>
 import FrontendLayout from '@/Layouts/FrontendLayout.vue';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
+import Breadcrumb from './Component/Breadcrumb.vue';
 
 const props = defineProps({
     product: {
@@ -42,7 +46,21 @@ const props = defineProps({
         type: Array,
         required: true
     },
+    category:{
+        type: Object
+    },
+    subcategory:{
+        type: Object
+    }
 })
+
+console.log(props.product);
+console.log(props.category);
+console.log(props.subcategory);
+
+
+
+
 const productOptions = computed(() => {
     return props.productOptions.filter(e => e.color_name !== "組合色")
 })
@@ -64,7 +82,7 @@ const filteredThumbnails = computed(() => {
         return allThumbnails.value; // 預設顯示所有縮圖
     }
     // console.log(productOptions.value);
-    
+
     const colorOption = productOptions.value.find(option => option.color_code === selectedColor.value);
     return colorOption ? colorOption.product_images : [];
 });
