@@ -27,8 +27,17 @@ class ProductController extends Controller
 
         $subcategory_id = $subcategory->id;
         $subcategory_name = $subcategory->name;
+        $category_id = $subcategory->category_id;
 
         $productLists = Product::where('subcategory_id', $subcategory_id)->get();
+        $categoryLists = Subcategory::where('category_id', $category_id)
+        ->get()
+        ->map(function($category_list){
+            return [
+                'name' => $category_list->name,
+                'search_key' => $category_list->search_key
+            ];
+        });
 
         // Log::info($productLists);
 
@@ -36,7 +45,8 @@ class ProductController extends Controller
             'productLists' => $productLists,
             'subcategory_name' => $subcategory_name,
             'category' => $subcategory->category,
-            'subcategory' => $subcategory
+            'subcategory' => $subcategory,
+            'categoryLists' => $categoryLists
 
         ]);
     }
