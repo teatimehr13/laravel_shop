@@ -31,7 +31,7 @@ const props = defineProps({
     categoryLists: Array
 });
 
-console.log(props.categoryLists);
+// console.log(props.categoryLists);
 
 
 </script>

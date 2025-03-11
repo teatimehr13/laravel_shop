@@ -35,7 +35,7 @@ class ProductController extends Controller
         ->map(function($category_list){
             return [
                 'name' => $category_list->name,
-                'search_key' => $category_list->search_key
+                'search_key' => $category_list->search_key,
             ];
         });
 
