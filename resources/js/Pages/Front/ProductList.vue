@@ -9,11 +9,6 @@
 
                     <div style="margin: auto; width: 100%;" class="product-container">
 
-                        <div>
-                            <h1>{{ subcategory_name }}</h1>
-                        </div>
-
-
                         <div class="product-list-card-con">
                             <div class="product-list-card" v-for="(productList, idx) in productLists"
                                 :key="productList.id">
@@ -181,7 +176,7 @@ function toCurrency(num) {
 .layout-container {
     display: grid;
     grid-template-columns:
-        [left-space] 1fr [aside] 220px [gap] 20px [product-con] minmax(auto, 1330px) [right-space] 1fr;
+        [left-space] 1fr [aside] 220px [gap] 20px [product-con] clamp(900px, 70vw, 1330px) [right-space] 1fr;
     padding-left: 2rem;
     padding-right: 2rem;
 }
