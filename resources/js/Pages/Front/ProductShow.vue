@@ -4,25 +4,85 @@
             <Breadcrumb :category="category" :subcategory="subcategory" :product="product" />
 
             <section>
-                <div style="max-width: 1200px; margin: auto;">
+                <div class="layout-container">
+                    <div class="product-show">
+                        <div class="product-img-con">
+                            <div class="prodcut-main-img">
+                                <!-- 主要圖片 -->
+                                <el-image :src="selectedImage" style="width: 400px; height: 400px;" />
+                            </div>
 
-                    <div>
-                        <!-- 主要圖片 -->
-                        <el-image :src="selectedImage" style="width: 400px; height: 400px;" />
-
-                        <!-- 縮圖列表 -->
-                        <div class="thumbnail-container">
-                            <img v-for="(image, index) in filteredThumbnails" :key="index" :src="image.image"
-                                class="thumbnail" @click="selectedImage = image.image"
-                                :class="{ active: selectedImage === image.image }">
+                            <!-- 縮圖列表 -->
+                            <div class="thumbnail-container">
+                                <img v-for="(image, index) in filteredThumbnails" :key="index" :src="image.image"
+                                    class="thumbnail" @click="selectedImage = image.image"
+                                    :class="{ active: selectedImage === image.image }">
+                            </div>
                         </div>
 
-                        <!-- 顏色選擇 -->
-                        <div class="color-options">
-                            <span v-for="color in productOptions" :key="color.id" class="color-box"
-                                :class="{ active: selectedColor === color.color_code }" @click="changeColor(color)">
-                                {{ color.color_name }}
-                            </span>
+                        <div class="product-details-con">
+                            <div>
+                                <h1 class="product-title">
+                                    <strong>
+                                        {{ product.name }}
+                                    </strong>
+                                </h1>
+
+                                <div class="product-describe">
+                                    <ul>
+                                        <li>
+                                            極致畫質：5,010 萬全片幅堆疊背照式感光元件
+                                        </li>
+                                        <li>
+                                            高速連拍：30 fps 支援預拍及連拍加速功能
+                                        </li>
+                                        <li>
+                                            智慧對焦：AI 智慧追蹤對焦，多元辨識目標
+                                        </li>
+                                        <li>
+                                            影像穩定：中央 8.5 級、邊角 7 級穩定拍攝效果
+                                        </li>
+                                        <li>
+                                            四軸多角度翻轉螢幕：提升拍攝彈性
+                                        </li>
+                                        <li>
+                                            8K30P、4K120P 高規格影片格式：支援 Lut 輸入/監看
+                                        </li>
+                                        <li>
+                                            支援動態積極模式的影像錄製
+                                        </li>
+                                        <li>
+                                            10 種風格外觀/S-Cinetone 快速出片
+                                        </li>
+                                        <li>
+                                            支援 AF 對焦輔助、呼吸補償、對焦圖等專業功能
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <hr>
+
+                                <div>
+                                    <!-- 顏色選擇 -->
+                                    <div class="color-options">
+                                        <span v-for="color in productOptions" :key="color.id" class="color-box"
+                                            :class="{ active: selectedColor === color.color_code }"
+                                            @click="changeColor(color)" @mouseenter="changeBigImage(color)">
+                                            {{ color.color_name }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="product-text-content">
+                                    <div class="price-text">
+                                        優惠價: <span>{{ toCurrency(product.price) }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="button-group">
+
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -46,10 +106,10 @@ const props = defineProps({
         type: Array,
         required: true
     },
-    category:{
+    category: {
         type: Object
     },
-    subcategory:{
+    subcategory: {
         type: Object
     }
 })
@@ -65,9 +125,11 @@ const productOptions = computed(() => {
     return props.productOptions.filter(e => e.color_name !== "組合色")
 })
 const selectedImage = ref(productOptions.value[0]?.product_images[0]?.image || ''); // 預設為第一個顏色的第一張圖
+console.log(productOptions.value[0]);
 
 
 // 預設選擇的顏色
+// const selectedColor = ref(productOptions.value[0]?.color_code);
 const selectedColor = ref(null);
 
 //初次載入時拿所有縮圖
@@ -89,8 +151,24 @@ const filteredThumbnails = computed(() => {
 
 // **切換顏色時**
 const changeColor = (color) => {
+    console.log(color);
+    // console.log(color.product_images[0].image);
+    // console.log(selectedImage.value);
+
+    selectedImage.value = color.product_images.length ? color.product_images[0].image : '';   
     selectedColor.value = color.color_code;
 };
+
+const changeBigImage = (color) => {
+    console.log(color);
+    selectedImage.value = color.product_images.length ? color.product_images[0].image : ''; 
+}
+
+
+function toCurrency(num) {
+    if (!num && num !== 0) return "$"; // 避免 null 或 undefined
+    return `$${Number(num).toLocaleString("en-US")}`; // 確保是數字再轉換
+}
 
 </script>
 
@@ -124,5 +202,68 @@ const changeColor = (color) => {
 
 .color-box.active {
     border: 2px solid rgb(169, 169, 169);
+}
+
+.product-show {
+    grid-column: aside / right-space;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.product-describe>ul {
+    list-style-type: square;
+    padding-left: 1rem;
+}
+
+.product-describe>ul>li {}
+
+.product-title {
+    position: relative;
+    display: block;
+    margin-bottom: 1.25rem;
+    word-break: break-all;
+    font-size: 2rem;
+}
+
+.product-img-con {}
+
+.prodcut-main-img {
+    border: 1px solid #e4e7ec;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    margin-bottom: .75rem;
+}
+
+.product-details-con {
+    padding-left: 3rem;
+}
+
+.product-details-con hr {
+    clear: both;
+    max-width: 105rem;
+    height: 0;
+    margin: 1.25rem auto;
+    border-top: 0;
+    border-right: 0;
+    border-bottom: 1px solid #e5e7eb;
+    border-left: 0;
+}
+
+.price-text{
+    color: #666666;
+    padding: 5px 0;
+}
+.price-text span {
+    color: #282828;
+    font-size: 2.25rem;
+    font-weight: bold;
+}
+
+.product-text-content {
+    margin-top: 1rem;
 }
 </style>

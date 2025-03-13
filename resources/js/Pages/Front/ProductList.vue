@@ -4,7 +4,7 @@
             <Breadcrumb :category="category" :subcategory="subcategory" />
 
             <section>
-                <div class="layout-container">
+                <div class="layout-container product-list">
                     <Sidebar :categoryLists="categoryLists" />
 
                     <div style="margin: auto; width: 100%;" class="product-container">
@@ -173,13 +173,7 @@ function toCurrency(num) {
     margin-bottom: 20px;
 }
 
-.layout-container {
-    display: grid;
-    grid-template-columns:
-        [left-space] 1fr [aside] 220px [gap] 20px [product-con] clamp(900px, 70vw, 1330px) [right-space] 1fr;
-    padding-left: 2rem;
-    padding-right: 2rem;
-}
+
 
 .layout-container aside {
     grid-column: aside;
@@ -234,6 +228,11 @@ function toCurrency(num) {
     color: #282828;
     font-size: 1.25rem;
     font-weight: bold;
+}
+
+.product-list {
+    grid-template-areas:
+        "left-space aside gap product-con right-space";
 }
 
 </style>
