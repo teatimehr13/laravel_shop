@@ -64,11 +64,23 @@
 
                                 <div>
                                     <!-- 顏色選擇 -->
-                                    <div class="color-options">
-                                        <span v-for="color in productOptions" :key="color.id" class="color-box"
-                                            :class="{ active: selectedColor === color.color_code }"
-                                            @click="changeColor(color)" @mouseenter="changeBigImage(color)">
-                                            {{ color.color_name }}
+                                    <div style="display: block; margin-bottom: 10px;">
+                                        <span style="margin-right: 10px;">
+                                            <strong>顏色</strong> 
+                                        </span>
+                                        <span>
+                                            {{ selectedColorName }}
+                                        </span>
+                                    </div>
+
+                                    <div class="color-options color-cube-outner color-box" v-for="color in productOptions"
+                                    :class="{ active: selectedColor === color.color_code }" :style="{ '--border-color': color.color_code }"
+                                        :key="color.id"  
+                                        @click="changeColor(color)" @mouseenter="changeBigImage(color)">
+                                        <span class="color-cube ">
+                                            <span class="color-cube-inner"
+                                                :style="{ backgroundColor: color.color_code }">
+                                            </span>
                                         </span>
                                     </div>
                                 </div>
@@ -131,6 +143,7 @@ console.log(productOptions.value[0]);
 // 預設選擇的顏色
 // const selectedColor = ref(productOptions.value[0]?.color_code);
 const selectedColor = ref(null);
+const selectedColorName = ref(null);
 
 //初次載入時拿所有縮圖
 const allThumbnails = computed(() => {
@@ -155,13 +168,14 @@ const changeColor = (color) => {
     // console.log(color.product_images[0].image);
     // console.log(selectedImage.value);
 
-    selectedImage.value = color.product_images.length ? color.product_images[0].image : '';   
+    selectedImage.value = color.product_images.length ? color.product_images[0].image : '';
     selectedColor.value = color.color_code;
+    selectedColorName.value = color.color_name;
 };
 
 const changeBigImage = (color) => {
     console.log(color);
-    selectedImage.value = color.product_images.length ? color.product_images[0].image : ''; 
+    selectedImage.value = color.product_images.length ? color.product_images[0].image : '';
 }
 
 
@@ -194,14 +208,16 @@ function toCurrency(num) {
     /* height: 30px; */
     display: inline-block;
     cursor: pointer;
-    border-radius: 5px;
+    /* border-radius: 5px; */
     margin-right: 10px;
     border: 2px solid transparent;
     padding: 3px;
 }
 
 .color-box.active {
-    border: 2px solid rgb(169, 169, 169);
+    /* border: 2px solid var(--border-color);  */
+    /* border: 2px solid #000000;  */
+    border: 2px solid color-mix(in srgb, var(--border-color) 85%, black);
 }
 
 .product-show {
@@ -253,10 +269,11 @@ function toCurrency(num) {
     border-left: 0;
 }
 
-.price-text{
+.price-text {
     color: #666666;
     padding: 5px 0;
 }
+
 .price-text span {
     color: #282828;
     font-size: 2.25rem;
@@ -265,5 +282,38 @@ function toCurrency(num) {
 
 .product-text-content {
     margin-top: 1rem;
+}
+
+.color-cube-outner {
+    /* border: 1px solid var(--el-border-color); */
+    /* border-radius: 4px; */
+    box-sizing: border-box;
+    display: inline-flex;
+    font-size: 0;
+    height: 32px;
+    justify-content: center;
+    padding: 4px;
+    position: relative;
+    width: 32px;
+    transition: transform 0.3s ease;
+}
+
+.color-cube {
+    border: 1px solid var(--el-text-color-secondary);
+    border-radius: var(--el-border-radius-small);
+    box-sizing: border-box;
+    display: block;
+    height: 100%;
+    position: relative;
+    text-align: center;
+    width: 100%;
+}
+
+.color-cube-inner {
+    align-items: center;
+    display: inline-flex;
+    height: 100%;
+    justify-content: center;
+    width: 100%;
 }
 </style>

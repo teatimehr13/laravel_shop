@@ -420,7 +420,6 @@ const predefinedColors = computed(() => {
     border: 1px solid var(--el-border-color);
   border-radius: 4px;
   box-sizing: border-box;
-  cursor: pointer;
   display: inline-flex;
   font-size: 0;
   height: 32px;
@@ -450,7 +449,4 @@ const predefinedColors = computed(() => {
     width: 100%;
 }
 
-/* ::v-deep(.el-color-picker__color-inner) {
-  background-color: #ffffff !important;
-} */
 </style>
