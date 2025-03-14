@@ -23,9 +23,18 @@
                 </el-col>
                 <el-col>
                     <el-form-item prop="color_code">
-                        <el-input v-model="newCoRowData.color_code" placeholder="輸入顏色" size="small"
+                        <!-- <el-input v-model="newCoRowData.color_code" placeholder="輸入顏色" size="small"
                             :disabled="isCombination"
-                            @input="(val) => emit('update:newCoRowData', { ...props.newCoRowData, color_code: val })" />
+                            @input="(val) => emit('update:newCoRowData', { ...props.newCoRowData, color_code: val })" /> -->
+
+                        <div class="demo-color-block">
+                            <el-tooltip class="box-item" effect="dark" content="選取產品顏色" placement="top">
+                                <span class="demonstration">
+                                    <el-color-picker v-model="newCoRowData.color_code" :disabled="isCombination"
+                                        @change="(val) => emit('update:newCoRowData', { ...props.newCoRowData, color_code: val })" />
+                                </span>
+                            </el-tooltip>
+                        </div>
                     </el-form-item>
                 </el-col>
 
@@ -368,5 +377,15 @@ watch(isCombination, (newVal) => {
     justify-content: center;
     transform: translateY(23px);
     margin-bottom: 15px;
+}
+
+.demo-color-block {
+    display: flex;
+    align-items: center;
+    /* margin-bottom: 16px; */
+}
+
+.demo-color-block .demonstration {
+    margin-right: 16px;
 }
 </style>

@@ -15,10 +15,20 @@
             <el-table-column label="顏色" width="130">
                 <template #default="scope">
                     <div v-if="editingRow !== scope.row.id">
-                        {{ scope.row.color_code }}
+                        <!-- {{ scope.row.color_code }} -->
+                        <div class="color-cube-outner" v-if="scope.row.color_code !== 'combo'">
+                            <span class="color-cube">
+                                <span class="color-cube-inner" :style="{backgroundColor: scope.row.color_code}"></span>
+                            </span>
+                        </div>
                     </div>
                     <el-form-item v-else prop="color_code">
-                        <el-input v-model="tempRow.color_code" placeholder="輸入顏色" size="small" />
+                        <!-- <el-input v-model="tempRow.color_code" placeholder="輸入顏色" size="small" /> -->
+                        <el-tooltip class="box-item" effect="dark" content="選取產品顏色" placement="top" v-if="scope.row.color_code !== 'combo'">
+                                <span class="demonstration">
+                                    <el-color-picker v-model="tempRow.color_code" />
+                                </span>
+                            </el-tooltip>
                     </el-form-item>
                 </template>
             </el-table-column>
@@ -311,6 +321,12 @@ const popconColfirmVisible = ref({});
     
 // }
 
+const predefinedColors = computed(() => {
+  return tempRow.value.color_code === "combo"
+    ? ["rgba(255, 255, 255, 0)"] // 透明色
+    : ["#ff0000", "#00ff00", "#0000ff"]; // 其他顏色
+});
+
 </script>
 
 <style scoped>
@@ -389,4 +405,52 @@ const popconColfirmVisible = ref({});
 .upload-placeholder .el-button:hover {
     cursor: pointer;
 }
+
+.demo-color-block {
+    display: flex;
+    align-items: center;
+    /* margin-bottom: 16px; */
+}
+
+.demo-color-block .demonstration {
+    margin-right: 16px;
+}
+
+.color-cube-outner {
+    border: 1px solid var(--el-border-color);
+  border-radius: 4px;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0;
+  height: 32px;
+  justify-content: center;
+  padding: 4px;
+  position: relative;
+  width: 32px;
+  transition: transform 0.3s ease; /* 過渡效果 */
+}
+
+.color-cube {
+    border: 1px solid var(--el-text-color-secondary);
+    border-radius: var(--el-border-radius-small);
+    box-sizing: border-box;
+    display: block;
+    height: 100%;
+    position: relative;
+    text-align: center;
+    width: 100%;
+}
+
+.color-cube-inner {
+    align-items: center;
+    display: inline-flex;
+    height: 100%;
+    justify-content: center;
+    width: 100%;
+}
+
+/* ::v-deep(.el-color-picker__color-inner) {
+  background-color: #ffffff !important;
+} */
 </style>
