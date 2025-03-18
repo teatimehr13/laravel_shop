@@ -1,48 +1,55 @@
 <template>
-    <el-form :model="formData" label-width="300px" class="demo-ruleForm" :rules="formRules" ref="internalFormRef">
-        <el-form-item label="產品名稱" :label-position="labelPosition" prop="name">
-            <el-input v-model="formData.name" />
-        </el-form-item>
-
-        <el-form-item label="產品title" :label-position="labelPosition" prop="title">
-            <el-input v-model="formData.title" />
-        </el-form-item>
-
-        <el-form-item v-if="mode == 'add'" label="類別" :label-position="labelPosition" prop="category_id">
-            <el-select v-model="formData.category_id" :teleported="false" @change="categoryChange(formData.category_id)">
-                <el-option v-for="category in formData.categories" :key="category.id" :label="category.name"
-                    :value="category.id">
-                </el-option>
-            </el-select>
-        </el-form-item>
-
-        <el-form-item label="子類別" :label-position="labelPosition" prop="subcategory_id">
-            <el-select v-model="formData.subcategory_id" :teleported="false" @change="handleSelectChange">
-                <el-option v-for="subcategory in formData.subcategories" :key="subcategory.id" :label="subcategory.name"
-                    :value="subcategory.id">
-                </el-option>
-            </el-select>
-        </el-form-item>
-
-        <el-form-item label="操作" :label-position="labelPosition" prop="published_status">
-            <el-radio-group v-model="formData['published_status']">
-                <el-radio :value="1">上架</el-radio>
-                <el-radio :value="0">下架</el-radio>
-            </el-radio-group>
-        </el-form-item>
-
-        <el-form-item label="圖片" :label-position="labelPosition" prop="image">
-            <el-upload :file-list="fileList" class="upload-demo" action="" :on-preview="handlePreview"
-                :on-remove="handleRemove" list-type="picture" :auto-upload="false" :limit="1" :on-exceed="handleExceed"
-                ref="upload" popper-class="no-transition" :on-change="handleOnChange">
-                <el-button type="" style="width: 100% !important;">選擇檔案</el-button>
-            </el-upload>
-
-            <el-dialog v-model="dialogVisible">
-                <img w-full :src="dialogImageUrl" alt="Preview Image" style="margin: auto;" />
-            </el-dialog>
-        </el-form-item>
-    </el-form>
+    <div style="max-height: 500px; overflow-y: auto;">
+        <el-form :model="formData" label-width="300px" class="demo-ruleForm" :rules="formRules" ref="internalFormRef">
+            <el-form-item label="產品名稱" :label-position="labelPosition" prop="name">
+                <el-input v-model="formData.name" />
+            </el-form-item>
+    
+            <el-form-item label="產品title" :label-position="labelPosition" prop="title">
+                <el-input v-model="formData.title" />
+            </el-form-item>
+    
+            <el-form-item v-if="mode == 'add'" label="類別" :label-position="labelPosition" prop="category_id">
+                <el-select v-model="formData.category_id" :teleported="false"
+                    @change="categoryChange(formData.category_id)">
+                    <el-option v-for="category in formData.categories" :key="category.id" :label="category.name"
+                        :value="category.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+    
+            <el-form-item label="子類別" :label-position="labelPosition" prop="subcategory_id">
+                <el-select v-model="formData.subcategory_id" :teleported="false" @change="handleSelectChange">
+                    <el-option v-for="subcategory in formData.subcategories" :key="subcategory.id" :label="subcategory.name"
+                        :value="subcategory.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+    
+            <el-form-item label="操作" :label-position="labelPosition" prop="published_status">
+                <el-radio-group v-model="formData['published_status']">
+                    <el-radio :value="1">上架</el-radio>
+                    <el-radio :value="0">下架</el-radio>
+                </el-radio-group>
+            </el-form-item>
+    
+            <el-form-item label="圖片" :label-position="labelPosition" prop="image">
+                <el-upload :file-list="fileList" class="upload-demo" action="" :on-preview="handlePreview"
+                    :on-remove="handleRemove" list-type="picture" :auto-upload="false" :limit="1" :on-exceed="handleExceed"
+                    ref="upload" popper-class="no-transition" :on-change="handleOnChange">
+                    <el-button type="" style="width: 40% !important;">選擇檔案</el-button>
+                </el-upload>
+    
+                <el-dialog v-model="dialogVisible">
+                    <img w-full :src="dialogImageUrl" alt="Preview Image" style="margin: auto;" />
+                </el-dialog>
+            </el-form-item>
+            <el-form-item label="產品描述" :label-position="labelPosition" prop="description">
+                <QuillEditor v-model:content="formData.description" content-type="html" theme="snow" ref="quillRef"
+                    style="min-height: 200px;" />
+            </el-form-item>
+        </el-form>
+    </div>
 </template>
 
 <script setup>
@@ -50,6 +57,7 @@
 import { reactive, watch, ref, toRef } from "vue";
 import { genFileId } from 'element-plus';
 import axios from "axios";
+
 
 //拿到父組件的資料
 const props = defineProps({
@@ -61,7 +69,7 @@ const props = defineProps({
         default: "edit", // 預設為編輯模式
     },
 });
-console.log(props.formData);
+// console.log(props.formData);
 
 //傳給父組件資料
 const emits = defineEmits(["update:file-list", "update:form-data", "submit", "uploadList"]);
@@ -102,9 +110,9 @@ const handleSelectChange = () => {
 };
 
 const categoryChange = async (category_id) => {
-    const response =  await axios.post(`/back/categories/${category_id}/subsel`);
-    console.log(response.data);   
-    
+    const response = await axios.post(`/back/categories/${category_id}/subsel`);
+    console.log(response.data);
+
     props.formData.subcategories = response.data;
     props.formData.subcategory_id = response.data.length ? response.data[0].id : '';
 }
@@ -149,6 +157,7 @@ const formRules = reactive({
 
     category_id: [{ required: true, message: "此選項為必填", trigger: "blur" }]
 });
+const quillRef = ref(null);
 
 // watch(
 //     () => props.mode,
@@ -165,6 +174,7 @@ const formRules = reactive({
 defineExpose({
     formValidate,
     internalFormRef,
+    quillRef
 });
 
 //刪除待上傳的圖片
@@ -204,6 +214,17 @@ const handleExceed = (files) => {
     upload.value.handleStart(file)
 };
 
+
+
 </script>
 
+<style scoped>
+::v-deep(.el-input),
+::v-deep(.el-select) {
+    width: 40%;
+}
 
+::v-deep(.el-upload) {
+    justify-content: left;
+}
+</style>

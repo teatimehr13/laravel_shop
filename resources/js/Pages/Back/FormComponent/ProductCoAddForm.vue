@@ -108,7 +108,7 @@
         </div>
     </el-col>
 
-    <el-dialog v-model="addCoVisible" style="width: max-content;">
+    <el-dialog v-model="addCoVisible" style="width: max-content;" align-center>
         <img w-full :src="addCoImageUrl" alt="Preview Image" />
     </el-dialog>
 </template>

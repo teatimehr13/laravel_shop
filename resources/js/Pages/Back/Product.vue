@@ -58,7 +58,7 @@
                                 顏色管理
                             </el-button>
 
-                            <el-popover :placement="popoverPlacement" trigger="click" :width="350"
+                            <el-popover :placement="popoverPlacement" trigger="click" :width="700"   
                                 v-model:visible="popoverVisible[scope.row.id]" popper-class="custom-scrollbar"
                                 :hide-after="0" :show-after="100" @show="handlePopoverShow(scope.row.id)"
                                 :popper-style="popoverStyle" @before-leave="enableScroll" :offset="offSet"
@@ -97,7 +97,7 @@
                 </el-table>
             </div>
 
-            <el-dialog v-model="dialogFormToggle" title="新增" width="400px">
+            <el-dialog v-model="dialogFormToggle" title="新增" width="700px" align-center>
                 <ProductForm v-model:form-data="popForm" v-model:file-list="fileList" v-model:upload-list="uploadList"
                     @uploadList="emitUploadList" ref="formRef" mode="add" />
                 <template #footer>
@@ -107,7 +107,7 @@
             </el-dialog>
 
             <!-- 增刪改查product color -->
-            <el-dialog v-model="dialogColorVisible" :title="product_dialog_title" width="1000">
+            <el-dialog v-model="dialogColorVisible" :title="product_dialog_title" width="1000" align-center>
                 <ProductCoEditForm v-model:color_options_data="color_options_data" v-model:fileList_co="fileList_co"
                     v-model:tempRow="tempRow" :editingRow="editingRow" @toggle-edit="toggleEdit"
                     @cancel-edit="cancelEdit" @del-co="chkCoImgs" ref="colorFormRef" />
@@ -134,8 +134,8 @@ import ProductCoEditForm from "./FormComponent/ProductCoEditForm.vue";
 import ProductCoAddForm from "./FormComponent/ProductCoAddForm.vue";
 import ProductCoAttPicForm from "./FormComponent/ProductCoAttPicForm.vue";
 import debounce from "lodash.debounce";
-import { genFileId } from 'element-plus'
-
+import { genFileId, valueEquals } from 'element-plus'
+import DOMPurify from 'dompurify';
 
 
 const props = defineProps({
@@ -179,6 +179,7 @@ const popForm = reactive({
     color_codes: [],
     subcategories: [],
     categories: categories.value,
+    description: ''
 })
 
 // 初始數據
@@ -272,7 +273,7 @@ const triggerRefs = ref({});
 
 const size = ref('default');
 
-let offSet = ref(8);
+let offSet = ref(15);
 
 const popoverStyle = ref({
     // height: "550px",
@@ -314,6 +315,7 @@ const openEditPopover = (row) => {
         popForm.subcategory_id = parseInt(row.subcategory_id);
         popForm.published_status = parseInt(row.published_status);
         popForm.color_codes = row.color_codes;
+        popForm.description = row.description;
 
     }, 100)
 };
@@ -413,6 +415,9 @@ const formValidated = (mode) => {
 const resetForm = () => {
     nextTick(() => {
         formRef.value.internalFormRef.resetFields();
+        // formRef.value.quillRef.value.getEditor().setText('');
+        // console.log(formRef.value.quillRef.setText(''));
+
 
         popForm.id = '';
         popForm.name = '';
@@ -421,25 +426,43 @@ const resetForm = () => {
         popForm.published_status = '';
         popForm.color_codes = [];
         popForm.subcategories = [];
+        popForm.description = '';
 
         fileList.value = [];
         uploadList.value = [];
+        formRef.value.quillRef.setText('');
+        // console.log(popForm);
+        // console.log(formRef.value);
+
+
     })
 };
 
+// let htmls = `<img src="x" onerror="alert('XSS!')" />`;
+
+
 //提交
 let formData = new FormData();
-
 const formBeforSubmit = () => {
     formData = new FormData(); // 清空
     console.log(popForm);
+
+    const safeDescription = DOMPurify.sanitize(popForm.description);
+    console.log(safeDescription);
+
 
     formData.append('name', popForm.name);
     formData.append('title', popForm.title);
     formData.append('subcategory_id', popForm.subcategory_id); //待修正
     formData.append('published_status', popForm.published_status);
     formData.append('color_codes', popForm.color_codes);
+    formData.append('description', safeDescription);
 
+    for (const [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+    }
+
+    // return
     console.log(uploadList.value);
 
 
@@ -473,17 +496,18 @@ const onSubmitEdit = async (id) => {
 
         // console.log(formData);
         // for (const [key, value] of formData.entries()) {
-        //     console.log(`${key}:`, value);
+        // console.log(`${key}:`, value);
         // }
 
         // 模擬 PATCH 方法
         formData.append('_method', 'PATCH');
 
         // const response = await axios.patch(`/back/products/${id}`, formData, {
-        //     headers: {
-        //         'Content-Type': 'multipart/form-data',
-        //     },
+        // headers: {
+        // 'Content-Type': 'multipart/form-data',
+        // },
         // });
+        // return
 
         const response = await axios.post(`/back/products/${id}`, formData, {
             headers: {
@@ -624,7 +648,7 @@ const toggleEdit = async (row) => {
         console.log(fileList_co.value);
 
         // for (const [key, value] of formDataForCo.entries()) {
-        //     console.log(`${key}:`, value);
+        // console.log(`${key}:`, value);
         // }
 
         await colorFormRef.value.colorFormValidate();
@@ -779,7 +803,7 @@ const colorAddFormBeforSubmit = () => {
     }
 
     // for (const [key, value] of formDataForCoAdd.entries()) {
-    //     console.log(`${key}:`, value);
+    // console.log(`${key}:`, value);
     // }
 
     return formDataForCoAdd;
@@ -926,6 +950,11 @@ watch(
     height: 400px !important;
     overflow-y: scroll !important;
     background-color: #409eff;
+}
+
+::v-deep(.custom-pop .pop-content) {
+  max-height: 500px !important;
+  overflow-y: auto !important; 
 }
 
 

@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class Product extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'image', 'title', 'price', 'published_status', 'subcategory_id', 'slug'];
+    protected $fillable = ['name', 'image', 'title', 'price', 'published_status', 'subcategory_id', 'slug', 'description'];
 
     const DISABLED = 'disable';
     const ENABLED = 'enable';

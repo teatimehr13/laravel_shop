@@ -86,6 +86,8 @@ class ProductController extends Controller
 
         try {
             $validate_data = $request->validated();
+            Log::info($validate_data);
+            // return;
             // return response()->json($validate_data);
 
             if ($request->hasFile('image')) {
