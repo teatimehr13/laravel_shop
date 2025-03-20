@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             $table->text('description')->nullable()->after('title');
+            $table->text('special_message')->nullable()->after('description'); 
+            $table->dateTime('special_start_at')->nullable()->after('special_message'); 
+            $table->dateTime('special_end_at')->nullable()->after('special_start_at');  
         });
     }
 
@@ -23,6 +26,9 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             $table->dropColumn('description');
+            $table->text('special_message')->nullable()->after('description'); 
+            $table->dateTime('special_start_at')->nullable()->after('special_message'); 
+            $table->dateTime('special_end_at')->nullable()->after('special_start_at');  
         });
     }
 };

@@ -299,7 +299,6 @@ watch(isCombination, (newVal) => {
     margin: 20px auto;
 }
 
-
 ::v-deep(.el-form-item__label) {
     margin-bottom: 4px;
     color: #172b4d;

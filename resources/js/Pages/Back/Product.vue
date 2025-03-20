@@ -58,13 +58,13 @@
                                 顏色管理
                             </el-button>
 
-                            <el-popover :placement="popoverPlacement" trigger="click" :width="700"   
+                            <el-popover :placement="popoverPlacement" trigger="click" :width="700" transition="none"
                                 v-model:visible="popoverVisible[scope.row.id]" popper-class="custom-scrollbar"
-                                :hide-after="0" :show-after="100" @show="handlePopoverShow(scope.row.id)"
+                                @show="handlePopoverShow(scope.row.id)" :show-after="150" :hide-after="0"
                                 :popper-style="popoverStyle" @before-leave="enableScroll" :offset="offSet"
-                                ref="popoverRef">
+                                ref="popoverRef" @before-enter="openEditPopover(scope.row)">
                                 <template #reference>
-                                    <el-button size="small" @click="openEditPopover(scope.row)"
+                                    <el-button size="small" 
                                         :ref="el => (triggerRefs[scope.row.id] = el)"
                                         :class="{ activeButton: activeRow === scope.row.id }">編輯</el-button>
                                 </template>
@@ -97,7 +97,7 @@
                 </el-table>
             </div>
 
-            <el-dialog v-model="dialogFormToggle" title="新增" width="700px" align-center>
+            <el-dialog v-model="dialogFormToggle" title="新增" class="productForm-dialog" align-center>
                 <ProductForm v-model:form-data="popForm" v-model:file-list="fileList" v-model:upload-list="uploadList"
                     @uploadList="emitUploadList" ref="formRef" mode="add" />
                 <template #footer>
@@ -179,7 +179,10 @@ const popForm = reactive({
     color_codes: [],
     subcategories: [],
     categories: categories.value,
-    description: ''
+    description: '',
+    special_message: '',
+    special_start_at: '',
+    special_end_at: ''
 })
 
 // 初始數據
@@ -289,35 +292,27 @@ const closePopover = (id) => {
 const activeRow = ref(null);
 const openEditPopover = (row) => {
     console.log(row);
+    nextTick(() => {
+        // setTimeout(() => {
+            formRef2.value.resetForm();
+            formRef2.value.setFormData(row); //popForm
 
-    // formRef2.value.resetFields();
-    setTimeout(() => {
-        formRef2.value.internalFormRef.resetFields()
+            fileList.value = row.image ? [
+                {
+                    name: row.name,
+                    url: row.image,
+                    uid: genFileId(),
+                },
+            ] : [];
 
-        fileList.value = row.image ? [
-            {
-                name: row.name,
-                url: row.image,
-                uid: genFileId(),
-            },
-        ] : [];
+            uploadList.value = [
+                {
+                    delete_image: false
+                },
+            ]
+        // }, 100)
+    })
 
-        uploadList.value = [
-            {
-                delete_image: false
-            },
-        ]
-
-        popForm.id = row.id;
-        popForm.name = row.name;
-        popForm.subcategories = row.subcategories;
-        popForm.title = row.title;
-        popForm.subcategory_id = parseInt(row.subcategory_id);
-        popForm.published_status = parseInt(row.published_status);
-        popForm.color_codes = row.color_codes;
-        popForm.description = row.description;
-
-    }, 100)
 };
 
 //顯示popover(更新)
@@ -414,33 +409,15 @@ const formValidated = (mode) => {
 // 重置表單
 const resetForm = () => {
     nextTick(() => {
-        formRef.value.internalFormRef.resetFields();
-        // formRef.value.quillRef.value.getEditor().setText('');
-        // console.log(formRef.value.quillRef.setText(''));
+        // formRef.value.internalFormRef.resetFields();
+        // console.log(popForm);
 
-
-        popForm.id = '';
-        popForm.name = '';
-        popForm.title = '';
-        popForm.subcategory_id = '';
-        popForm.published_status = '';
-        popForm.color_codes = [];
-        popForm.subcategories = [];
-        popForm.description = '';
-
+        formRef.value.resetForm();
+        formRef.value.resetFormData(); //popForm
         fileList.value = [];
         uploadList.value = [];
-        formRef.value.quillRef.setText('');
-        // console.log(popForm);
-        // console.log(formRef.value);
-
-
     })
 };
-
-// let htmls = `<img src="x" onerror="alert('XSS!')" />`;
-
-
 //提交
 let formData = new FormData();
 const formBeforSubmit = () => {
@@ -448,6 +425,8 @@ const formBeforSubmit = () => {
     console.log(popForm);
 
     const safeDescription = DOMPurify.sanitize(popForm.description);
+    const safeSpecialMsg = DOMPurify.sanitize(popForm.special_message);
+
     console.log(safeDescription);
 
 
@@ -457,6 +436,10 @@ const formBeforSubmit = () => {
     formData.append('published_status', popForm.published_status);
     formData.append('color_codes', popForm.color_codes);
     formData.append('description', safeDescription);
+
+    formData.append('special_message', safeSpecialMsg);
+    formData.append('special_start_at', formatDate(popForm.special_start_at));
+    formData.append('special_end_at', formatDate(popForm.special_end_at));
 
     for (const [key, value] of formData.entries()) {
         console.log(`${key}:`, value);
@@ -502,13 +485,6 @@ const onSubmitEdit = async (id) => {
         // 模擬 PATCH 方法
         formData.append('_method', 'PATCH');
 
-        // const response = await axios.patch(`/back/products/${id}`, formData, {
-        // headers: {
-        // 'Content-Type': 'multipart/form-data',
-        // },
-        // });
-        // return
-
         const response = await axios.post(`/back/products/${id}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -538,6 +514,7 @@ const onSubmitEdit = async (id) => {
 
     } catch (error) {
         console.error('提交失败:', error);
+        showMessage("error", "保存失敗");
     }
 };
 
@@ -569,7 +546,7 @@ const onSubmitAdd = async () => {
 
     } catch (error) {
         console.error('提交失败:', error);
-        showMessage("error", "新增失敗");
+        showMessage("error", "保存失敗");
     }
 }
 
@@ -931,6 +908,38 @@ watch(
     { deep: true } // 深度監聽，確保監聽對象的嵌套值變化
 );
 
+
+
+function formatDate(input) {
+    if (!input) return null;
+
+    let dateObj;
+
+    // 檢查是否已是 Date 物件
+    if (input instanceof Date) {
+        dateObj = input;
+    } else if (typeof input === 'string') {
+        // 嘗試將字串轉為 Date
+        dateObj = new Date(input);
+        if (isNaN(dateObj)) {
+            console.warn('formatDate 錯誤：無效的日期字串', input);
+            return null;
+        }
+    } else {
+        console.warn('formatDate 錯誤：不支援的型別', input);
+        return null;
+    }
+
+    const yyyy = dateObj.getFullYear();
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0'); // 月份從 0 開始
+    const dd = String(dateObj.getDate()).padStart(2, '0');
+    const hh = String(dateObj.getHours()).padStart(2, '0');
+    const min = String(dateObj.getMinutes()).padStart(2, '0');
+    const ss = String(dateObj.getSeconds()).padStart(2, '0');
+
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+}
+
 </script>
 
 <style scoped>
@@ -953,8 +962,8 @@ watch(
 }
 
 ::v-deep(.custom-pop .pop-content) {
-  max-height: 500px !important;
-  overflow-y: auto !important; 
+    max-height: 500px !important;
+    overflow-y: auto !important;
 }
 
 
@@ -1012,4 +1021,14 @@ watch(
 ::v-deep(.el-form-item) {
     margin: auto;
 }
+
+::v-deep(.productForm-dialog) {
+    min-width: 700px;
+}
+
+
+/* ::v-deep(.productForm-dialog) {
+  max-height: 100vh;
+  overflow: hidden;
+} */
 </style>

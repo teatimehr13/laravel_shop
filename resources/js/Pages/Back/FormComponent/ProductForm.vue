@@ -1,14 +1,14 @@
 <template>
-    <div style="max-height: 500px; overflow-y: auto;">
+    <div class="form-container">
         <el-form :model="formData" label-width="300px" class="demo-ruleForm" :rules="formRules" ref="internalFormRef">
             <el-form-item label="產品名稱" :label-position="labelPosition" prop="name">
                 <el-input v-model="formData.name" />
             </el-form-item>
-    
+
             <el-form-item label="產品title" :label-position="labelPosition" prop="title">
                 <el-input v-model="formData.title" />
             </el-form-item>
-    
+
             <el-form-item v-if="mode == 'add'" label="類別" :label-position="labelPosition" prop="category_id">
                 <el-select v-model="formData.category_id" :teleported="false"
                     @change="categoryChange(formData.category_id)">
@@ -17,29 +17,29 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-    
+
             <el-form-item label="子類別" :label-position="labelPosition" prop="subcategory_id">
                 <el-select v-model="formData.subcategory_id" :teleported="false" @change="handleSelectChange">
-                    <el-option v-for="subcategory in formData.subcategories" :key="subcategory.id" :label="subcategory.name"
-                        :value="subcategory.id">
+                    <el-option v-for="subcategory in formData.subcategories" :key="subcategory.id"
+                        :label="subcategory.name" :value="subcategory.id">
                     </el-option>
                 </el-select>
             </el-form-item>
-    
+
             <el-form-item label="操作" :label-position="labelPosition" prop="published_status">
                 <el-radio-group v-model="formData['published_status']">
                     <el-radio :value="1">上架</el-radio>
                     <el-radio :value="0">下架</el-radio>
                 </el-radio-group>
             </el-form-item>
-    
+
             <el-form-item label="圖片" :label-position="labelPosition" prop="image">
                 <el-upload :file-list="fileList" class="upload-demo" action="" :on-preview="handlePreview"
-                    :on-remove="handleRemove" list-type="picture" :auto-upload="false" :limit="1" :on-exceed="handleExceed"
-                    ref="upload" popper-class="no-transition" :on-change="handleOnChange">
+                    :on-remove="handleRemove" list-type="picture" :auto-upload="false" :limit="1"
+                    :on-exceed="handleExceed" ref="upload" popper-class="no-transition" :on-change="handleOnChange">
                     <el-button type="" style="width: 40% !important;">選擇檔案</el-button>
                 </el-upload>
-    
+
                 <el-dialog v-model="dialogVisible">
                     <img w-full :src="dialogImageUrl" alt="Preview Image" style="margin: auto;" />
                 </el-dialog>
@@ -48,13 +48,45 @@
                 <QuillEditor v-model:content="formData.description" content-type="html" theme="snow" ref="quillRef"
                     style="min-height: 200px;" />
             </el-form-item>
+
+            <hr style="margin: 10px auto;">
+
+            <div style="margin: 10px auto;">
+                <span>特惠欄位</span>
+                <el-tooltip effect="dark" :content="showSpecial ? '點擊隱藏欄位' : '點擊顯示欄位'" placement="top">
+                    <el-link @click="showSpecial = !showSpecial" type="primary" :underline="false">
+                        {{ showSpecial ? '[顯示]' : '[隱藏]' }}
+                    </el-link>
+                </el-tooltip>
+            </div>
+
+            <transition name="expand-fade">
+                <el-form-item v-show="showSpecial" label="特惠訊息" :label-position="labelPosition" prop="special_message">
+                    <QuillEditor v-model:content="formData.special_message" content-type="html" theme="snow"
+                        ref="specialQuillRef" style="min-height: 200px;" />
+                </el-form-item>
+            </transition>
+
+            <transition name="expand-fade">
+                <el-form-item v-show="showSpecial" label="特惠時間" :label-position="labelPosition" prop="special_start_at">
+                    <el-date-picker v-model="formData.special_start_at" type="datetime" placeholder="開始時間"
+                        :teleported="false" style="margin-right:10px" />
+                </el-form-item>
+            </transition>
+
+            <transition name="expand-fade">
+                <el-form-item v-show="showSpecial" label="" :label-position="labelPosition" prop="special_end_at">
+                    <el-date-picker v-model="formData.special_end_at" type="datetime" placeholder="結束時間"
+                        :teleported="false" />
+                </el-form-item>
+            </transition>
         </el-form>
     </div>
 </template>
 
 <script setup>
 
-import { reactive, watch, ref, toRef } from "vue";
+import { reactive, watch, ref, toRef, onMounted } from "vue";
 import { genFileId } from 'element-plus';
 import axios from "axios";
 
@@ -117,6 +149,21 @@ const categoryChange = async (category_id) => {
     props.formData.subcategory_id = response.data.length ? response.data[0].id : '';
 }
 
+const validateEndDate = (rule, value, callback) => {
+    if (!value || !props.formData.special_start_at) {
+        return callback(); // 若空，交由後端驗證
+    }
+
+    const start = new Date(props.formData.special_start_at);
+    const end = new Date(value);
+
+    if (end < start) {
+        callback(new Error('結束時間需晚於開始時間'));
+    } else {
+        callback();
+    }
+};
+
 const formRules = reactive({
     name: [
         { required: true, message: "產品名稱必填項", trigger: "blur" },
@@ -154,10 +201,21 @@ const formRules = reactive({
             trigger: "change",
         },
     ],
-
-    category_id: [{ required: true, message: "此選項為必填", trigger: "blur" }]
+    category_id: [
+        { required: true, message: "此選項為必填", trigger: "blur" }
+    ],
+    special_start_at: [
+        { type: 'date', required: false, message: '請選擇開始時間', trigger: 'change' },
+    ],
+    special_end_at: [
+        { type: 'date', required: false, message: '請選擇結束時間', trigger: 'change' },
+        { validator: validateEndDate, trigger: 'change' }
+    ]
 });
 const quillRef = ref(null);
+const specialQuillRef = ref(null);
+const showSpecial = props.mode == 'edit' ? ref(true) : ref(false);
+
 
 // watch(
 //     () => props.mode,
@@ -171,11 +229,7 @@ const quillRef = ref(null);
 //     { immediate: true }
 // );
 
-defineExpose({
-    formValidate,
-    internalFormRef,
-    quillRef
-});
+
 
 //刪除待上傳的圖片
 const handleRemove = (uploadFile, uploadFiles) => {
@@ -214,7 +268,50 @@ const handleExceed = (files) => {
     upload.value.handleStart(file)
 };
 
+const resetForm = () => {
+    internalFormRef.value.resetFields();
+    quillRef.value.setText('');
+    specialQuillRef.value.setText('');
+}
 
+const resetFormData = () => {
+    props.formData.id = '';
+    props.formData.name = '';
+    props.formData.title = '';
+    props.formData.subcategory_id = '';
+    props.formData.published_status = '';
+    props.formData.color_codes = [];
+    props.formData.subcategories = [];
+    props.formData.description = '';
+    props.formData.special_message = '';
+    props.formData.special_start_at = '';
+    props.formData.special_end_at = '';
+}
+
+const setFormData = (row) => {
+    props.formData.id = row.id;
+    props.formData.name = row.name;
+    props.formData.subcategories = row.subcategories;
+    props.formData.title = row.title;
+    props.formData.subcategory_id = parseInt(row.subcategory_id);
+    props.formData.published_status = parseInt(row.published_status);
+    props.formData.color_codes = row.color_codes;
+    props.formData.description = row.description;
+    props.formData.special_message = row.special_message;
+    props.formData.special_start_at = row.special_start_at;
+    props.formData.special_end_at = row.special_end_at;
+}
+
+
+defineExpose({
+    formValidate,
+    internalFormRef,
+    quillRef,
+    specialQuillRef,
+    resetForm,
+    resetFormData,
+    setFormData
+});
 
 </script>
 
@@ -226,5 +323,36 @@ const handleExceed = (files) => {
 
 ::v-deep(.el-upload) {
     justify-content: left;
+}
+
+::v-deep(.demo-ruleForm > .el-form-item) {
+    margin-bottom: 13px;
+}
+
+.form-container {
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.expand-fade-enter-active,
+.expand-fade-leave-active {
+    transition: opacity 1s ease, max-height 1s ease, transform 1s ease;
+    overflow: hidden;
+}
+
+.expand-fade-enter-from,
+.expand-fade-leave-to {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+}
+
+.expand-fade-enter-to,
+.expand-fade-leave-from {
+    opacity: 1;
+    max-height: 1000px;
+    /* 預估最大高度 */
+    transform: translateY(0)scale(1);
 }
 </style>

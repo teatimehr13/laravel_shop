@@ -28,36 +28,8 @@
                                     </strong>
                                 </h1>
 
-                                <div class="product-describe">
-                                    <ul>
-                                        <li>
-                                            極致畫質：5,010 萬全片幅堆疊背照式感光元件
-                                        </li>
-                                        <li>
-                                            高速連拍：30 fps 支援預拍及連拍加速功能
-                                        </li>
-                                        <li>
-                                            智慧對焦：AI 智慧追蹤對焦，多元辨識目標
-                                        </li>
-                                        <li>
-                                            影像穩定：中央 8.5 級、邊角 7 級穩定拍攝效果
-                                        </li>
-                                        <li>
-                                            四軸多角度翻轉螢幕：提升拍攝彈性
-                                        </li>
-                                        <li>
-                                            8K30P、4K120P 高規格影片格式：支援 Lut 輸入/監看
-                                        </li>
-                                        <li>
-                                            支援動態積極模式的影像錄製
-                                        </li>
-                                        <li>
-                                            10 種風格外觀/S-Cinetone 快速出片
-                                        </li>
-                                        <li>
-                                            支援 AF 對焦輔助、呼吸補償、對焦圖等專業功能
-                                        </li>
-                                    </ul>
+                                <div>
+                                    <div v-html="product.description" class="product-describe"></div>
                                 </div>
 
                                 <hr>
@@ -226,7 +198,7 @@ function toCurrency(num) {
     grid-template-columns: 1fr 1fr;
 }
 
-.product-describe>ul {
+::v-deep(.product-describe>ul)  {
     list-style-type: square;
     padding-left: 1rem;
 }

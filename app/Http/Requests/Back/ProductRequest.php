@@ -33,7 +33,10 @@ class ProductRequest extends FormRequest
                 Rule::in(array_keys(Product::published_statuses)) //限定值在自定義範圍內
             ],
             'subcategory_id' => 'required|integer|exists:subcategories,id',
-            'description' => 'nullable|string'
+            'description' => 'nullable|string',
+            'special_message' => 'nullable|string',
+            'special_start_at' => 'nullable|date',
+            'special_end_at' => 'nullable|date|after_or_equal:special_start_at'
             // 'product_options' => 'nullable|array' //放productOptionsRequest那
         ];
     }
