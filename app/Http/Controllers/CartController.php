@@ -18,7 +18,8 @@ class CartController extends Controller
     public function index(Request $request)
     {
         // Log::info($request->user());
-        Log::info($request);
+        // Log::info($request);
+
         $cartItems = $this->getCartItems($request);
         $endPrice = $this->getEndPrice($request);
         return response()->json(
@@ -49,72 +50,148 @@ class CartController extends Controller
     {
         $user_status = $request->user();
         if ($user_status) {
-            $this->addToDBCart($request);
+            return $this->addToDBCart($request);
         } else {
-            $this->addToCookieCart($request);
+            return $this->addToCookieCart($request);
         }
     }
 
     //登入後存資料庫
+    // public function addToDBCart(Request $request)
+    // {
+    //     //來自app > Models > User.php裡面
+    //     $cart = $request->user()->getPurchaseCartOrCreate();
+    //     $productOptions = $request->input('data.productOptions');
+
+    //     foreach ($productOptions as $key => $value) {
+    //         //如果驗證 $key和product_option有關，加進購物車
+    //         if (preg_match('/^product_option_[0-9]+$/', $key)) {
+    //             $quantity = intval($value); //integer
+    //             $productOptionId = intval(str_replace('product_option_', '', $key));
+    //             if ($quantity && $productOptionId) {
+    //                 //驗證商品的狀態是什麼? 草稿? enabled?
+    //                 $product_option = ProductOption::findIfEnable($productOptionId);
+    //                 if ($product_option) {
+    //                     //eloquent模型方法
+    //                     $cartItem = $cart->cartItems()->where('product_option_id', $productOptionId)->first();
+    //                     if ($cartItem) {
+    //                         //存在的話，save資料庫
+    //                         $cartItem->quantity += $quantity;
+    //                         $cartItem->save();
+    //                     } else {
+    //                         //不存在的話新建一筆進資料庫
+    //                         $cart->cartItems()->save(
+    //                             new CartItem([
+    //                                 'product_option_id' => $productOptionId,
+    //                                 'quantity' => $quantity
+    //                             ])
+    //                         );
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
     public function addToDBCart(Request $request)
     {
         //來自app > Models > User.php裡面
         $cart = $request->user()->getPurchaseCartOrCreate();
-        $productOptions = $request->input('data.productOptions');
+        // Log::info($cart);
+        $productOptions =  $request->validate([
+            'quantity' => 'required|integer|min:1',
+            'id' => 'required|integer|'
+        ]);
 
-        foreach ($productOptions as $key => $value) {
-            //如果驗證 $key和product_option有關，加進購物車
-            if (preg_match('/^product_option_[0-9]+$/', $key)) {
-                $quantity = intval($value); //integer
-                $productOptionId = intval(str_replace('product_option_', '', $key));
-                if ($quantity && $productOptionId) {
-                    //驗證商品的狀態是什麼? 草稿? enabled?
-                    $product_option = ProductOption::findIfEnable($productOptionId);
-                    if ($product_option) {
-                        //eloquent模型方法
-                        $cartItem = $cart->cartItems()->where('product_option_id', $productOptionId)->first();
-                        if ($cartItem) {
-                            //存在的話，save資料庫
-                            $cartItem->quantity += $quantity;
-                            $cartItem->save();
-                        } else {
-                            //不存在的話新建一筆進資料庫
-                            $cart->cartItems()->save(
-                                new CartItem([
-                                    'product_option_id' => $productOptionId,
-                                    'quantity' => $quantity
-                                ])
-                            );
-                        }
-                    }
-                }
-            }
+        //如果驗證 $key和product_option有關，加進購物車
+        $quantity = intval($productOptions['quantity']); //integer
+        $productOptionId = intval($productOptions['id']);
+
+        if ($quantity <= 0 || $productOptionId <= 0) {
+            return response()->json(['msg' => '商品規格不符'], 400);
         }
+
+        $product_option = ProductOption::findIfEnable($productOptionId);
+
+        if (!$product_option) {
+            return response()->json(['msg' => '商品不存在或未啟用'], 404);
+        }
+
+        $cartItem = $cart->cartItems()->where('product_option_id', $productOptionId)->first();
+        if ($cartItem) {
+            $cartItem->quantity += $quantity;
+            $cartItem->save();
+        } else {
+            $cart->cartItems()->save(
+                new CartItem([
+                    'product_option_id' => $productOptionId,
+                    'quantity' => $quantity
+                ])
+            );
+        }
+        return response()->json(['msg' => '加入購物車成功']);
     }
 
     //登入前存cookie (加入購物車的頁面)
+    // public function addToCookieCart(Request $request)
+    // {
+    //     $cookieCart = $this->getCartFromCookie();
+    //     $productOptions = $request->input('data.productOptions');
+
+    //     foreach ($productOptions as $key => $value) {
+    //         if (preg_match('/^product_option_[0-9]+$/', $key)) {
+    //             $quantity = intval($value);
+    //             $productOptionId = intval(str_replace("product_option_", '', $key));
+    //             if ($quantity && $productOptionId) {
+    //                 $product_option = ProductOption::findIfEnable($productOptionId);
+    //                 // Log::info($product_option);
+    //                 if ($product_option) {
+    //                     if (isset($cookieCart[$productOptionId])) {
+    //                         $cookieCart[$productOptionId] += $quantity;
+    //                     } else {
+    //                         $cookieCart[$productOptionId] = $quantity;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     $this->saveCookieCart($cookieCart);
+    // }
+
     public function addToCookieCart(Request $request)
     {
         $cookieCart = $this->getCartFromCookie();
-        $productOptions = $request->input('data.productOptions');
+        $productOptions =  $request->validate([
+            'quantity' => 'required|integer|min:1',
+            'id' => 'required|integer|'
+        ]);
 
-        foreach ($productOptions as $key => $value) {
-            if (preg_match('/^product_option_[0-9]+$/', $key)) {
-                $quantity = intval($value);
-                $productOptionId = intval(str_replace("product_option_", '', $key));
-                if ($quantity && $productOptionId) {
-                    $product_option = ProductOption::findIfEnable($productOptionId);
-                    // Log::info($product_option);
-                    if ($product_option) {
-                        if (isset($cookieCart[$productOptionId])) {
-                            $cookieCart[$productOptionId] += $quantity;
-                        } else {
-                            $cookieCart[$productOptionId] = $quantity;
-                        }
-                    }
-                }
+
+        $quantity = intval($productOptions['quantity']); //integer
+        $productOptionId = intval($productOptions['id']);
+
+        if ($quantity <= 0 || $productOptionId <= 0) {
+            return response()->json(['msg' => '商品規格不符'], 400);
+        }
+
+        $product_option = ProductOption::findIfEnable($productOptionId);
+
+        if (!$product_option) {
+            return response()->json(['msg' => '商品不存在或未啟用'], 404);
+        }
+
+        $product_option = ProductOption::findIfEnable($productOptionId);
+
+        if ($product_option) {
+            if (isset($cookieCart[$productOptionId])) {
+                $cookieCart[$productOptionId] += $quantity;
+            } else {
+                $cookieCart[$productOptionId] = $quantity;
             }
         }
+
+        // Log::info($cookieCart);
+        // return;
         $this->saveCookieCart($cookieCart);
     }
 
@@ -133,6 +210,7 @@ class CartController extends Controller
         Cookie::queue(
             Cookie::make('cart', $cartToJson, 60 * 24 * 7, null, null, false, false)
         );
+        // Log::info(Cookie::get('cart'));
     }
 
     //刪除購物車資料
@@ -346,7 +424,8 @@ class CartController extends Controller
     }
 
     //生成訂單
-    private function createOrderByCart(Request $request){
+    private function createOrderByCart(Request $request)
+    {
         $user_status = $request->user();
         // Log::info($user_status);
         $cart = $user_status->getPurchaseCartOrCreate();
@@ -359,7 +438,7 @@ class CartController extends Controller
         ]);
 
         //利用order找到order items去存儲資料
-        $order->orderItems()->saveMany($cart->cartItems->map(function($cartItem){
+        $order->orderItems()->saveMany($cart->cartItems->map(function ($cartItem) {
             return new OrderItem([
                 'name' => $cartItem->productOption->name,
                 'price' => $cartItem->productOption->price,

@@ -28,6 +28,10 @@
                                     </strong>
                                 </h1>
 
+                                <div v-if="isInEventPeriod(product.special_start_at, product.special_end_at)">
+                                    <div v-html="product.special_message" class="special_msg product-describe"></div>
+                                </div>
+
                                 <div>
                                     <div v-html="product.description" class="product-describe"></div>
                                 </div>
@@ -38,20 +42,21 @@
                                     <!-- 顏色選擇 -->
                                     <div style="display: block; margin-bottom: 10px;">
                                         <span style="margin-right: 10px;">
-                                            <strong>顏色</strong> 
+                                            <strong>顏色</strong>
                                         </span>
                                         <span>
                                             {{ selectedColorName }}
                                         </span>
                                     </div>
 
-                                    <div class="color-options color-cube-outner color-box" v-for="color in productOptions"
-                                    :class="{ active: selectedColor === color.color_code }" :style="{ '--border-color': color.color_code }"
-                                        :key="color.id"  
-                                        @click="changeColor(color)" @mouseenter="changeBigImage(color)">
+                                    <div class="color-options color-cube-outner color-box"
+                                        v-for="option in productOptions"
+                                        :class="{ active: selectedColor === option.color_code }"
+                                        :style="{ '--border-color': option.color_code }" :key="option.id"
+                                        @click="changeColor(option)" @mouseenter="changeBigImage(option)">
                                         <span class="color-cube ">
                                             <span class="color-cube-inner"
-                                                :style="{ backgroundColor: color.color_code }">
+                                                :style="{ backgroundColor: option.color_code }">
                                             </span>
                                         </span>
                                     </div>
@@ -64,7 +69,9 @@
                                 </div>
 
                                 <div class="button-group">
-
+                                    <el-button color="#626aef" size="large" class="addTocart"
+                                        @click="addTOCart">加入購物車</el-button>
+                                    <el-button size="large" class="addTocart" @click="testCart">測試</el-button>
                                 </div>
                             </div>
                         </div>
@@ -78,8 +85,9 @@
 
 <script setup>
 import FrontendLayout from '@/Layouts/FrontendLayout.vue';
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, reactive } from 'vue';
 import Breadcrumb from './Component/Breadcrumb.vue';
+import axios from 'axios';
 
 const props = defineProps({
     product: {
@@ -116,6 +124,7 @@ console.log(productOptions.value[0]);
 // const selectedColor = ref(productOptions.value[0]?.color_code);
 const selectedColor = ref(null);
 const selectedColorName = ref(null);
+const selectedProductOptionId = ref(null);
 
 //初次載入時拿所有縮圖
 const allThumbnails = computed(() => {
@@ -143,10 +152,13 @@ const changeColor = (color) => {
     selectedImage.value = color.product_images.length ? color.product_images[0].image : '';
     selectedColor.value = color.color_code;
     selectedColorName.value = color.color_name;
+    selectedProductOptionId.value = color.id;
+    // console.log(selectedProductOptionId.value);
+
 };
 
 const changeBigImage = (color) => {
-    console.log(color);
+    // console.log(color);
     selectedImage.value = color.product_images.length ? color.product_images[0].image : '';
 }
 
@@ -156,6 +168,54 @@ function toCurrency(num) {
     return `$${Number(num).toLocaleString("en-US")}`; // 確保是數字再轉換
 }
 
+function isInEventPeriod(startAt, endAt) {
+    const now = new Date();
+    const start = new Date(startAt);
+    const end = new Date(endAt);
+
+    return now >= start && now <= end;
+}
+
+
+const productOptionCartData = reactive({
+    quantity: 1,
+    id: null
+});
+
+const addTOCart = async () => {
+    try {
+        productOptionCartData.id = selectedProductOptionId.value;
+        if (productOptionCartData.id) {
+            const response = await axios.post('/cart/addToCart', productOptionCartData);
+            // console.log(response);
+            await msg_feedback(response.data.msg, 'success')
+        } else {
+            await msg_feedback('請選擇商品規格', 'info')
+        }
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+    }
+}
+
+const testCart = async () => {
+    try {
+        console.log(123);
+        const response = await axios.get('/cart/getCartFromCookie');
+        console.log(response);
+        // await msg_feedback(response.data.msg, 'success')
+
+    } catch {
+
+    }
+}
+
+const msg_feedback = (msg, type) => {
+    ElMessage({
+        message: msg,
+        type: type,
+        plain: true,
+    })
+}
 </script>
 
 <style scoped>
@@ -198,7 +258,7 @@ function toCurrency(num) {
     grid-template-columns: 1fr 1fr;
 }
 
-::v-deep(.product-describe>ul)  {
+::v-deep(.product-describe>ul) {
     list-style-type: square;
     padding-left: 1rem;
 }
@@ -254,6 +314,7 @@ function toCurrency(num) {
 
 .product-text-content {
     margin-top: 1rem;
+    margin-bottom: 1.125rem;
 }
 
 .color-cube-outner {
@@ -287,5 +348,14 @@ function toCurrency(num) {
     height: 100%;
     justify-content: center;
     width: 100%;
+}
+
+.special_msg {
+    color: #bd0000;
+}
+
+.addTocart {
+    font-size: 1.25rem;
+    padding: 25px 40px;
 }
 </style>

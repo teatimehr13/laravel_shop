@@ -62,10 +62,10 @@ Route::prefix('cart')->name('cart.')->group(function () {
     // Route::get('/', [CartController::class, 'index'])->name('index');
     // Route::post('/addToCart', [CartController::class, 'addToCart'])->name('addToCart');
     Route::middleware('web')->get('/', [CartController::class, 'index']);
-    Route::middleware('web')->post('/addToCart', [CartController::class, 'addToCart']);
+    // Route::middleware('web')->post('/addToCart', [CartController::class, 'addToCart']);
     Route::middleware('web')->delete('/deleteCartItem', [CartController::class, 'deleteCartItem']);
     Route::middleware('web')->post('/updateCartItem', [CartController::class, 'updateCartItem']);
-    Route::middleware('web')->get('/getCartFromCookie', [CartController::class, 'getCartFromCookie']);
+    // Route::middleware('web')->get('/getCartFromCookie', [CartController::class, 'getCartFromCookie']);
     Route::middleware('web')->get('/checkout', [CartController::class, 'checkout'])->name('checkout');
 });
 

@@ -60,7 +60,7 @@
 
                             <el-popover :placement="popoverPlacement" trigger="click" :width="700" transition="none"
                                 v-model:visible="popoverVisible[scope.row.id]" popper-class="custom-scrollbar"
-                                @show="handlePopoverShow(scope.row.id)" :show-after="150" :hide-after="0"
+                                @show="handlePopoverShow(scope.row.id)" :show-after="100" :hide-after="0"
                                 :popper-style="popoverStyle" @before-leave="enableScroll" :offset="offSet"
                                 ref="popoverRef" @before-enter="openEditPopover(scope.row)">
                                 <template #reference>

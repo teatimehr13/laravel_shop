@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+body {
+    font-family: 'Roboto', Helvetica, "Microsoft JhengHei", sans-serif;
+}
+
+/* 覆蓋 Element Plus 預設字體 */
+:root {
+    --el-font-family: 'Roboto', Helvetica, "Microsoft JhengHei", sans-serif;
+}
