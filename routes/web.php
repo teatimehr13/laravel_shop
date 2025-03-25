@@ -114,6 +114,9 @@ Route::middleware('auth')->group(function () {
 Route::prefix('cart')->name('cart.')->group(function () {
     Route::post('/addToCart', [CartController::class, 'addToCart']);
     Route::get('/getCartFromCookie', [CartController::class, 'getCartFromCookie']);
+    Route::get('/getCartItems', [CartController::class, 'getCartItems']);
+    Route::patch('/updateCartItem', [CartController::class, 'updateCartItem']);
+    Route::get('/', [CartController::class, 'index']);
 });
 
 // Route::post('/back/products/{product_id}/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');

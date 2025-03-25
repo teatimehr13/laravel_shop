@@ -200,8 +200,10 @@ const addTOCart = async () => {
 const testCart = async () => {
     try {
         console.log(123);
-        const response = await axios.get('/cart/getCartFromCookie');
-        console.log(response);
+        // const response = await axios.get('/cart/getCartFromCookie');
+        const response = await axios.get('/cart');
+        
+        console.log(response.data);
         // await msg_feedback(response.data.msg, 'success')
 
     } catch {

@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
+
 
 class CartController extends Controller
 {
@@ -22,12 +24,17 @@ class CartController extends Controller
 
         $cartItems = $this->getCartItems($request);
         $endPrice = $this->getEndPrice($request);
-        return response()->json(
-            [
-                'cartItems' => CartItemResource::collection($cartItems),
-                'endPrice' => $endPrice
-            ]
-        );
+        // return response()->json(
+        //     [
+        //         'cartItems' => CartItemResource::collection($cartItems),
+        //         'endPrice' => $endPrice
+        //     ]
+        // );
+
+        return Inertia::render('Front/Cart', [
+            'cartItems' => $cartItems,
+            'endPrice' => $endPrice
+        ]);
 
         // $filteredCartItems = array_map(function ($item) {
         //     return [
@@ -193,6 +200,7 @@ class CartController extends Controller
         // Log::info($cookieCart);
         // return;
         $this->saveCookieCart($cookieCart);
+        return response()->json(['msg' => '加入購物車成功']);
     }
 
     //拿到cookie
@@ -210,6 +218,7 @@ class CartController extends Controller
         Cookie::queue(
             Cookie::make('cart', $cartToJson, 60 * 24 * 7, null, null, false, false)
         );
+
         // Log::info(Cookie::get('cart'));
     }
 
@@ -288,57 +297,145 @@ class CartController extends Controller
         return false;
     }
 
+    // //購物車結帳頁面(登入前)
+    // private function updateToCookieCart(Request $request)
+    // {
+    //     // Log::info($request->input('data.productOptions'));
+
+    //     if ($request->input('data.productOptions')) {
+    //         $productOptions = $request->input('data.productOptions');
+
+    //         if (is_array($productOptions)) {
+    //             $cookieCart = [];
+    //             foreach ($productOptions as $productOptionId => $value) {
+    //                 if (isset($value['quantity'])) {
+    //                     $quantity = intval($value['quantity']);
+    //                     if ($quantity > 0) {
+    //                         $productOption = ProductOption::findIfEnable($productOptionId);
+
+    //                         if ($productOption) {
+    //                             $cookieCart[$productOptionId] = $quantity;
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //             // Log::info($cookieCart);
+    //             $this->saveCookieCart($cookieCart);
+    //         }
+    //     }
+    // }
+
     //購物車結帳頁面(登入前)
     private function updateToCookieCart(Request $request)
     {
         // Log::info($request->input('data.productOptions'));
 
-        if ($request->input('data.productOptions')) {
-            $productOptions = $request->input('data.productOptions');
+        Log::info($request->input('product_option_id'));
+        Log::info($request->input('quantity'));
 
-            if (is_array($productOptions)) {
-                $cookieCart = [];
-                foreach ($productOptions as $productOptionId => $value) {
-                    if (isset($value['quantity'])) {
-                        $quantity = intval($value['quantity']);
-                        if ($quantity > 0) {
-                            $productOption = ProductOption::findIfEnable($productOptionId);
+        if ($request->has('product_option_id') && $request->has('quantity')) {
+            $quantity = intval($request->input('quantity'));
+            $productOptionId = $request->input('product_option_id');
 
-                            if ($productOption) {
-                                $cookieCart[$productOptionId] = $quantity;
-                            }
-                        }
-                    }
+            if ($quantity > 0) {
+                $cookieCart = $this->getCartFromCookie();
+                $productOption = ProductOption::findIfEnable($productOptionId);
+                if ($productOption) {
+                    $cookieCart[$productOptionId] = $quantity;
                 }
-                // Log::info($cookieCart);
+
                 $this->saveCookieCart($cookieCart);
             }
         }
+
+
+        //   if ($request->input('data.productOptions')) {
+        //       $productOptions = $request->input('data.productOptions');
+
+        //       if (is_array($productOptions)) {
+        //           $cookieCart = [];
+        //           foreach ($productOptions as $productOptionId => $value) {
+        //               if (isset($value['quantity'])) {
+        //                   $quantity = intval($value['quantity']);
+        //                   if ($quantity > 0) {
+        //                       $productOption = ProductOption::findIfEnable($productOptionId);
+
+        //                       if ($productOption) {
+        //                           $cookieCart[$productOptionId] = $quantity;
+        //                       }
+        //                   }
+        //               }
+        //           }
+        //           // Log::info($cookieCart);
+        //           $this->saveCookieCart($cookieCart);
+        //       }
+        //   }
     }
+
+    // //更新購物車(登入後)
+    // private function updateToDBCart(Request $request)
+    // {
+    //     if ($request->has('data.productOptions')) {
+    //         $product_options = $request->input('data.productOptions');
+
+    //         if (is_array($product_options)) {
+    //             $cart = $request->user()->getPurchaseCartOrCreate();
+    //             foreach ($product_options as $productOptionId => $value) {
+    //                 if (isset($value['quantity'])) {
+    //                     $quantity = intval($value['quantity']);
+    //                     $product_option = ProductOption::findIfEnable($productOptionId);
+    //                     if ($product_option) {
+    //                         $cartItem = $cart->cartItems()->where('product_option_id', $productOptionId)->first();
+    //                         if ($cartItem) {
+    //                             $cartItem->quantity = $quantity;
+    //                             $cartItem->save();
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     //更新購物車(登入後)
     private function updateToDBCart(Request $request)
     {
-        if ($request->has('data.productOptions')) {
-            $product_options = $request->input('data.productOptions');
+        if ($request->has('product_option_id') && $request->has('quantity')) {
+            // Log::info($request->input('product_option_id'));
+            // Log::info($request->input('quantity'));
+            $cart = $request->user()->getPurchaseCartOrCreate();
+            $quantity = intval($request->input('quantity'));
+            $productOptionId = $request->input('product_option_id');
+            $product_option = ProductOption::findIfEnable($productOptionId);
+        }
 
-            if (is_array($product_options)) {
-                $cart = $request->user()->getPurchaseCartOrCreate();
-                foreach ($product_options as $productOptionId => $value) {
-                    if (isset($value['quantity'])) {
-                        $quantity = intval($value['quantity']);
-                        $product_option = ProductOption::findIfEnable($productOptionId);
-                        if ($product_option) {
-                            $cartItem = $cart->cartItems()->where('product_option_id', $productOptionId)->first();
-                            if ($cartItem) {
-                                $cartItem->quantity = $quantity;
-                                $cartItem->save();
-                            }
-                        }
-                    }
-                }
+        if ($product_option) {
+            $cartItem = $cart->cartItems()->where('product_option_id', $productOptionId)->first();
+            if ($cartItem && $quantity > 0) {
+                $cartItem->quantity = $quantity;
+                $cartItem->save();
             }
         }
+        // if ($request->has('data.productOptions')) {
+        //     $product_options = $request->input('data.productOptions');
+
+        // if (is_array($product_options)) {
+        //     $cart = $request->user()->getPurchaseCartOrCreate();
+        //     foreach ($product_options as $productOptionId => $value) {
+        //         if (isset($value['quantity'])) {
+        //             $quantity = intval($value['quantity']);
+        //             $product_option = ProductOption::findIfEnable($productOptionId);
+        //             if ($product_option) {
+        //                 $cartItem = $cart->cartItems()->where('product_option_id', $productOptionId)->first();
+        //                 if ($cartItem) {
+        //                     $cartItem->quantity = $quantity;
+        //                     $cartItem->save();
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+        // }
     }
 
     //拿到購物車資料
@@ -377,6 +474,7 @@ class CartController extends Controller
                     array_push($cartItemsArray, $cartItem);
                 }
             }
+            // Log::info($cartItemsArray);
             return $cartItemsArray;
         }
     }
@@ -389,7 +487,7 @@ class CartController extends Controller
             function ($currentValue, $cartItemObj) {
                 $productOption = $cartItemObj["productOption"];
                 $quantity = $cartItemObj["quantity"];
-                return $currentValue = intval($quantity) * $productOption->price;
+                return $currentValue + intval($quantity) * $productOption->price ?? 0;
             },
             0
         );
