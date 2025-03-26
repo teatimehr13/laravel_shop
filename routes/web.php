@@ -116,6 +116,7 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::get('/getCartFromCookie', [CartController::class, 'getCartFromCookie']);
     Route::get('/getCartItems', [CartController::class, 'getCartItems']);
     Route::patch('/updateCartItem', [CartController::class, 'updateCartItem']);
+    Route::delete('/deleteCartItem', [CartController::class, 'deleteCartItem']);
     Route::get('/', [CartController::class, 'index']);
 });
 

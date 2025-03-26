@@ -226,17 +226,18 @@ class CartController extends Controller
     public function deleteCartItem(Request $request)
     {
         $user_status = $request->user();
+        // Log::info($user_status);
         if ($user_status) {
             if ($this->deleteFromDBCart($request)) {
-                return response('success');
+                return response()->json(['msg' => '刪除成功', 'status' => 'success']);
             } else {
-                return response('failed');
+                return response()->json(['msg' => '刪除失敗', 'status' => 'error']);
             }
         } else {
             if ($this->deleteFromCookieCart($request)) {
-                return response('success');
+                return response()->json(['msg' => '刪除成功', 'status' => 'success']);
             } else {
-                return response('failed');
+                return response()->json(['msg' => '刪除失敗', 'status' => 'error']);
             }
         }
     }
@@ -284,8 +285,10 @@ class CartController extends Controller
     //刪除資料庫
     private function deleteFromDBCart(Request $request)
     {
+        Log::info($request->input('product_option_id'));
         if ($request->has('product_option_id')) {
             $productOptionId = intval($request->input('product_option_id'));
+            Log::info($productOptionId);
             $cart = $request->user()->getPurchaseCartOrCreate();
             $cartItem = $cart->cartItems()->where('product_option_id', $productOptionId)->first();
 
@@ -294,7 +297,6 @@ class CartController extends Controller
                 return true;
             }
         }
-        return false;
     }
 
     // //購物車結帳頁面(登入前)

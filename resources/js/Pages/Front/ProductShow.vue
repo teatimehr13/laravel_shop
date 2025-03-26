@@ -165,7 +165,7 @@ const changeBigImage = (color) => {
 
 function toCurrency(num) {
     if (!num && num !== 0) return "$"; // 避免 null 或 undefined
-    return `$${Number(num).toLocaleString("en-US")}`; // 確保是數字再轉換
+    return `NT$${Number(num).toLocaleString("en-US")}`; // 確保是數字再轉換
 }
 
 function isInEventPeriod(startAt, endAt) {
