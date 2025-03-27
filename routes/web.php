@@ -70,25 +70,25 @@ Route::middleware('auth')->group(function () {
         //     return Inertia::render('Back/Product');
         // })->name('products');
 
-        Route::resource('products', BackProductController::class)->only(['index', 'update', 'destroy','store']);
+        Route::resource('products', BackProductController::class)->only(['index', 'update', 'destroy', 'store']);
         Route::post('/categories/{category_id}/subsel', [BackProductController::class, 'getSubSel']);
         Route::get('/products/{product_id}/prod_options', [BackProductController::class, 'prod_options']);
         // Route::post('/product_options/{product_option_id}/updateProdCo', [BackProductController::class, 'updateProdCo']);
         // Route::post('/product_options/addProdCo', [BackProductController::class, 'addProdCo']);
         // Route::post('/product_options/{product_option_id}', [BackProductController::class, 'delProdCo']);
 
-        Route::resource('product_options', BackProductOptionController::class)->only('destroy','store', 'update');
+        Route::resource('product_options', BackProductOptionController::class)->only('destroy', 'store', 'update');
         Route::post('/products/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
         Route::post('/products/updateProductImages', [BackProductOptionController::class, 'updateProductImages'])->name('updateProductImages');
         // checkProductOptionImages
         Route::get('/product_options/{id}/checkImgs', [BackProductOptionController::class, 'checkProductOptionImages'])->name('checkProductOptionImages');
-        
-        Route::resource('stores', BackStoreController::class);
-        Route::resource('categories', BackCategoryController::class)->only(['index','update','destroy','store']);
-        Route::post('/categories/reorder', [BackCategoryController::class, 'reorderCategories']);
-        
 
-        
+        Route::resource('stores', BackStoreController::class);
+        Route::resource('categories', BackCategoryController::class)->only(['index', 'update', 'destroy', 'store']);
+        Route::post('/categories/reorder', [BackCategoryController::class, 'reorderCategories']);
+
+
+
         // Route::post('/subcategories/update_sub', [BackSubcategoryController::class, 'updateSub'])->name('subcategories.updateSub');
         Route::resource('subcategories', BackSubcategoryController::class)->only(['destroy']);
         Route::post('/subcategories/{subcategory}/update_sub', [BackSubcategoryController::class, 'updateSub']);
@@ -123,6 +123,10 @@ Route::prefix('cart')->name('cart.')->group(function () {
 // Route::post('/back/products/{product_id}/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
 
 // Route::post('/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
+
+Route::get('/checkout', function () {
+    return Inertia::render('Front/Checkout');
+})->name('checkout');
 
 require __DIR__ . '/auth.php';
 
