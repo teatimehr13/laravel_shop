@@ -136,7 +136,12 @@ async function checkout() {
     // }
 
     if (isLoggedIn.value) {
-        router.visit('/checkout')
+        router.visit('/checkout', {
+            method: 'get',
+            data: {
+                selected_ids:selectedIds.value
+            }
+        })
     } else {
         router.visit('/login?redirect=checkout')
     }

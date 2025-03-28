@@ -3,6 +3,7 @@
 use App\Http\Controllers\Front\ProductController;
 use App\Http\Controllers\Front\CategoryController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Back\ProductController as BackProductController;
@@ -124,9 +125,11 @@ Route::prefix('cart')->name('cart.')->group(function () {
 
 // Route::post('/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
 
-Route::get('/checkout', function () {
-    return Inertia::render('Front/Checkout');
-})->name('checkout');
+// Route::get('/checkout', function () {
+//     return Inertia::render('Front/Checkout');
+// })->name('checkout');
+
+Route::get('/checkout', [CheckoutController::class, 'index']);
 
 require __DIR__ . '/auth.php';
 

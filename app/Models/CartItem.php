@@ -15,11 +15,21 @@ class CartItem extends Model
     //     'productOption' => 'array', // 或者你可以使用其他適合你的格式
     // ];
 
-    public function cart(){
+    public function cart()
+    {
         return $this->belongsTo(Cart::class);
     }
 
-    public function productOption(){
+    public function productOption()
+    {
         return $this->belongsTo(ProductOption::class, 'product_option_id');
+    }
+
+    // Laravel Accessor 命名規則
+    // subtotal -> getSubtotalAttribute()
+    public function getSubtotalAttribute()
+    {
+        $price = $this->productOption->price ?? $this->productOption->product->price;;
+        return $this->quantity * $price;
     }
 }
