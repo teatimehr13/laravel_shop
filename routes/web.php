@@ -130,6 +130,7 @@ Route::prefix('cart')->name('cart.')->group(function () {
 // })->name('checkout');
 
 Route::get('/checkout', [CheckoutController::class, 'index']);
+Route::post('/checkout/placeOrder', [CheckoutController::class, 'placeOrder'])->name('placeOrder');
 
 require __DIR__ . '/auth.php';
 

@@ -259,11 +259,11 @@ class CartController extends Controller
         // }
     }
 
-    //結帳
-    public function checkout(Request $request)
-    {
-        return $this->createOrderByCart($request);
-    }
+    // //結帳
+    // public function checkout(Request $request)
+    // {
+    //     return $this->createOrderByCart($request);
+    // }
 
     //刪除cookie
     private function deleteFromCookieCart(Request $request)
@@ -524,30 +524,30 @@ class CartController extends Controller
     }
 
     //生成訂單
-    private function createOrderByCart(Request $request)
-    {
-        $user_status = $request->user();
-        // Log::info($user_status);
-        $cart = $user_status->getPurchaseCartOrCreate();
-        $amount = $this->getEndPrice($request);
+    // private function createOrderByCart(Request $request)
+    // {
+    //     $user_status = $request->user();
+    //     // Log::info($user_status);
+    //     $cart = $user_status->getPurchaseCartOrCreate();
+    //     $amount = $this->getEndPrice($request);
 
-        $order = Order::create([
-            'amount' => $amount,
-            'address' => 'testing...address',
-            'user_id' => $user_status->id
-        ]);
+    //     $order = Order::create([
+    //         'amount' => $amount,
+    //         'address' => 'testing...address',
+    //         'user_id' => $user_status->id
+    //     ]);
 
-        //利用order找到order items去存儲資料
-        $order->orderItems()->saveMany($cart->cartItems->map(function ($cartItem) {
-            return new OrderItem([
-                'name' => $cartItem->productOption->name,
-                'price' => $cartItem->productOption->price,
-                'quantity' => $cartItem->quantity,
-                'product_option_id' => $cartItem->product_option_id
-            ]);
-        }));
+    //     //利用order找到order items去存儲資料
+    //     $order->orderItems()->saveMany($cart->cartItems->map(function ($cartItem) {
+    //         return new OrderItem([
+    //             'name' => $cartItem->productOption->name,
+    //             'price' => $cartItem->productOption->price,
+    //             'quantity' => $cartItem->quantity,
+    //             'product_option_id' => $cartItem->product_option_id
+    //         ]);
+    //     }));
 
-        //購物車變成訂單後，刪除
-        // $cart->cartItems()->delete();
-    }
+    //     //購物車變成訂單後，刪除
+    //     // $cart->cartItems()->delete();
+    // }
 }
