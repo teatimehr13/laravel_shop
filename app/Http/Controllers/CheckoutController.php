@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\ProductOption;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 
@@ -16,36 +18,14 @@ class CheckoutController extends Controller
      */
     public function index(Request $request)
     {
+        $user = $request->user();
         $selectedIds = $request->input('selected_ids');
+        $checkoutItems = $this->getCheckoutItems($user, $selectedIds);
 
         // 拿不到數量
         // $productOptions = ProductOption::with('product')->whereIn('id', $selectedIds)->get();
 
         // $total = $request->user()->getPurchaseCartOrCreate()->total;
-        $user = $request->user();
-
-        $checkoutItems = $request->user()
-            ->getPurchaseCartOrCreate()
-            ->cartItems()
-            ->with('productOption.product')
-            ->whereIn('product_option_id', $selectedIds)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'quantity' => $item->quantity,
-                    'subtotal' => $item->subtotal,
-                    'productOption' => [
-                        'id' => $item->productOption->id,
-                        'image' => $item->productOption->image,
-                        'price' => $item->productOption->price,
-                        'color_name' => $item->productOption->color_name,
-                    ],
-                    'product' => [
-                        'name' => $item->productOption->product->name,
-                        'price' => $item->productOption->product->price,
-                    ]
-                ];
-            });
 
         return Inertia::render('Front/Checkout', [
             'checkoutItems' => $checkoutItems,
@@ -109,37 +89,131 @@ class CheckoutController extends Controller
     }
 
     //生成訂單
+    // private function createOrderByCart(Request $request)
+    // {
+    //     $order_data = $request->validate([
+    //         'address' => 'required|string',
+    //         'phone' => 'required|string',
+    //         'note' => 'nullable|string',
+    //         'name' => 'nullable|string',
+    //         // 'id' => 'required|integer'
+    //     ]);
+
+    //     Log::info($order_data);
+    //     return;
+    //     $user_status = $request->user();
+    //     // Log::info($user_status);
+    //     $cart = $user_status->getPurchaseCartOrCreate();
+    //     $amount = $this->getEndPrice($request);
+
+    //     $order = Order::create([
+    //         'amount' => $amount,
+    //         'address' => 'testing...address',
+    //         'user_id' => $user_status->id
+    //     ]);
+
+    //     //利用order找到order items去存儲資料
+    //     $order->orderItems()->saveMany($cart->cartItems->map(function ($cartItem) {
+    //         return new OrderItem([
+    //             'name' => $cartItem->productOption->name,
+    //             'price' => $cartItem->productOption->price,
+    //             'quantity' => $cartItem->quantity,
+    //             'product_option_id' => $cartItem->product_option_id
+    //         ]);
+    //     }));
+
+    //     //購物車變成訂單後，刪除
+    //     // $cart->cartItems()->delete();
+    // }
+
     private function createOrderByCart(Request $request)
     {
-        $order_data =  $request->validate([
-            'address' => 'required|string',
-            'phone' => 'require|string',
-            'quantity' => 'required|integer|min:1',
-            'id' => 'required|integer|'
+        $validated = $request->validate([
+            'selected_ids' => 'required|array|min:1',
+            'selected_ids.*' => 'integer|exists:product_options,id',
+            'address' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'note' => 'nullable|string|max:500',
+            'order_status' => 'required|integer'
         ]);
-        return;
-        $user_status = $request->user();
-        // Log::info($user_status);
-        $cart = $user_status->getPurchaseCartOrCreate();
-        $amount = $this->getEndPrice($request);
 
+        $user = $request->user();
+        $checkoutItems = $this->getCheckoutItems($user, $validated['selected_ids']);
+
+        // 總金額（商品總額 + 運費）
+        $subtotal = $checkoutItems->sum('subtotal');
+        $shippingFee = 60; // 可改成變數
+        $total = $subtotal + $shippingFee;
+
+        // Log::info($validated);
+        // Log::info($checkoutItems);
+        // Log::info($subtotal);
+        // Log::info($total);
+
+        // return;
+
+        // 建立 Order
         $order = Order::create([
-            'amount' => $amount,
-            'address' => 'testing...address',
-            'user_id' => $user_status->id
-        ]);  
+            'user_id' => $user->id,
+            'amount' => $total,
+            'address' => $validated['address'],
+            'phone' => $validated['phone'],
+            'note' => $validated['note'],
+            'order_number' => now()->format('YmdHis') . rand(1000, 9999),
+            'order_status' => $validated['order_status'] //變數
+        ]);
 
-        //利用order找到order items去存儲資料
-        $order->orderItems()->saveMany($cart->cartItems->map(function ($cartItem) {
-            return new OrderItem([
-                'name' => $cartItem->productOption->name,
-                'price' => $cartItem->productOption->price,
-                'quantity' => $cartItem->quantity,
-                'product_option_id' => $cartItem->product_option_id
+        // 建立 order_items
+        foreach ($checkoutItems as $item) {
+            $order->orderItems()->create([
+                'name' => $item['product']['name'] . ' (' . $item['productOption']['color_name'] . ')',
+                'price' => $item['productOption']['price'],
+                'quantity' => $item['quantity'],
+                'image' => $item['productOption']['image'],
+                'product_option_id' => $item['productOption']['id'],
             ]);
-        }));
+        }
 
-        //購物車變成訂單後，刪除
-        // $cart->cartItems()->delete();
+        return response()->json(['msg' => 'order success']);
+        // return redirect()->route('order.success')->with('message', '訂單已建立');
+    }
+
+    //拿到購物車全部的金額
+    private function getEndPrice(Request $request)
+    {
+        return array_reduce(
+            $this->getCartItems($request),
+            function ($currentValue, $cartItemObj) {
+                $productOption = $cartItemObj["productOption"];
+                $quantity = $cartItemObj["quantity"];
+                return $currentValue + intval($quantity) * $productOption->price ?? 0;
+            },
+            0
+        );
+    }
+
+    private function getCheckoutItems(User $user, array $selectedIds)
+    {
+        return $user->getPurchaseCartOrCreate()
+            ->cartItems()
+            ->with('productOption.product')
+            ->whereIn('product_option_id', $selectedIds)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'quantity' => $item->quantity,
+                    'subtotal' => $item->subtotal,
+                    'productOption' => [
+                        'id' => $item->productOption->id,
+                        'image' => $item->productOption->image,
+                        'price' => $item->productOption->price,
+                        'color_name' => $item->productOption->color_name,
+                    ],
+                    'product' => [
+                        'name' => $item->productOption->product->name,
+                        'price' => $item->productOption->product->price,
+                    ]
+                ];
+            });
     }
 }

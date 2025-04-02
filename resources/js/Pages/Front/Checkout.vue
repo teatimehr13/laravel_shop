@@ -78,24 +78,44 @@
 
                 <div class="chk-shpInfo">
                     <div class="shipInfo-contact">
-                        <div v-if="!editing">
+                        <div>
                             <span>
                                 寄送資訊
                             </span>
-                            <br>
-                            <span>
-                                賣家宅配:
-                                {{ user.name }} {{ user.phone }}
-                            </span>
-                            |
-                            <span>
-                                {{ user.address }}
-                            </span>
-                        </div>
-                        <div v-else class="edit-fields">
-                            <el-input v-model="order_form.name" placeholder="姓名" class="edit-input" />
-                            <el-input v-model="order_form.phone" placeholder="電話" class="edit-input" />
-                            <el-input v-model="order_form.address" placeholder="地址" class="edit-input" />
+                            <div class="buyer-info" v-if="!editing">
+                                <div>
+                                    <span>
+                                        賣家宅配:
+                                    </span>
+                                </div>
+                                <div>
+                                    {{ user.name }} 
+                                </div>
+                                <div>
+                                    {{ user.phone }}
+                                </div>
+                                <div>
+                                    <span>
+                                        {{ user.address }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div v-else class="edit-fields buyer-info">
+                                <div>
+                                    <span>
+                                        賣家宅配:
+                                    </span>
+                                </div>
+                                <div class="buyer-name">
+                                    <el-input v-model="user.name" placeholder="姓名"/>
+                                </div>
+                                <div class="buyer-phone">
+                                    <el-input v-model="user.phone" placeholder="電話"/>
+                                </div>
+                                <div class="buyer-address">
+                                    <el-input v-model="user.address" placeholder="地址"/>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <el-button type="primary" link @click="editing = !editing">
@@ -209,7 +229,7 @@
                 </div>
             </div>
             <div style="display: flex; justify-content: flex-end; margin: 12px auto;">
-                <el-button color="#f56c6c" style="color: white; font-weight: bold;" size="large">下訂單</el-button>
+                <el-button color="#f56c6c" style="color: white; font-weight: bold;" size="large" @click="place_order">下訂單</el-button>
             </div>
         </div>
     </div>
@@ -236,8 +256,6 @@ console.log(props.checkoutItems);
 console.log(props.checkoutTotal);
 console.log(props.user);
 
-
-
 const order_form = reactive({
     note: '',
     address: '',
@@ -251,14 +269,26 @@ function toCurrency(num) {
 }
 
 const paymentMethod = ref('cash');
+const editing = ref(false);
 
-const editingPhone = ref(false);
-const editingAddress = ref(false);
-const editing = ref(false)
-// const cartItems = ref([
+const mapToOrderStatus = {
+    credit: 2,
+    cash: 3,
+}
 
-// ])
-
+const place_order = async () => {
+    const selectedIds = props.checkoutItems.map(item => item.productOption.id);
+    order_form.address = props.user.address;
+    order_form.name = props.user.name;
+    order_form.phone = props.user.phone;
+    order_form.selected_ids = selectedIds;
+    order_form.order_status = mapToOrderStatus[paymentMethod.value];
+    // console.log(order_form);
+    
+    const response = await axios.post('/checkout/placeOrder', order_form);
+    // console.log(response.data);
+    
+}
 
 </script>
 
@@ -486,4 +516,27 @@ const editing = ref(false)
     color: #909399;
     font-size: .9rem;
 }
+
+.buyer-info {
+    display: flex;
+    gap: 5px;
+}
+
+.buyer-name {
+    flex: 1;
+}
+
+.buyer-phone {
+    flex: 1.25;
+}
+
+.buyer-address {
+    flex: 2;
+}
+
+::v-deep(.el-input__inner:focus) {
+    outline: none;
+    box-shadow: none;
+}
+
 </style>
