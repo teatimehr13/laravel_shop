@@ -4,6 +4,7 @@ use App\Http\Controllers\Front\ProductController;
 use App\Http\Controllers\Front\CategoryController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Back\ProductController as BackProductController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Back\ProductOptionController as BackProductOptionContro
 use App\Http\Controllers\Back\StoreController as BackStoreController;
 use App\Http\Controllers\Back\NewsController as BackNewsController;
 use App\Http\Controllers\Back\CategoryController as BackCategoryController;
+use App\Models\Order;
 use Illuminate\Foundation\Application;
 use Inertia\Inertia;
 
@@ -130,7 +132,9 @@ Route::prefix('cart')->name('cart.')->group(function () {
 // })->name('checkout');
 
 Route::get('/checkout', [CheckoutController::class, 'index']);
-Route::post('/checkout/placeOrder', [CheckoutController::class, 'placeOrder']);
+Route::post('/checkout/placeOrder', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
+Route::get('/order/{order}', [OrderController::class, 'show'])->name('order.show');
+// Route::resource('order', [OrderController::class, 'order'])->only(['index', 'show']);
 
 require __DIR__ . '/auth.php';
 

@@ -21,16 +21,23 @@ class CheckoutController extends Controller
         $user = $request->user();
         $selectedIds = $request->input('selected_ids');
         $checkoutItems = $this->getCheckoutItems($user, $selectedIds);
+        $shippingFee = $this->calculateShippingFee($checkoutItems->sum('subtotal'));
+        $checkoutTotal = $checkoutItems->sum('subtotal') + $shippingFee;
 
         // 拿不到數量
         // $productOptions = ProductOption::with('product')->whereIn('id', $selectedIds)->get();
 
         // $total = $request->user()->getPurchaseCartOrCreate()->total;
+        // $checkoutInfo = 
 
         return Inertia::render('Front/Checkout', [
             'checkoutItems' => $checkoutItems,
-            'checkoutTotal' => $checkoutItems->sum('subtotal'),
-            'user' => $user
+            'user' => $user,
+            'checkoutSummary' => [
+                'subtotal' => $checkoutItems->sum('subtotal'),
+                'shippingFee' => $shippingFee,
+                'total' => $checkoutTotal
+              ],
         ]);
     }
 
@@ -142,7 +149,8 @@ class CheckoutController extends Controller
 
         // 總金額（商品總額 + 運費）
         $subtotal = $checkoutItems->sum('subtotal');
-        $shippingFee = 60; // 可改成變數
+        // $shippingFee = 60; // 可改成變數
+        $shippingFee = $this->calculateShippingFee($subtotal);
         $total = $subtotal + $shippingFee;
 
         // Log::info($validated);
@@ -153,13 +161,14 @@ class CheckoutController extends Controller
         // return;
 
         // 建立 Order
+        $order_number = now()->format('YmdHis') . rand(1000, 9999);
         $order = Order::create([
             'user_id' => $user->id,
             'amount' => $total,
             'address' => $validated['address'],
             'phone' => $validated['phone'],
             'note' => $validated['note'],
-            'order_number' => now()->format('YmdHis') . rand(1000, 9999),
+            'order_number' => $order_number,
             'order_status' => $validated['order_status'] //變數
         ]);
 
@@ -174,7 +183,9 @@ class CheckoutController extends Controller
             ]);
         }
 
-        return response()->json(['msg' => 'order success']);
+        // return redirect()->route('orders.show');
+        return redirect()->route('order.show', ['order' => $order_number]);
+        // return response()->json(['msg' => 'order success']);
         // return redirect()->route('order.success')->with('message', '訂單已建立');
     }
 
@@ -215,5 +226,10 @@ class CheckoutController extends Controller
                     ]
                 ];
             });
+    }
+
+    private function calculateShippingFee($subtotal)
+    {
+        return $subtotal >= 490 ? 0 : 100;
     }
 }

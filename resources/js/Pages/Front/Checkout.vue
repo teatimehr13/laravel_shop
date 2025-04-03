@@ -66,7 +66,7 @@
                     小計
                 </div>
                 <div class="chk-total-price">
-                    {{ toCurrency(checkoutTotal) }}
+                    {{ toCurrency(checkoutSubtotal) }}
                 </div>
             </div> -->
 
@@ -89,7 +89,7 @@
                                     </span>
                                 </div>
                                 <div>
-                                    {{ user.name }} 
+                                    {{ user.name }}
                                 </div>
                                 <div>
                                     {{ user.phone }}
@@ -107,13 +107,13 @@
                                     </span>
                                 </div>
                                 <div class="buyer-name">
-                                    <el-input v-model="user.name" placeholder="姓名"/>
+                                    <el-input v-model="user.name" placeholder="姓名" />
                                 </div>
                                 <div class="buyer-phone">
-                                    <el-input v-model="user.phone" placeholder="電話"/>
+                                    <el-input v-model="user.phone" placeholder="電話" />
                                 </div>
                                 <div class="buyer-address">
-                                    <el-input v-model="user.address" placeholder="地址"/>
+                                    <el-input v-model="user.address" placeholder="地址" />
                                 </div>
                             </div>
                         </div>
@@ -207,7 +207,7 @@
                             商品總金額
                         </span>
                         <span>
-                            {{ toCurrency(checkoutTotal) }}
+                            {{ toCurrency(checkoutSummary.subtotal) }}
                         </span>
                     </div>
                     <div class="checkout-ship-fee">
@@ -215,7 +215,7 @@
                             運費總金額
                         </span>
                         <span>
-                            NT$60
+                            {{ toCurrency(checkoutSummary.shippingFee) }}
                         </span>
                     </div>
                     <div class="checkout-total-price">
@@ -223,13 +223,14 @@
                             總付款金額
                         </span>
                         <span>
-                            NT$87,000
+                            {{ toCurrency(checkoutSummary.total) }}
                         </span>
                     </div>
                 </div>
             </div>
             <div style="display: flex; justify-content: flex-end; margin: 12px auto;">
-                <el-button color="#f56c6c" style="color: white; font-weight: bold;" size="large" @click="place_order">下訂單</el-button>
+                <el-button color="#f56c6c" style="color: white; font-weight: bold;" size="large"
+                    @click="place_order">下訂單</el-button>
             </div>
         </div>
     </div>
@@ -238,23 +239,38 @@
 <script setup>
 import { ref, computed, reactive } from 'vue';
 import FrontendLayout from '@/Layouts/FrontendLayout.vue';
+import { useForm, router } from '@inertiajs/vue3'
 
 // 模擬購物車資料（你可從 props 傳入）
 const props = defineProps({
     checkoutItems: {
         type: Array,
     },
-    checkoutTotal: {
-        type: Number
-    },
     user: {
         type: Object
+    },
+    checkoutSummary: {
+        type: Object
     }
+    // checkoutSubtotal: {
+    //     type: Number
+    // },
+    // shippingFee: {
+    //     type: Number
+    // },
+    // checkoutTotal: {
+    //     type: Number
+    // }
 });
 
 console.log(props.checkoutItems);
-console.log(props.checkoutTotal);
-console.log(props.user);
+console.log(props.checkoutSummary);
+
+// console.log(props.checkoutSubtotal);
+// console.log(props.user);
+// console.log(props.shippingFee);
+
+
 
 const order_form = reactive({
     note: '',
@@ -276,18 +292,40 @@ const mapToOrderStatus = {
     cash: 3,
 }
 
-const place_order = async () => {
-    const selectedIds = props.checkoutItems.map(item => item.productOption.id);
-    order_form.address = props.user.address;
-    order_form.name = props.user.name;
-    order_form.phone = props.user.phone;
-    order_form.selected_ids = selectedIds;
-    order_form.order_status = mapToOrderStatus[paymentMethod.value];
+const place_order = () => {
+    // const selectedIds = props.checkoutItems.map(item => item.productOption.id);
+    // order_form.address = props.user.address;
+    // order_form.name = props.user.name;
+    // order_form.phone = props.user.phone;
+    // order_form.selected_ids = selectedIds;
+    // order_form.order_status = mapToOrderStatus[paymentMethod.value];
+
+    const submit_form = useForm({
+        address: props.user.address,
+        name: props.user.name,
+        phone: props.user.phone,
+        note: order_form.note, // 預設空備註
+        selected_ids: props.checkoutItems.map(item => item.productOption.id),
+        order_status: mapToOrderStatus[paymentMethod.value]
+    })
+
+    submit_form.post(route('checkout.placeOrder'));
+
+    // const placeOrder = () => {
+    //     order_form.post(route('place_order'), {
+    //         onSuccess: () => {
+    //             // 成功後轉跳到訂單列表頁，或訂單完成頁
+    //             router.visit(route('orders.index'))
+    //         }
+    //     })
+    // }
+
+
     // console.log(order_form);
-    
-    const response = await axios.post('/checkout/placeOrder', order_form);
+
+    // const response = await axios.post('/checkout/placeOrder', order_form);
     // console.log(response.data);
-    
+
 }
 
 </script>
@@ -538,5 +576,4 @@ const place_order = async () => {
     outline: none;
     box-shadow: none;
 }
-
 </style>
