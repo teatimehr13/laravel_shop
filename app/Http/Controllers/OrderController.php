@@ -38,10 +38,12 @@ class OrderController extends Controller
      */
     public function show($order_number)
     {
-        $order = Order::where('order_number', $order_number)->firstOrFail();
+        $order = Order::with('orderItems')->where('order_number', $order_number)->firstOrFail();
+        $totalQuantity = $order->orderItems->sum('quantity');
 
         return Inertia::render('Front/OrderShow', [
-            'order' => $order
+            'order' => $order,
+            'total_qty' => $totalQuantity,
         ]);
     }
 

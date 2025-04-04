@@ -15,6 +15,7 @@ import { QuillEditor } from '@vueup/vue-quill';
 
 
 
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const app = createApp({});
 
