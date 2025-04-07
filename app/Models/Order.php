@@ -15,6 +15,12 @@ class Order extends Model
     const SEND_BEFORE_PAID = 'send_before_paid';
     const CANCELLED = 'cancelled';
 
+    const PAYMENT_CASH = 'cash';
+    const PAYMENT_CREDIT_CARD = 'credit_card';
+    const PAYMENT_LINE_PAY = 'line_pay';
+    const PAYMENT_ATM = 'atm';
+    const PAYMENT_CVS = 'cvs';
+
     const orderStatuses = [
         0 => self::NOT_SELECTED_PAYMENT,
         1 => self::WAITING_FOR_THE_TRANSFER,
@@ -55,6 +61,28 @@ class Order extends Model
             }
         }
         return null;
+    }
+
+    public static function orderStatusStepMap(): array
+    {
+        return [
+            0 => 0, // NOT_SELECTED_PAYMENT → 收到訂單
+            1 => 1, // WAITING_FOR_THE_TRANSFER → 付款資訊確認
+            2 => 1, // PAID → 付款資訊確認
+            3 => 2, // SEND_BEFORE_PAID → 運送中
+            4 => 3, // CANCELLED → 結束（可用已送達樣式處理）
+        ];
+    }
+
+    public static function paymentMethodOptions()
+    {
+        return [
+            self::PAYMENT_CASH => '貨到付款',
+            self::PAYMENT_CREDIT_CARD => '信用卡',
+            self::PAYMENT_LINE_PAY => 'LINE Pay',
+            self::PAYMENT_ATM => 'ATM 轉帳',
+            self::PAYMENT_CVS => '超商繳費',
+        ];
     }
 
     public function user()

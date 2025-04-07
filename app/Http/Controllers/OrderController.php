@@ -39,11 +39,16 @@ class OrderController extends Controller
     public function show($order_number)
     {
         $order = Order::with('orderItems')->where('order_number', $order_number)->firstOrFail();
+        $orderData = $order->toArray();
+        $orderData['payment_method_label'] = Order::paymentMethodOptions()[$order->payment_method];
+        $orderData['step_index'] = Order::orderStatusStepMap()[$order->order_status] ?? 0;
+
         $totalQuantity = $order->orderItems->sum('quantity');
 
         return Inertia::render('Front/OrderShow', [
-            'order' => $order,
+            'order' => $orderData,
             'total_qty' => $totalQuantity,
+            // 'payment_method_label' => Order::paymentMethodOptions()[$order->payment_method] ?? '未知付款方式'
         ]);
     }
 
