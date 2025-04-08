@@ -40,6 +40,7 @@
             <div class="grid-header">數量</div>
             <div class="grid-header">訂購總額</div>
             <div class="grid-header">付款方式</div>
+            <div class="grid-header">操作</div>
 
             <div class="grid-cell">宅配</div>
             <div class="grid-cell">{{ formateDate(order.created_at) }}</div>
@@ -47,15 +48,49 @@
             <div class="grid-cell">{{ total_qty }}</div>
             <div class="grid-cell total-price">{{ toCurrency(order.amount) }}</div>
             <div class="grid-cell">{{ order.payment_method_label ?? '-' }}</div>
+            <div class="grid-cell">
+                <el-button link type='primary' @click="dialogReturnToggle">
+                    我要退貨
+                </el-button>
+            </div>
         </div>
     </div>
+
+    <el-dialog v-model="dialogReturn" title="退貨" class="return-dialog" align-center>
+        <div v-for="(item, idx) in order.order_items" class="return-con-layout">
+            <div class="item-chks">
+                <el-checkbox-group v-model="selectedIds">
+                    <el-checkbox size="large" :value="item.id" :key="item.id" />
+                </el-checkbox-group>
+            </div>
+            <div class="item-imgs">
+                <img :src="item.image" style="max-width: 80px;">
+            </div>
+            <div class="item-details">
+                <div class="item-name">
+                    {{ item.name }}
+                </div>
+                <!-- <div class="item-qty">
+                    x{{ item.quantity }}
+                </div> -->
+            </div>
+            <div>
+                <el-select v-model="selected_orderItems[item.id].quantity" placeholder="選取數量" style="width: 240px">
+                    <el-option v-for="qty in item.quantity" :key="qty" :label="qty" :value="qty"  />
+                </el-select>
+            </div>
+            <div class="item-price">
+                {{ toCurrency(item.price) }}
+            </div>
+        </div>
+    </el-dialog>
 </template>
 
 <script setup>
 import FrontendLayout from '@/Layouts/FrontendLayout.vue';
 import dayjs from 'dayjs';
 import { Memo, Money, Van, Checked } from '@element-plus/icons-vue';
-import { computed, ref } from 'vue';
+import { computed, ref, reactive, onMounted } from 'vue';
 
 const props = defineProps({
     order: {
@@ -87,11 +122,29 @@ const currentStep = props.order.step_index;
 
 // 計算進度百分比
 const progressWidth = computed(() => {
-  if (steps.length <= 1) return '0%'
-  const percent = (currentStep / (steps.length - 1)) * ((1000 - 140) / 1000 * 100);  //左右各70px
-  return `${percent}%`
+    if (steps.length <= 1) return '0%'
+    const percent = (currentStep / (steps.length - 1)) * ((1000 - 140) / 1000 * 100);  //左右各70px
+    return `${percent}%`
 })
 
+const selected_orderItems = reactive({})
+
+onMounted(() => {
+    props.order.order_items.forEach((item) => {
+    selected_orderItems[item.id] = {
+      selected: false,
+      quantity: 1,
+      reason: '',
+    }
+  })
+})
+
+const dialogReturn = ref(false);
+const selectedIds = ref([])
+
+const dialogReturnToggle = () => {
+    dialogReturn.value = !dialogReturn.value;
+}
 
 function toCurrency(num) {
     if (!num && num !== 0) return "NT$"; // 避免 null 或 undefined
@@ -145,7 +198,7 @@ function formateDate(rawTime) {
 
 .order-info {
     display: grid;
-    grid-template-columns: 1.5fr  2fr 2.5fr 0.75fr 1fr 1.5fr;
+    grid-template-columns: 1.5fr 2fr 2.5fr 0.75fr 1fr 1.5fr 1fr;
     border: 1px solid #ddd;
     font-size: 14px;
     margin: 15px 0;
@@ -246,5 +299,19 @@ function formateDate(rawTime) {
 .total-price {
     color: #e42c2c;
     font-weight: bold;
+}
+
+::v-deep(.return-dialog) {
+    min-width: 700px;
+}
+
+
+.return-con-layout {
+    display: flex;
+}
+
+.item-chks {
+    margin: auto;
+
 }
 </style>

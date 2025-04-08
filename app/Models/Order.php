@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use PDO;
 
 class Order extends Model
 {
@@ -99,5 +100,10 @@ class Order extends Model
     public function getRouteKeyName()
     {
         return 'order_number';
+    }
+
+    //一個訂單可以被退多次
+    public function returns(){
+        return $this->hasMany(ReturnRequest::class);
     }
 }
