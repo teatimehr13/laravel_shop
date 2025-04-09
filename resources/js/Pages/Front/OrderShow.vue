@@ -57,31 +57,78 @@
     </div>
 
     <el-dialog v-model="dialogReturn" title="退貨" class="return-dialog" align-center>
-        <div v-for="(item, idx) in order.order_items" class="return-con-layout">
-            <div class="item-chks">
+        <div v-for="(item, idx) in order.order_items" class="return-con-layout" :class="{ 'return-con-border': selected_orderItems[item.id].quantity > 0 }">
+            <i class="checkmark" v-if="selected_orderItems[item.id].quantity > 0">
+                <el-icon><Select /></el-icon>
+            </i>
+            <!-- <div class="item-chks">
                 <el-checkbox-group v-model="selectedIds">
                     <el-checkbox size="large" :value="item.id" :key="item.id" />
                 </el-checkbox-group>
-            </div>
+            </div> -->
             <div class="item-imgs">
                 <img :src="item.image" style="max-width: 80px;">
             </div>
             <div class="item-details">
-                <div class="item-name">
-                    {{ item.name }}
+                <div class="item-name flex">
+                    <div>商品名稱</div>
+                    <div>
+                        {{ item.name }}
+                    </div>
                 </div>
-                <!-- <div class="item-qty">
-                    x{{ item.quantity }}
+                <div class="item-qty flex">
+                    <div>訂單數量</div>
+                    <div>{{ item.quantity }}</div>
+                </div>
+                <div class="flex">
+                    <div>單價</div>
+                    <div>
+                        {{ toCurrency(item.price) }}
+                    </div>
+                </div>
+                <div class="flex">
+                    <div>退貨數量</div>
+                    <div>
+                        <!-- <el-select v-model="selected_orderItems[item.id].quantity" placeholder="選取數量"
+                            style="width: 70px">
+                            <el-option v-for="qty in item.quantity" :key="qty" :label="qty" :value="qty" />
+                        </el-select> -->
+                        <el-input-number v-model="selected_orderItems[item.id].quantity" :min="0" :max="item.quantity" size="small"  style="width: 100px;"/>
+                    </div>
+                </div>
+                <div class="flex">
+                    <div>退貨原因</div>
+                    <div>
+                        <el-select v-model="selected_orderItems[item.id].quantity" placeholder="選取數量"
+                            style="width: 150px">
+                            <el-option v-for="qty in item.quantity" :key="qty" :label="qty" :value="qty" />
+                        </el-select>
+                    </div>
+                </div>
+                <div class="flex">
+                    <div>
+                        描述
+                    </div>
+                    <div>
+                        <el-input maxlength="30" style="width: 300px" show-word-limit type="textarea" />
+                    </div>
+                </div>
+            </div>
+            <div class="item-fill">
+                <!-- <div>
+                    <el-select v-model="selected_orderItems[item.id].quantity" placeholder="選取數量" style="width: 100px">
+                        <el-option v-for="qty in item.quantity" :key="qty" :label="qty" :value="qty" />
+                    </el-select>
+                </div>
+
+                <div>
+                    <el-input  maxlength="30" style="width: 200px" placeholder="Please input"
+                        show-word-limit type="textarea" />
                 </div> -->
             </div>
-            <div>
-                <el-select v-model="selected_orderItems[item.id].quantity" placeholder="選取數量" style="width: 240px">
-                    <el-option v-for="qty in item.quantity" :key="qty" :label="qty" :value="qty"  />
-                </el-select>
-            </div>
-            <div class="item-price">
+            <!-- <div class="item-price">
                 {{ toCurrency(item.price) }}
-            </div>
+            </div> -->
         </div>
     </el-dialog>
 </template>
@@ -131,12 +178,10 @@ const selected_orderItems = reactive({})
 
 onMounted(() => {
     props.order.order_items.forEach((item) => {
-    selected_orderItems[item.id] = {
-      selected: false,
-      quantity: 1,
-      reason: '',
-    }
-  })
+        selected_orderItems[item.id] = {
+            quantity: 0,
+        }
+    })
 })
 
 const dialogReturn = ref(false);
@@ -178,15 +223,13 @@ function formateDate(rawTime) {
 }
 
 .item-details {
-    flex: 1;
-}
-
-.item-details {
-    flex: 3;
+    flex: 2;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     padding: 10px;
+    gap: 10px;
+
 }
 
 .item-price {
@@ -308,10 +351,80 @@ function formateDate(rawTime) {
 
 .return-con-layout {
     display: flex;
+    border-bottom: 1px solid #e8e7e7;
+    position: relative;
+    margin: 10px 0;
+}
+.return-con-border {
+    border: 1px dashed #ee4d2d;
+    border-radius: 3px; 
 }
 
 .item-chks {
     margin: auto;
 
 }
+
+.item-imgs {
+    margin-inline-end: 10px;
+    padding-inline: 5px;
+}
+
+.flex {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    flex-wrap: nowrap;
+}
+
+.flex:not(:last-of-type) {
+    border-bottom: .5px dashed #e8e7e7;
+}
+
+.flex div:first-of-type {
+    flex: 1;
+
+}
+
+.flex div:last-of-type {
+    flex: 6;
+}
+
+.checkmark {
+    top: -1px;
+    height: 1.875rem;
+    overflow: hidden;
+    position: absolute;
+    right: -1px;
+    width: 1.875rem;
+}
+
+.checkmark .el-icon {
+    bottom: 0;
+    color: #fff;
+    font-size: 8px;
+    position: absolute;
+    right: 0;
+    transform: translate(-50%, 100%);
+    top: 0;
+}
+
+.checkmark::before {
+    /* border: .9375rem solid transparent;
+    border-bottom: .9375rem solid var(--brand-primary-color, #ee4d2d); */
+    border-top: 1.875rem solid var(--brand-primary-color, #ee4d2d);
+    border-left: 1.875rem solid transparent;
+    bottom: 0;
+    content: "";
+    position: absolute;
+    /* right: -.9375rem; */
+}
 </style>
+
+
+<!-- <i v-show="paymentMethod === 'credit'" class="checkmark">
+    <el-icon><Select /></el-icon>
+</i> -->
+
+<!-- border: 1px solid #ee4d2d;
+border-radius: 3px; -->
