@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\ReturnItem;
+use App\Models\ReturnRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -39,15 +41,23 @@ class OrderController extends Controller
     public function show($order_number)
     {
         $order = Order::with('orderItems')->where('order_number', $order_number)->firstOrFail();
+        foreach($order->orderItems as $item){
+            $alreadyReturnQty = ReturnItem::where('order_item_id', $item->id)->sum('quantity');
+            $item->available_qty = $item->quantity - $alreadyReturnQty; 
+        }
+
         $orderData = $order->toArray();
         $orderData['payment_method_label'] = Order::paymentMethodOptions()[$order->payment_method];
         $orderData['step_index'] = Order::orderStatusStepMap()[$order->order_status] ?? 0;
 
         $totalQuantity = $order->orderItems->sum('quantity');
 
+        $return_options = ReturnItem::returnReasonOptions();
+
         return Inertia::render('Front/OrderShow', [
             'order' => $orderData,
             'total_qty' => $totalQuantity,
+            'return_reasons' => $return_options
             // 'payment_method_label' => Order::paymentMethodOptions()[$order->payment_method] ?? '未知付款方式'
         ]);
     }

@@ -97,8 +97,10 @@
                             style="width: 70px">
                             <el-option v-for="qty in item.quantity" :key="qty" :label="qty" :value="qty" />
                         </el-select> -->
-                        <el-input-number v-model="selected_orderItems[item.id].quantity" :min="0" :max="item.quantity"
-                            size="small" style="width: 100px;" @change="(val) => handleQuantityChange(item.id, val)" />
+                        <el-input-number v-model="selected_orderItems[item.id].quantity" :min="0"
+                            :max="item.available_qty" size="small" style="width: 100px;"
+                            @change="(val) => handleQuantityChange(item.id, val)" />
+                            <el-text style="margin: 0 10px;" type="danger">(可退數量：{{ item.available_qty }})</el-text>
                     </div>
                 </div>
                 <div class="flex" v-show="selected_orderItems[item.id].quantity > 0">
@@ -109,8 +111,8 @@
                             <el-form-item prop="reason">
                                 <el-select v-model="selected_orderItems[item.id].reason" placeholder="選擇退貨原因"
                                     style="width: 300px; display: block; ">
-                                    <el-option v-for="(reason, idx) in return_reasons" :key="idx" :label="reason"
-                                        :value="reason" />
+                                    <el-option v-for="(reason, idx) in return_reasons" :key="idx" :label="reason.label"
+                                        :value="reason.value" />
                                 </el-select>
                             </el-form-item>
                         </el-form>
@@ -140,6 +142,7 @@ import FrontendLayout from '@/Layouts/FrontendLayout.vue';
 import dayjs from 'dayjs';
 import { Memo, Money, Van, Checked } from '@element-plus/icons-vue';
 import { computed, ref, reactive, onMounted, watch, watchEffect } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
     order: {
@@ -148,6 +151,9 @@ const props = defineProps({
     total_qty: {
         type: Number
     },
+    return_reasons: {
+        type: Array
+    }
     // payment_method_label:{
     //     type: String
     // }
@@ -155,6 +161,8 @@ const props = defineProps({
 
 console.log(props.order);
 console.log(props.total_qty);
+console.log(props.return_reasons);
+
 // console.log(props.payment_method_label);
 
 
@@ -192,14 +200,14 @@ onMounted(() => {
 
 const dialogReturn = ref(false);
 const selectedIds = ref([])
-const return_reasons = [
-    '商品缺件',
-    '收到完全不同的商品',
-    '商品外表瑕疪 / 毀損',
-    '商品功能有問題',
-    '實品與賣場描述 / 圖片有落差',
-    '其他(商品須以原包裝退還)'
-]
+// const return_reasons = [
+//     '商品缺件',
+//     '收到完全不同的商品',
+//     '商品外表瑕疪 / 毀損',
+//     '商品功能有問題',
+//     '實品與賣場描述 / 圖片有落差',
+//     '其他(商品須以原包裝退還)'
+// ]
 
 const selectReturnAll = ref(false);
 
@@ -213,7 +221,8 @@ const dialogReturnToggle = () => {
 function handleSelectReturnAll(checked) {
     props.order.order_items.forEach(item => {
         selected_orderItems[item.id].quantity = checked
-            ? item.quantity
+            ? item.available_qty
+
             : 0;
     });
 }
@@ -221,7 +230,8 @@ function handleSelectReturnAll(checked) {
 //取消全選
 watchEffect(() => {
     const allSelected = props.order.order_items.every(item => {
-        return selected_orderItems[item.id]?.quantity === item.quantity;
+        return selected_orderItems[item.id]?.quantity === item.available_qty
+        ;
     });
 
     if (selectReturnAll.value !== allSelected) {
@@ -239,7 +249,7 @@ const rules = {
 const submitToReturn = async () => {
     try {
         await formValidate();
-        await test();
+        await submit_return();
     } catch (error) {
 
     }
@@ -267,15 +277,16 @@ const formValidate = async () => {
     }
 }
 
-const test = () => {
-    console.log(122);
+const submit_return = () => {
+    // const response = axios.post('')
+
 }
 
 function handleQuantityChange(id, val) {
-  if (val === 0) {
-    // selected_orderItems[id].description = '';
-    formRefs[id].resetFields('reason');
-  }
+    if (val === 0) {
+        // selected_orderItems[id].description = '';
+        formRefs[id].resetFields('reason');
+    }
 }
 
 //通知

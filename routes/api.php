@@ -6,6 +6,8 @@ use App\Http\Controllers\Back\CategoryController as BackCategoryController;
 use App\Http\Controllers\Back\SubcategoryController as BackSubcategoryController;
 use App\Http\Controllers\Back\ProductOptionController as BackProductOptionController;
 
+use App\Http\Controllers\ReturnRequestController;
+
 use App\Http\Controllers\CartController;
 use App\Libraries\UserAuth;
 
@@ -79,3 +81,6 @@ Route::middleware(['web'])->group(function () {
         return UserAuth::logout($request);
     });
 });
+
+
+Route::post('/returnRequest', [ReturnRequestController::class, 'store'])->name('returnRequest');

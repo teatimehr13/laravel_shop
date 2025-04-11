@@ -14,10 +14,17 @@ return new class extends Migration
         Schema::create('return_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('return_id')->constrained('returns')->onDelete('cascade');
-            $table->foreignId('order_item_id')->constrained('order_items')->onDelete('cascade');
+            $table->foreignId('order_item_id');
+            $table->string('name');
+            $table->integer('unit_price');
             $table->integer('quantity');
+            $table->integer('subtotal');
+            $table->integer('deduct')->default(0);
+            $table->integer('final_refund');
             $table->text('reason')->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
+
         });
     }
 

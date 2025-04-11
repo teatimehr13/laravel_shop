@@ -5,6 +5,7 @@ use App\Http\Controllers\Front\CategoryController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReturnRequestController;
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Back\ProductController as BackProductController;
@@ -135,6 +136,9 @@ Route::get('/checkout', [CheckoutController::class, 'index']);
 Route::post('/checkout/placeOrder', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
 Route::get('/order/{order}', [OrderController::class, 'show'])->name('order.show');
 // Route::resource('order', [OrderController::class, 'order'])->only(['index', 'show']);
+
+
+// Route::post('/returnRequest', [ReturnRequestController::class, 'store'])->name('returnRequest');
 
 require __DIR__ . '/auth.php';
 
