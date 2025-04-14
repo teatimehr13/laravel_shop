@@ -22,7 +22,13 @@ class ReturnItem extends Model
         'return_id',
         'order_item_id',
         'quantity',
+        'name',
+        'unit_price',
         'reason',
+        'subtotal',
+        'deduct',
+        'final_refund',
+        'description'
     ];
 
     private static function returnReasons()

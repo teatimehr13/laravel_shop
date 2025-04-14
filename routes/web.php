@@ -139,6 +139,7 @@ Route::get('/order/{order}', [OrderController::class, 'show'])->name('order.show
 
 
 // Route::post('/returnRequest', [ReturnRequestController::class, 'store'])->name('returnRequest');
+Route::post('/return/returnRequest', [ReturnRequestController::class, 'store'])->name('return.returnRequest');
 
 require __DIR__ . '/auth.php';
 

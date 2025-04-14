@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\ReturnItem;
 use App\Models\ReturnRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class OrderController extends Controller
@@ -47,6 +48,7 @@ class OrderController extends Controller
         }
 
         $orderData = $order->toArray();
+        // Log::info($orderData);
         $orderData['payment_method_label'] = Order::paymentMethodOptions()[$order->payment_method];
         $orderData['step_index'] = Order::orderStatusStepMap()[$order->order_status] ?? 0;
 

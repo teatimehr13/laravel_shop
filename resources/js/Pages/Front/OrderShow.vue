@@ -56,89 +56,91 @@
         </div>
     </div>
 
-    <el-dialog v-model="dialogReturn" title="退貨" class="return-dialog" align-center>
-        <div>
-            <el-checkbox v-model="selectReturnAll" label="全選" @change="handleSelectReturnAll" border />
-        </div>
-        <div v-for="(item, idx) in order.order_items" class="return-con-layout"
-            :class="{ 'return-con-border': selected_orderItems[item.id].quantity > 0 }">
-            <i class="checkmark" v-if="selected_orderItems[item.id].quantity > 0">
-                <el-icon><Select /></el-icon>
-            </i>
-            <!-- <div class="item-chks">
-                <el-checkbox-group v-model="selectedIds">
-                    <el-checkbox size="large" :value="item.id" :key="item.id" />
-                </el-checkbox-group>
-            </div> -->
-            <div class="item-imgs">
-                <img :src="item.image" style="max-width: 80px;">
-            </div>
-            <div class="item-details">
-                <div class="item-name flex">
-                    <div>商品名稱</div>
-                    <div>
-                        {{ item.name }}
+    <el-dialog v-model="dialogReturn" title="" class="return-dialog" align-center>
+        <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
+            <el-tab-pane label="退貨申請" name="first">
+                <!-- <ReturnForm /> -->
+                <div>
+                    <el-checkbox v-model="selectReturnAll" label="全選" @change="handleSelectReturnAll" border />
+                </div>
+                <div v-for="(item, idx) in order.order_items" class="return-con-layout"
+                    :class="{ 'return-con-border': selected_orderItems[item.id].quantity > 0 }">
+                    <i class="checkmark" v-if="selected_orderItems[item.id].quantity > 0">
+                        <el-icon><Select /></el-icon>
+                    </i>
+                    <div class="item-imgs">
+                        <img :src="item.image" style="max-width: 80px;">
+                    </div>
+                    <div class="item-details">
+                        <div class="item-name flex">
+                            <div>商品名稱</div>
+                            <div>
+                                {{ item.name }}
+                            </div>
+                        </div>
+                        <div class="item-qty flex">
+                            <div>訂單數量</div>
+                            <div>{{ item.quantity }}</div>
+                        </div>
+                        <div class="flex">
+                            <div>單價</div>
+                            <div>
+                                {{ toCurrency(item.price) }}
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <div>退貨數量</div>
+                            <div>
+                                <el-input-number v-model="selected_orderItems[item.id].quantity" :min="0"
+                                    :max="item.available_qty" size="small" style="width: 100px;"
+                                    @change="(val) => handleQuantityChange(item.id, val)" />
+                                <el-text style="margin: 0 10px;" type="danger">(可退數量：{{ item.available_qty }})</el-text>
+                            </div>
+                        </div>
+                        <div class="flex" v-show="selected_orderItems[item.id].quantity > 0">
+                            <div>退貨原因</div>
+                            <div>
+                                <el-form :model="selected_orderItems[item.id]" :rules="rules"
+                                    :ref="el => (formRefs[item.id] = el)">
+                                    <el-form-item prop="reason">
+                                        <el-select v-model="selected_orderItems[item.id].reason" placeholder="選擇退貨原因"
+                                            style="width: 300px; display: block; ">
+                                            <el-option v-for="(reason, idx) in return_reasons" :key="idx"
+                                                :label="reason.label" :value="reason.value" />
+                                        </el-select>
+                                    </el-form-item>
+                                </el-form>
+                            </div>
+                        </div>
+                        <div class="flex" v-show="selected_orderItems[item.id].quantity > 0">
+                            <div>
+                                描述
+                            </div>
+                            <div>
+                                <el-input maxlength="30" style="width: 300px" show-word-limit type="textarea"
+                                    placeholder="選填" v-model="selected_orderItems[item.id].description" />
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="item-qty flex">
-                    <div>訂單數量</div>
-                    <div>{{ item.quantity }}</div>
-                </div>
-                <div class="flex">
-                    <div>單價</div>
-                    <div>
-                        {{ toCurrency(item.price) }}
-                    </div>
-                </div>
-                <div class="flex">
-                    <div>退貨數量</div>
-                    <div>
-                        <!-- <el-select v-model="selected_orderItems[item.id].quantity" placeholder="選取數量"
-                            style="width: 70px">
-                            <el-option v-for="qty in item.quantity" :key="qty" :label="qty" :value="qty" />
-                        </el-select> -->
-                        <el-input-number v-model="selected_orderItems[item.id].quantity" :min="0"
-                            :max="item.available_qty" size="small" style="width: 100px;"
-                            @change="(val) => handleQuantityChange(item.id, val)" />
-                            <el-text style="margin: 0 10px;" type="danger">(可退數量：{{ item.available_qty }})</el-text>
-                    </div>
-                </div>
-                <div class="flex" v-show="selected_orderItems[item.id].quantity > 0">
-                    <div>退貨原因</div>
-                    <div>
-                        <el-form :model="selected_orderItems[item.id]" :rules="rules"
-                            :ref="el => (formRefs[item.id] = el)">
-                            <el-form-item prop="reason">
-                                <el-select v-model="selected_orderItems[item.id].reason" placeholder="選擇退貨原因"
-                                    style="width: 300px; display: block; ">
-                                    <el-option v-for="(reason, idx) in return_reasons" :key="idx" :label="reason.label"
-                                        :value="reason.value" />
-                                </el-select>
-                            </el-form-item>
-                        </el-form>
-                    </div>
-                </div>
-                <div class="flex" v-show="selected_orderItems[item.id].quantity > 0">
-                    <div>
-                        描述
-                    </div>
-                    <div>
-                        <el-input maxlength="30" style="width: 300px" show-word-limit type="textarea"
-                            placeholder="選填" />
-                    </div>
-                </div>
-            </div>
-        </div>
+                <el-button type="danger" @click="submitToReturn" :disabled="!canSubmit" style="margin: 10px; float: right;">提交</el-button>
+
+            </el-tab-pane>
+            <el-tab-pane label="退貨紀錄" name="second">Config</el-tab-pane>
+        </el-tabs>
 
         <template #footer>
-            <el-button type="danger" @click="submitToReturn">提交</el-button>
-            <el-button @click="dialogReturnToggle">取消</el-button>
+            <!-- <el-button type="danger" @click="submitToReturn" :disabled="!canSubmit">提交</el-button> -->
+            <!-- <el-button @click="dialogReturnToggle">關閉</el-button> -->
         </template>
+
+
     </el-dialog>
 </template>
 
 <script setup>
 import FrontendLayout from '@/Layouts/FrontendLayout.vue';
+import ReturnForm from './Component/ReturnForm.vue';
 import dayjs from 'dayjs';
 import { Memo, Money, Van, Checked } from '@element-plus/icons-vue';
 import { computed, ref, reactive, onMounted, watch, watchEffect } from 'vue';
@@ -184,60 +186,58 @@ const progressWidth = computed(() => {
     return `${percent}%`
 })
 
-const selected_orderItems = reactive({})
+const selected_orderItems = reactive({});
 
 onMounted(() => {
     props.order.order_items.forEach((item) => {
         selected_orderItems[item.id] = {
             quantity: 0,
-            reason: null
+            reason: null,
+            description: ''
         }
-
-
     })
-
 })
 
-const dialogReturn = ref(false);
-const selectedIds = ref([])
-// const return_reasons = [
-//     '商品缺件',
-//     '收到完全不同的商品',
-//     '商品外表瑕疪 / 毀損',
-//     '商品功能有問題',
-//     '實品與賣場描述 / 圖片有落差',
-//     '其他(商品須以原包裝退還)'
-// ]
+const canSubmit = computed(() => {
+    return Object.values(selected_orderItems).some(item => {
+        return item.quantity > 0 && item.reason;
+    });
 
+});
+
+console.log(canSubmit.value);
+
+const activeName = ref('first')
+
+const handleClick = (tab, event) => {
+    console.log(tab, event)
+}
+
+const dialogReturn = ref(false);
 const selectReturnAll = ref(false);
 
 const dialogReturnToggle = () => {
     dialogReturn.value = !dialogReturn.value;
-
-
 }
 
-//全選狀態
+// 計算是否所有商品都已選 (計算狀態)
+const isAllSelected = computed(() => {
+    return props.order.order_items.every(item => {
+        return selected_orderItems[item.id]?.quantity === item.available_qty;
+    });
+});
+
+// 監聽isAllSelected 狀態 (做出反應)
+watch(isAllSelected, (val) => {
+    selectReturnAll.value = val;
+});
+
+// 點擊 checkbox 時，選或取消所有
 function handleSelectReturnAll(checked) {
     props.order.order_items.forEach(item => {
-        selected_orderItems[item.id].quantity = checked
-            ? item.available_qty
-
-            : 0;
+        selected_orderItems[item.id].quantity = checked ? item.available_qty : 0;
     });
 }
-
-//取消全選
-watchEffect(() => {
-    const allSelected = props.order.order_items.every(item => {
-        return selected_orderItems[item.id]?.quantity === item.available_qty
-        ;
-    });
-
-    if (selectReturnAll.value !== allSelected) {
-        selectReturnAll.value = allSelected;
-    }
-});
 
 const rules = {
     reason: [
@@ -277,10 +277,41 @@ const formValidate = async () => {
     }
 }
 
-const submit_return = () => {
-    // const response = axios.post('')
+const submit_return = async () => {
+    // console.log(selected_orderItems); //多維物件
+
+    const submit_data = {
+        order_id: props.order.id,
+        items: Object.entries(selected_orderItems).filter(([id, e]) => e.quantity > 0 && e.reason != null)
+            .map(([id, e]) => ({
+                order_item_id: parseInt(id),
+                quantity: e.quantity,
+                reason: e.reason,
+                description: e.description || '',
+            }))
+    }
+
+    console.log(submit_data);
+
+    try {
+        const response = await axios.post('/return/returnRequest', submit_data);
+        showMessage('success', response.data.msg);
+    } catch (error) {
+        console.error(error.response?.data);
+        if (error.response && error.response.data) {
+            const res = error.response.data;
+            console.log(error);
+
+            showMessage('error', res.error || '發生未知錯誤');
+        } else {
+            // 其他錯誤，如連線問題
+            showMessage('error', '無法連接伺服器，請稍後再試');
+        }
+    }
+
 
 }
+
 
 function handleQuantityChange(id, val) {
     if (val === 0) {
@@ -533,11 +564,3 @@ function formateDate(rawTime) {
     width: 300px;
 }
 </style>
-
-
-<!-- <i v-show="paymentMethod === 'credit'" class="checkmark">
-    <el-icon><Select /></el-icon>
-</i> -->
-
-<!-- border: 1px solid #ee4d2d;
-border-radius: 3px; -->

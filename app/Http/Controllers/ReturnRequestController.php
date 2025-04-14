@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Requests\Front\ReturnRequest as ReturnRequestForm;
 use App\Models\ReturnItem;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 class ReturnRequestController extends Controller
@@ -40,22 +41,23 @@ class ReturnRequestController extends Controller
         $totalFinalRefund = 0;
 
         $pendingReturnItems = [];
-
         // Log::info($validated);
-        Log::info($pendingReturnItems);
-        
-        // return response()->json($validated);
 
         //先處理returnItem 但不建
         foreach ($validated['items'] as $item) {
             $orderItem = OrderItem::findOrFail($item['order_item_id']);
+
+            if(!$orderItem){
+                return response()->json(['error' => '找不到商品項目'], 422);
+            }
+
             $alreadyReturn = ReturnItem::where('order_item_id', $orderItem->id)->sum('quantity');
             $availableQty = $orderItem->quantity - $alreadyReturn;
 
             if ($item['quantity'] > $availableQty) {
-                return back()->withErrors([
-                    "items.{$orderItem->id}.quantity" => "退貨數量超過可退上限（最多可退 $availableQty 件）"
-                ]);
+                return response()->json([
+                    'error' => "退貨數量超過上限（最多 $availableQty 件）"
+                ], 422);
             }
 
             $unit_price = $orderItem->price;
@@ -82,23 +84,37 @@ class ReturnRequestController extends Controller
             ];
         }
 
-        //建完return再建returnItem
-        $return = ReturnRequest::create([
-            'order_id' => $validated['order_id'],
-            'return_number' => Str::uuid(),
-            'total_subtotal' => $totalSubtotal,
-            'total_deduct_amount' => $totalDeduct,
-            'total_refund_amount' => $totalFinalRefund,
-            'status' => 'pending',
-            'refund_method' => '',
-        ]);
+        // Log::info($pendingReturnItems);
 
-
-        foreach ($pendingReturnItems as $returnItem) {
-            $returnItem['return_id'] = $return->id;
-            ReturnItem::create($returnItem);
+        try{
+            //建完return再建returnItem
+            $return = ReturnRequest::create([
+                'order_id' => $validated['order_id'],
+                'return_number' => Str::uuid(),
+                'total_subtotal' => $totalSubtotal,
+                'total_deduct_amount' => $totalDeduct,
+                'total_refund_amount' => $totalFinalRefund,
+                'status' => 'pending',
+                'refund_method' => '',
+            ]);
+    
+    
+            foreach ($pendingReturnItems as $returnItem) {
+                $returnItem['return_id'] = $return->id;
+                ReturnItem::create($returnItem);
+            }
+        } catch(Exception $e) {
+            return response()->json([
+                'error' => '建立退貨資料時發生錯誤',
+                'message' => $e->getMessage()
+            ], 500);
         }
 
+        return response()->json([
+            'msg' => '退貨申請已送出',
+            // 'return_id' => $return->id,
+            // 'return_number' => $return->return_number
+        ], 201);
     }
 
 
