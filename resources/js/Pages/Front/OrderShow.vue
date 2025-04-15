@@ -16,7 +16,7 @@
             </ul>
         </div>
 
-        <div class="order-item-lists" v-for="(item, idx) in order.order_items">
+        <div class="order-item-lists" v-for="(item, idx) in state.order.order_items">
             <div class="item-imgs">
                 <img :src="item.image" style="max-width: 100px;">
             </div>
@@ -43,11 +43,11 @@
             <div class="grid-header">操作</div>
 
             <div class="grid-cell">宅配</div>
-            <div class="grid-cell">{{ formateDate(order.created_at) }}</div>
-            <div class="grid-cell">{{ order.order_number }}</div>
+            <div class="grid-cell">{{ formateDate(state.order.created_at) }}</div>
+            <div class="grid-cell">{{ state.order.order_number }}</div>
             <div class="grid-cell">{{ total_qty }}</div>
-            <div class="grid-cell total-price">{{ toCurrency(order.amount) }}</div>
-            <div class="grid-cell">{{ order.payment_method_label ?? '-' }}</div>
+            <div class="grid-cell total-price">{{ toCurrency(state.order.amount) }}</div>
+            <div class="grid-cell">{{ state.order.payment_method_label ?? '-' }}</div>
             <div class="grid-cell">
                 <el-button link type='primary' @click="dialogReturnToggle">
                     我要退貨
@@ -59,7 +59,8 @@
     <el-dialog v-model="dialogReturn" title="" class="return-dialog" align-center>
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
             <el-tab-pane label="退貨申請" name="first">
-                <ReturnForm :order="order" :return_reasons="return_reasons" :to-currency="toCurrency" @test01="test01" />
+                <ReturnForm :order="state.order" :return_reasons="return_reasons" :to-currency="toCurrency"
+                    @get-order-num="getOrderNum" />
             </el-tab-pane>
             <el-tab-pane label="退貨紀錄" name="second">Config</el-tab-pane>
         </el-tabs>
@@ -100,6 +101,12 @@ console.log(props.order);
 console.log(props.total_qty);
 console.log(props.return_reasons);
 
+const state = reactive({
+  order: props.order,
+  total_qty: props.total_qty,
+  return_reasons: props.return_reasons,
+});
+
 // console.log(props.payment_method_label);
 
 
@@ -110,7 +117,7 @@ const steps = [
     { title: '已送達', icon: Checked },
 ]
 
-const currentStep = props.order.step_index;
+const currentStep = state.order.step_index;
 // console.log(props.order.step_index);
 
 
@@ -135,9 +142,15 @@ const dialogReturnToggle = () => {
     dialogReturn.value = !dialogReturn.value;
 }
 
-const test01 = (value) => {
-    console.log(12345678);
-    console.log(value);
+const getOrderNum = async (order_number) => {
+    // console.log(order_number);
+
+    const response = await axios.get(`/order/fetchOrderData/${order_number}`);
+    console.log(response.data);
+    state.order = response.data.order;
+    state.total_qty = response.data.total_qty;
+    console.log(state);
+    
 }
 
 //通知

@@ -91,15 +91,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('categories', BackCategoryController::class)->only(['index', 'update', 'destroy', 'store']);
         Route::post('/categories/reorder', [BackCategoryController::class, 'reorderCategories']);
 
-
-
         // Route::post('/subcategories/update_sub', [BackSubcategoryController::class, 'updateSub'])->name('subcategories.updateSub');
         Route::resource('subcategories', BackSubcategoryController::class)->only(['destroy']);
         Route::post('/subcategories/{subcategory}/update_sub', [BackSubcategoryController::class, 'updateSub']);
         Route::post('/categories/{category_id}/subcategories', [BackSubcategoryController::class, 'store']);
         Route::post('/subcategories/reorder', [BackSubcategoryController::class, 'reorderSubcategories']);
-
-
 
         Route::post('/stores/update_stores', [BackStoreController::class, 'update_stores'])->name('stores.update_stores');
         Route::post('/stores/delete_stores', [BackStoreController::class, 'delete_stores'])->name('stores.delete_stores');
@@ -124,17 +120,11 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::get('/', [CartController::class, 'index']);
 });
 
-// Route::post('/back/products/{product_id}/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
-
-// Route::post('/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
-
-// Route::get('/checkout', function () {
-//     return Inertia::render('Front/Checkout');
-// })->name('checkout');
 
 Route::get('/checkout', [CheckoutController::class, 'index']);
 Route::post('/checkout/placeOrder', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
 Route::get('/order/{order}', [OrderController::class, 'show'])->name('order.show');
+Route::get('/order/fetchOrderData/{order_number}', [OrderController::class, 'fetchOrderData'])->name('order.fetchOrderData');
 // Route::resource('order', [OrderController::class, 'order'])->only(['index', 'show']);
 
 

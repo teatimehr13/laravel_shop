@@ -78,7 +78,7 @@ console.log(props.order.order_items);
 // console.log(props.showMessage);
 
 const emit = defineEmits([
-    'test01'
+    'get-order-num'
 ])
 
 const returnRef = ref('');
@@ -203,7 +203,7 @@ const submitToReturn = async () => {
     try {
         await formValidate();
         await submit_return();
-        await emit('test01', 87)
+        await emit('get-order-num', props.order.order_number)
     } catch (error) {
 
     }
@@ -268,6 +268,7 @@ const showMessage = (type, title) => {
     align-items: center;
     padding: 5px;
     flex-wrap: nowrap;
+    /* gap: 20px; */
 }
 
 .flex:not(:last-of-type) {
@@ -275,7 +276,7 @@ const showMessage = (type, title) => {
 }
 
 .flex div:first-of-type {
-    flex: 1;
+    flex: 1.5;
 
 }
 

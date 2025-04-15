@@ -41,27 +41,7 @@ class OrderController extends Controller
      */
     public function show($order_number)
     {
-        $order = Order::with('orderItems')->where('order_number', $order_number)->firstOrFail();
-        foreach($order->orderItems as $item){
-            $alreadyReturnQty = ReturnItem::where('order_item_id', $item->id)->sum('quantity');
-            $item->available_qty = $item->quantity - $alreadyReturnQty; 
-        }
-
-        $orderData = $order->toArray();
-        // Log::info($orderData);
-        $orderData['payment_method_label'] = Order::paymentMethodOptions()[$order->payment_method];
-        $orderData['step_index'] = Order::orderStatusStepMap()[$order->order_status] ?? 0;
-
-        $totalQuantity = $order->orderItems->sum('quantity');
-
-        $return_options = ReturnItem::returnReasonOptions();
-
-        return Inertia::render('Front/OrderShow', [
-            'order' => $orderData,
-            'total_qty' => $totalQuantity,
-            'return_reasons' => $return_options
-            // 'payment_method_label' => Order::paymentMethodOptions()[$order->payment_method] ?? '未知付款方式'
-        ]);
+        return Inertia::render('Front/OrderShow', $this->getOrderData($order_number));
     }
 
     /**
@@ -86,5 +66,32 @@ class OrderController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function fetchOrderData($order_number)
+    {
+        return response()->json($this->getOrderData($order_number));
+    }
+
+
+
+    // Controller 裡新增
+    private function getOrderData($order_number)
+    {
+        $order = Order::with('orderItems')->where('order_number', $order_number)->firstOrFail();
+        foreach ($order->orderItems as $item) {
+            $alreadyReturnQty = ReturnItem::where('order_item_id', $item->id)->sum('quantity');
+            $item->available_qty = $item->quantity - $alreadyReturnQty;
+        }
+
+        $orderData = $order->toArray();
+        $orderData['payment_method_label'] = Order::paymentMethodOptions()[$order->payment_method];
+        $orderData['step_index'] = Order::orderStatusStepMap()[$order->order_status] ?? 0;
+
+        return [
+            'order' => $orderData,
+            'total_qty' => $order->orderItems->sum('quantity'),
+            'return_reasons' => ReturnItem::returnReasonOptions(),
+        ];
     }
 }
