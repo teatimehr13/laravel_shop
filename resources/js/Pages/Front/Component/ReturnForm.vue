@@ -110,7 +110,7 @@ const selectReturnAll = ref(false);
 // 計算是否所有商品都已選 (計算狀態)
 const isAllSelected = computed(() => {
     return props.order.order_items.every(item => {
-        return selected_orderItems[item.id]?.quantity === item.available_qty;
+        return  selected_orderItems[item.id]?.quantity === item.available_qty;
     });
 });
 
@@ -153,6 +153,18 @@ const formValidate = async () => {
     }
 }
 
+const resetForm = () => {
+    for (const item of props.order.order_items) {
+        const id = item.id;
+        const form = formRefs[id];
+        selected_orderItems[id].description = '';
+        selected_orderItems[id].quantity = 0;
+        form.resetFields('reason');
+    }
+
+    selectReturnAll.value = false;
+}
+
 const submit_return = async () => {
     // console.log(selected_orderItems); //多維物件
 
@@ -172,7 +184,7 @@ const submit_return = async () => {
     try {
         const response = await axios.post('/return/returnRequest', submit_data);
         console.log(response.data);
-        
+
         showMessage('success', response.data.msg);
     } catch (error) {
         // console.error(error.response?.data);
@@ -208,6 +220,12 @@ const submitToReturn = async () => {
 
     }
 }
+
+
+defineExpose({
+    returnRef,
+    resetForm
+})
 
 //通知
 const showMessage = (type, title) => {

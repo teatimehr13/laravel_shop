@@ -36,7 +36,8 @@ class Order extends Model
         'order_status',
         'amount',
         'address',
-        'user_id'
+        'user_id',
+        'payment_method'
     ];
 
     //初始化模型事件，當Order被new時，自動做這些事

@@ -59,8 +59,8 @@
     <el-dialog v-model="dialogReturn" title="" class="return-dialog" align-center>
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
             <el-tab-pane label="退貨申請" name="first">
-                <ReturnForm :order="state.order" :return_reasons="return_reasons" :to-currency="toCurrency"
-                    @get-order-num="getOrderNum" />
+                <ReturnForm ref="returnRef" :order="state.order" :return_reasons="return_reasons"
+                    :to-currency="toCurrency" @get-order-num="getOrderNum" />
             </el-tab-pane>
             <el-tab-pane label="退貨紀錄" name="second">Config</el-tab-pane>
         </el-tabs>
@@ -102,9 +102,9 @@ console.log(props.total_qty);
 console.log(props.return_reasons);
 
 const state = reactive({
-  order: props.order,
-  total_qty: props.total_qty,
-  return_reasons: props.return_reasons,
+    order: props.order,
+    total_qty: props.total_qty,
+    return_reasons: props.return_reasons,
 });
 
 // console.log(props.payment_method_label);
@@ -133,6 +133,17 @@ const activeName = ref('first');
 
 const handleClick = (tab, event) => {
     // console.log(tab, event)
+    console.log(tab.props.name);
+
+    switch (tab.props.name) {
+        case "first":
+
+            break
+        case "second":
+            getReturnHistory()
+            break
+    }
+
 }
 
 const dialogReturn = ref(false);
@@ -142,15 +153,24 @@ const dialogReturnToggle = () => {
     dialogReturn.value = !dialogReturn.value;
 }
 
+const returnRef = ref('');
 const getOrderNum = async (order_number) => {
-    // console.log(order_number);
-
     const response = await axios.get(`/order/fetchOrderData/${order_number}`);
     console.log(response.data);
     state.order = response.data.order;
     state.total_qty = response.data.total_qty;
     console.log(state);
-    
+    await resetReturnForm();
+}
+
+const resetReturnForm = () => {
+    return returnRef.value.resetForm();
+}
+
+const getReturnHistory = async () => {
+    const orderId = props.order.id;
+    const response = await axios.get(`/return/return-history/${orderId}`);
+    console.log(response.data);
 }
 
 //通知

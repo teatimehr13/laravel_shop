@@ -159,10 +159,10 @@
                             </i>
                         </label>
 
-                        <label class="payment-btn" :class="{ active: paymentMethod === 'credit' }">
-                            <input type="radio" name="payment" value="credit" v-model="paymentMethod" />
+                        <label class="payment-btn" :class="{ active: paymentMethod === 'credit_card' }">
+                            <input type="radio" name="payment" value="credit_card" v-model="paymentMethod" />
                             <span>信用卡/金融卡</span>
-                            <i v-show="paymentMethod === 'credit'" class="checkmark">
+                            <i v-show="paymentMethod === 'credit_card'" class="checkmark">
                                 <el-icon><Select /></el-icon>
                             </i>
 
@@ -171,7 +171,7 @@
                 </div>
             </div>
 
-            <div class="checkout-con-layout" v-show="paymentMethod === 'credit'">
+            <div class="checkout-con-layout" v-show="paymentMethod === 'credit_card'">
                 <div class="payment-acc">
                     <span>選擇付款帳戶</span>
                 </div>
@@ -288,7 +288,7 @@ const paymentMethod = ref('cash');
 const editing = ref(false);
 
 const mapToOrderStatus = {
-    credit: 2,
+    credit_card: 2,
     cash: 3,
 }
 
@@ -306,7 +306,8 @@ const place_order = () => {
         phone: props.user.phone,
         note: order_form.note, // 預設空備註
         selected_ids: props.checkoutItems.map(item => item.productOption.id),
-        order_status: mapToOrderStatus[paymentMethod.value]
+        order_status: mapToOrderStatus[paymentMethod.value],
+        payment_method: paymentMethod.value
     })
 
     submit_form.post(route('checkout.placeOrder'));

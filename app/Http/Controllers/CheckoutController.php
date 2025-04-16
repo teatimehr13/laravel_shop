@@ -141,7 +141,8 @@ class CheckoutController extends Controller
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'note' => 'nullable|string|max:500',
-            'order_status' => 'required|integer'
+            'order_status' => 'required|integer',
+            'payment_method' => 'required|string'
         ]);
 
         $user = $request->user();
@@ -154,6 +155,7 @@ class CheckoutController extends Controller
         $total = $subtotal + $shippingFee;
 
         // Log::info($validated);
+        // return
         // Log::info($checkoutItems);
         // Log::info($subtotal);
         // Log::info($total);
@@ -169,11 +171,13 @@ class CheckoutController extends Controller
             'phone' => $validated['phone'],
             'note' => $validated['note'],
             'order_number' => $order_number,
-            'order_status' => $validated['order_status'] //變數
+            'order_status' => $validated['order_status'], //變數
+            'payment_method' => $validated['payment_method'] 
         ]);
 
         // 建立 order_items
         foreach ($checkoutItems as $item) {
+            Log::info($item['productOption']['image']);
             $order->orderItems()->create([
                 'name' => $item['product']['name'] . ' (' . $item['productOption']['color_name'] . ')',
                 'price' => $item['productOption']['price'],

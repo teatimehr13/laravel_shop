@@ -130,6 +130,7 @@ Route::get('/order/fetchOrderData/{order_number}', [OrderController::class, 'fet
 
 // Route::post('/returnRequest', [ReturnRequestController::class, 'store'])->name('returnRequest');
 Route::post('/return/returnRequest', [ReturnRequestController::class, 'store'])->name('return.returnRequest');
+Route::get('/return/return-history/{orderId}', [ReturnRequestController::class, 'fetch_return_history']);
 
 require __DIR__ . '/auth.php';
 

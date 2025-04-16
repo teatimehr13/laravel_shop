@@ -47,7 +47,7 @@ class ReturnRequestController extends Controller
         foreach ($validated['items'] as $item) {
             $orderItem = OrderItem::findOrFail($item['order_item_id']);
 
-            if(!$orderItem){
+            if (!$orderItem) {
                 return response()->json(['error' => '找不到商品項目'], 422);
             }
 
@@ -79,14 +79,14 @@ class ReturnRequestController extends Controller
                 'subtotal' => $subtotal,
                 'deduct' => $deduct,
                 'final_refund' => $finalRefund,
-                'reason'=> $item['reason'],
+                'reason' => $item['reason'],
                 'description' => $item['description'] ?? null
             ];
         }
 
         // Log::info($pendingReturnItems);
 
-        try{
+        try {
             //建完return再建returnItem
             $return = ReturnRequest::create([
                 'order_id' => $validated['order_id'],
@@ -97,13 +97,13 @@ class ReturnRequestController extends Controller
                 'status' => 'pending',
                 'refund_method' => '',
             ]);
-    
-    
+
+
             foreach ($pendingReturnItems as $returnItem) {
                 $returnItem['return_id'] = $return->id;
                 ReturnItem::create($returnItem);
             }
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'error' => '建立退貨資料時發生錯誤',
                 'message' => $e->getMessage()
@@ -148,5 +148,14 @@ class ReturnRequestController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function fetch_return_history($orderId)
+    {
+        $returnRequests = ReturnRequest::with(['returnItems.orderItem'])
+            ->where('order_id', $orderId)
+            ->get();
+
+        return response()->json($returnRequests);
     }
 }
