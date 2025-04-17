@@ -14,7 +14,11 @@ class ReturnRequest extends Model
     protected $fillable = [
         'order_id',
         'return_number',
-        'status'
+        'status',
+        'total_subtotal',
+        'total_refund_amount',
+        'total_deduct_amount',
+        'refund_method'
     ];
 
     //一個退貨單有多個退貨商品

@@ -62,7 +62,10 @@
                 <ReturnForm ref="returnRef" :order="state.order" :return_reasons="return_reasons"
                     :to-currency="toCurrency" @get-order-num="getOrderNum" />
             </el-tab-pane>
-            <el-tab-pane label="退貨紀錄" name="second">Config</el-tab-pane>
+            <el-tab-pane label="退貨紀錄" name="second" v-loading="loading">
+                <ReturnHistory ref="historyRef" :history-data="historyData" :formate-date="formateDate" :to-currency="toCurrency"/>
+
+            </el-tab-pane>
         </el-tabs>
 
         <template #footer>
@@ -77,6 +80,7 @@
 <script setup>
 import FrontendLayout from '@/Layouts/FrontendLayout.vue';
 import ReturnForm from './Component/ReturnForm.vue';
+import ReturnHistory from './Component/ReturnHistory.vue';
 import dayjs from 'dayjs';
 import { Memo, Money, Van, Checked } from '@element-plus/icons-vue';
 import { computed, ref, reactive, onMounted, watch, watchEffect } from 'vue';
@@ -140,7 +144,7 @@ const handleClick = (tab, event) => {
 
             break
         case "second":
-            getReturnHistory()
+            getReturnHistory();
             break
     }
 
@@ -167,11 +171,44 @@ const resetReturnForm = () => {
     return returnRef.value.resetForm();
 }
 
+
+const showHistory = ref(false);
+const historyData = ref();
 const getReturnHistory = async () => {
     const orderId = props.order.id;
     const response = await axios.get(`/return/return-history/${orderId}`);
     console.log(response.data);
+
+    try {
+        const response = await axios.get(`/return/return-history/${orderId}`);
+        historyData.value = response.data;
+    } catch (error) {
+        console.error('抓退貨資料失敗', error);
+        showMessage('error', '資料讀取失敗');
+    } finally {
+        loading.value = false;
+    }
 }
+
+const loading = ref(true);
+
+// const handleBeforeLeave = async(tab) => {
+//     console.log(tab);
+
+//     switch (tab) {
+//         case "first":
+//             return true;
+
+//         case "second":
+//             return true;
+//             const data = await getReturnHistory();
+//             // console.log(data);
+//             historyData.value = data;
+//             loading.value = false;
+//     }
+
+//     return false
+// }
 
 //通知
 const showMessage = (type, title) => {
