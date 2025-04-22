@@ -16,6 +16,17 @@ class Order extends Model
     const SEND_BEFORE_PAID = 'send_before_paid';
     const CANCELLED = 'cancelled';
 
+    const STATUS_PENDING = 'pending';  //0
+    const STATUS_PAID = 'paid'; //1
+    const STATUS_PROCESSING = 'processing';  //2
+    const STATUS_SHIPPED = 'shipped'; //3
+    const STATUS_DELIVERED = 'delivered'; //4
+    const STATUS_COMPLETED = 'completed'; //5
+    const STATUS_CANCELLED = 'cancelled'; //6
+    const STATUS_REFUNDED = 'refunded'; //7
+    const STATUS_PARTIAL_REFUNDED = 'partial_refunded'; //8
+
+
     const PAYMENT_CASH = 'cash';
     const PAYMENT_CREDIT_CARD = 'credit_card';
     const PAYMENT_LINE_PAY = 'line_pay';
@@ -65,14 +76,19 @@ class Order extends Model
         return null;
     }
 
+    //給前台使用者看的
     public static function orderStatusStepMap(): array
     {
         return [
-            0 => 0, // NOT_SELECTED_PAYMENT → 收到訂單
-            1 => 1, // WAITING_FOR_THE_TRANSFER → 付款資訊確認
-            2 => 1, // PAID → 付款資訊確認
-            3 => 2, // SEND_BEFORE_PAID → 運送中
-            4 => 3, // CANCELLED → 結束（可用已送達樣式處理）
+            0 => 0, // 訂單成立
+            1 => 1, // 已付款
+            2 => 1, // 處理中 也屬於付款後狀態
+            3 => 2, // 出貨中
+            4 => 3, // 已送達
+            5 => 3, // 已完成 → 當成已送達
+            6 => 3, // 取消 → 歸類為已結束
+            7 => 3, // 已退款 → 同上
+            8 => 3, // 部分退款 → 同上
         ];
     }
 
@@ -86,6 +102,47 @@ class Order extends Model
             self::PAYMENT_CVS => '超商繳費',
         ];
     }
+
+    public static function statusChineseLabels()
+    {
+        return [
+            self::STATUS_PENDING => '待付款',
+            self::STATUS_PAID => '已付款',
+            self::STATUS_PROCESSING => '處理中',
+            self::STATUS_SHIPPED => '已出貨',
+            self::STATUS_DELIVERED => '已送達',
+            self::STATUS_COMPLETED => '已完成',
+            self::STATUS_CANCELLED => '已取消',
+            self::STATUS_REFUNDED => '已退款',
+            self::STATUS_PARTIAL_REFUNDED => '部分退款',
+        ];
+    }
+
+    public static function statusKeys()
+    {
+        return [
+            0 => self::STATUS_PENDING,
+            1 => self::STATUS_PAID,
+            2 => self::STATUS_PROCESSING,
+            3 => self::STATUS_SHIPPED,
+            4 => self::STATUS_DELIVERED,
+            5 => self::STATUS_COMPLETED,
+            6 => self::STATUS_CANCELLED,
+            7 => self::STATUS_REFUNDED,
+            8 => self::STATUS_PARTIAL_REFUNDED,
+        ];
+    }
+
+    //會輸出 order_status_labe的屬性，也可直接寫在controller
+    // $key = Order::statusKeys()[$order->order_status] ?? null;
+    // $order->order_status_label = Order::orderStatusChineseLabels()[$key] ?? '未知狀態';
+    public function getOrderStatusLabelAttribute()
+    {
+        $key = self::statusKeys()[$this->order_status] ?? null;
+        return self::statusChineseLabels()[$key] ?? '';
+    }
+
+
 
     public function user()
     {
@@ -104,7 +161,8 @@ class Order extends Model
     }
 
     //一個訂單可以被退多次
-    public function returns(){
+    public function returns()
+    {
         return $this->hasMany(ReturnRequest::class);
     }
 }

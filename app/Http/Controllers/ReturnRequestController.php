@@ -154,6 +154,7 @@ class ReturnRequestController extends Controller
     {
         $returnRequests = ReturnRequest::with(['returnItems.orderItem'])
             ->where('order_id', $orderId)
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json($returnRequests);

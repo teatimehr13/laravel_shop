@@ -29,8 +29,8 @@
 
                     <el-collapse v-model="activeNames" @change="handleChange">
                         <el-collapse-item title="退貨明細" :name="item.id">
-
-                            <div class="flex" style="align-items: flex-start;" v-for="(d_item, d_idx) in item.return_items" :key="d_idx">
+                            <div class="flex" style="align-items: flex-start;"
+                                v-for="(d_item, d_idx) in item.return_items" :key="d_idx">
                                 <div>
                                     <img :src="d_item.order_item.image" style="max-width: 50px;">
                                 </div>
@@ -43,7 +43,7 @@
                                         <div>退款金額</div>
                                         <div>
                                             {{ toCurrency(d_item.unit_price) }} x
-                                            {{ d_item.quantity }} = 
+                                            {{ d_item.quantity }} =
                                             {{ toCurrency(d_item.final_refund) }}
                                         </div>
                                     </div>
@@ -51,7 +51,7 @@
                                         <div>原因</div>
                                         <div>{{ d_item.reason }}</div>
                                     </div>
-                                    <div class="flex">
+                                    <div class="flex" v-if="d_item.description">
                                         <div>備註</div>
                                         <div>{{ d_item.description }}</div>
                                     </div>
@@ -59,7 +59,6 @@
                             </div>
                         </el-collapse-item>
                     </el-collapse>
-
                 </div>
             </div>
         </div>
@@ -78,19 +77,23 @@ const props = defineProps({
     toCurrency: Function,
 })
 
+const activeNames = ref();
+
 watch(
     () => props.historyData,
     (newVal) => {
         if (newVal) {
             const historyData = reactive(props.historyData);
             console.log(historyData);
-
+            activeNames.value = historyData[0].id;
+            console.log(activeNames.value);
         }
     },
     { immediate: true }
 );
 
-const activeNames = ref([44]);
+// const activeNames = ref([47]);
+
 const handleChange = (val) => {
     console.log(val)
 }

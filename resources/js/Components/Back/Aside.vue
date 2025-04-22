@@ -32,11 +32,11 @@
                 <span>categories</span>
             </el-menu-item>
 
-            <el-menu-item index="5">
+            <el-menu-item index="/back/backorder" @click="navigateTo('backorder.index')">
                 <el-icon>
                     <!-- <setting /> -->
                 </el-icon>
-                <span>Navigator Five</span>
+                <span>order</span>
             </el-menu-item>
         </el-menu>
     </div>

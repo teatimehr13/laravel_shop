@@ -375,6 +375,7 @@ function formateDate(rawTime) {
 .return-dialog {
     min-width: 600px;
     max-width: max-content;
+    min-height: 500px;
 }
 
 .item-chks {

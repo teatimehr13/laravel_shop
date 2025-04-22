@@ -14,6 +14,8 @@ use App\Http\Controllers\Back\ProductOptionController as BackProductOptionContro
 use App\Http\Controllers\Back\StoreController as BackStoreController;
 use App\Http\Controllers\Back\NewsController as BackNewsController;
 use App\Http\Controllers\Back\CategoryController as BackCategoryController;
+use App\Http\Controllers\Back\OrderController as BackOrderController;
+
 use App\Models\Order;
 use Illuminate\Foundation\Application;
 use Inertia\Inertia;
@@ -103,6 +105,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('news', BackNewsController::class);
         Route::post('/news/update_news', [BackNewsController::class, 'update_news'])->name('news.update_news');
         Route::post('/news/delete_news', [BackNewsController::class, 'delete_news'])->name('news.delete_news');
+    
+        Route::resource('backorder', BackOrderController::class)->only(['index', 'show']);
+        
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
