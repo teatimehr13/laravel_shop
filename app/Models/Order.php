@@ -133,6 +133,20 @@ class Order extends Model
         ];
     }
 
+    public static function orderStatusSelect()
+    {
+        $keys = self::statusKeys();
+        $labels = self::statusChineseLabels();
+    
+        $result = [];
+        foreach ($keys as $index => $statusKey) {
+            $result[$index] = $labels[$statusKey] ?? $statusKey;
+        }
+    
+        return $result;
+    }
+
+
     //會輸出 order_status_labe的屬性，也可直接寫在controller
     // $key = Order::statusKeys()[$order->order_status] ?? null;
     // $order->order_status_label = Order::orderStatusChineseLabels()[$key] ?? '未知狀態';

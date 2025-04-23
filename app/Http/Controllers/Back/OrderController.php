@@ -18,11 +18,17 @@ class OrderController extends Controller
         //     return response()->json($this->fetchData($request));
         // }
         // return response()->json($this->fetchData($request));
+        
 
         $orders = $this->fetchData($request); // 包含條件篩選 + 分頁
+        $order_status_select = Order::orderStatusSelect();
+        $payment_method_select = Order::paymentMethodOptions();
+
 
         return Inertia::render('Back/Orders/Index', [
             'orders' => $orders, // 分頁後的訂單資料，Vue 可以直接用
+            'order_status_select' =>$order_status_select,
+            'payment_method_select' => $payment_method_select,
             'filters' => $request->only([
                 'order_number', 
                 'order_status', 
@@ -45,13 +51,14 @@ class OrderController extends Controller
         $order_number = $request->input('order_number');
         $order_status = $request->input('order_status');
         $payment_method = $request->input('payment_method');
+        // $payment_method = $request->filled('payment_method') ? (int) $request->input('payment_method') : null;
         $created_date = $request->input('created_at');
 
         $paymentMethodOptions = Order::paymentMethodOptions();
 
         $query = Order::query()
             ->when($order_number, fn($q) => $q->where('order_number', 'LIKE', "%{$order_number}%"))
-            ->when($order_status, fn($q) => $q->where('order_status', $order_status))
+            ->when(!is_null($order_status), fn($q) => $q->where('order_status', $order_status))
             ->when($payment_method, fn($q) => $q->where('payment_method', $payment_method))
             ->when($created_date, fn($q) => $q->whereDate('created_at', $created_date));
             
