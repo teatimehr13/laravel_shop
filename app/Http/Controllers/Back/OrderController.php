@@ -33,7 +33,9 @@ class OrderController extends Controller
                 'order_number', 
                 'order_status', 
                 'payment_method', 
-                'created_at'
+                'created_at',
+                'sort_by',
+                'sort_dir'
             ]), 
         ]);
     }
@@ -62,7 +64,18 @@ class OrderController extends Controller
             ->when($payment_method, fn($q) => $q->where('payment_method', $payment_method))
             ->when($created_date, fn($q) => $q->whereDate('created_at', $created_date));
             
-            $orders = $query->latest()->paginate(10); // 加上 eager loading 與分頁（可自訂）
+            $sort_by = $request->input('sort_by', 'created_at'); //預設用時間
+            $sort_dir = $request->input('sort_dir', 'desc'); //預設desc
+
+            $validSorts = ['created_at', 'amount'];
+            $validDirs = ['asc', 'desc'];
+
+            if (in_array($sort_by, $validSorts) && in_array($sort_dir, $validDirs)) {
+                $query->orderBy($sort_by, $sort_dir);
+            }
+            
+            $orders = $query->latest()->paginate(10); // 加上 eager loading 與分頁（可自訂
+
             $orders->through(function ($order) use ($paymentMethodOptions) {
             // getCollection()->transform // through可替代成getCollection()->transform (ver8.0以下)
             $order->payment_method_label = $paymentMethodOptions[$order->payment_method] ?? '未知';

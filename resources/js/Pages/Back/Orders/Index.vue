@@ -10,16 +10,28 @@
                     <el-input v-model="filters.order_number" placeholder="輸入訂單編號" style="width: 240px"
                         @keyup.enter="changePage()" />
 
-                    <el-select v-model="filters.order_status" placeholder="訂單狀態" style="width: 150px" @change="changePage()">
+                    <el-select v-model="filters.order_status" placeholder="訂單狀態" style="width: 150px"
+                        @change="changePage()">
                         <el-option label="全部" value="">全部</el-option>
                         <el-option v-for="(val, key) in props.order_status_select" :key="key" :label="val"
                             :value="key" />
                     </el-select>
 
-                    <el-select v-model="filters.payment_method" placeholder="付款方式" style="width: 150px" @change="changePage()">
+                    <el-select v-model="filters.payment_method" placeholder="付款方式" style="width: 150px"
+                        @change="changePage()">
                         <el-option label="全部" value="">全部</el-option>
                         <el-option v-for="(val, key) in props.payment_method_select" :key="key" :label="val"
                             :value="key" />
+                    </el-select>
+                </div>
+
+                <div class="filters">
+                    <el-select v-model="selectedSortKey" @change="handleSortChange" placeholder="排序依據"
+                        style="width: 200px; margin-right: 10px">
+                        <el-option label="訂單時間（新到舊）" :value="0" />
+                        <el-option label="訂單時間（舊到新）" :value="1" />
+                        <el-option label="金額（高到低）" :value="2" />
+                        <el-option label="金額（低到高）" :value="3" />
                     </el-select>
                 </div>
 
@@ -85,7 +97,7 @@ const props = defineProps({
     orders: Object,
     filters: Object,
     order_status_select: Array,
-    payment_method_select: Object 
+    payment_method_select: Object
 });
 
 console.log(props.orders);
@@ -117,9 +129,9 @@ const page = ref(props.orders.current_page);
 
 
 const changePage = (p = 1) => {
-    
+
     console.log(filters.value);
-    
+
     const cleanFilters = Object.fromEntries(Object.entries(filters.value).filter(([_, v]) => v !== ''));
     console.log(cleanFilters);
     // router.get(route('backorder.index'),
@@ -133,6 +145,35 @@ const changePage = (p = 1) => {
     router.get(route('backorder.index'), cleanFilters);
 };
 
+//篩選
+
+const sortOptionsMap = {
+    0: { by: 'created_at', dir: 'desc' },
+    1: { by: 'created_at', dir: 'asc' },
+    2: { by: 'amount', dir: 'desc' },
+    3: { by: 'amount', dir: 'asc' },
+};
+
+const entry = Object.entries(sortOptionsMap).find(
+  ([_, val]) => val.by === filters.value.sort_by && val.dir === filters.value.sort_dir
+);
+
+const selectedSortKey = ref(entry ? Number(entry[0]) : 0); // 預設值為 0：時間新到舊
+console.log(selectedSortKey.value);
+
+// console.log(Number(entry[0]) || 0);
+
+
+const handleSortChange = (key) => {
+    const option = sortOptionsMap[key];
+    if (option) {
+        filters.value.sort_by = option.by;
+        filters.value.sort_dir = option.dir;
+        changePage(); 
+    }
+
+    console.log(filters.value);
+};
 
 </script>
 
