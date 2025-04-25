@@ -43,8 +43,11 @@ class OrderController extends Controller
     public function show(string $id)
     {
         $order_items = Order::with('orderItems')->findOrFail($id);
+        $shippingFee = $this->calculateShippingFee($order_items->amount);
+        $order_items->shippingFee = $shippingFee;
         return Inertia::render('Back/Orders/Show', [
             'order_items' => $order_items, // 分頁後的訂單資料，Vue 可以直接用
+            // 'shippingFee' => $shippingFee
         ]);
     }
 
@@ -73,7 +76,7 @@ class OrderController extends Controller
             if (in_array($sort_by, $validSorts) && in_array($sort_dir, $validDirs)) {
                 $query->orderBy($sort_by, $sort_dir);
             }
-            
+
             $orders = $query->latest()->paginate(10); // 加上 eager loading 與分頁（可自訂
 
             $orders->through(function ($order) use ($paymentMethodOptions) {
@@ -83,5 +86,10 @@ class OrderController extends Controller
             return $order;
         });
         return $orders;
+    }
+
+    private function calculateShippingFee($subtotal)
+    {
+        return $subtotal >= 490 ? 0 : 100;
     }
 }

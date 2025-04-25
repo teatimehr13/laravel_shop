@@ -5,5 +5,10 @@
 </template>
 
 <style>
-
+.header {
+    background-color: #ffffff;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+}
 </style>

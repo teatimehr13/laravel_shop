@@ -66,14 +66,11 @@
                             <template #default="scope">
                                 <div>
                                     <el-button link type="primary">
-                                        <el-icon>
+                                        <Link :href="route('backorder.show', scope.row.id)">
+                                        <el-icon style="vertical-align: bottom;">
                                             <Search />
                                         </el-icon>
-                                        <!-- <span>
-                                查看
-                            </span> -->
-                                        <Link :href="route('backorder.show', scope.row.id)">
-                                        查看詳情
+                                        訂單詳情
                                         </Link>
                                     </el-button>
                                 </div>
@@ -155,7 +152,7 @@ const sortOptionsMap = {
 };
 
 const entry = Object.entries(sortOptionsMap).find(
-  ([_, val]) => val.by === filters.value.sort_by && val.dir === filters.value.sort_dir
+    ([_, val]) => val.by === filters.value.sort_by && val.dir === filters.value.sort_dir
 );
 
 const selectedSortKey = ref(entry ? Number(entry[0]) : 0); // 預設值為 0：時間新到舊
@@ -169,7 +166,7 @@ const handleSortChange = (key) => {
     if (option) {
         filters.value.sort_by = option.by;
         filters.value.sort_dir = option.dir;
-        changePage(); 
+        changePage();
     }
 
     console.log(filters.value);
