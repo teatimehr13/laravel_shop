@@ -45,6 +45,9 @@ class OrderController extends Controller
         $order_items = Order::with('orderItems')->findOrFail($id);
         $shippingFee = $this->calculateShippingFee($order_items->amount);
         $order_items->shippingFee = $shippingFee;
+        $paymentMethodOptions = Order::paymentMethodOptions();
+        $order_items->payment_method_label = $paymentMethodOptions[$order_items->payment_method] ?? '未知';
+        $order_items->order_status_label = $order_items->order_status_label;
         return Inertia::render('Back/Orders/Show', [
             'order_items' => $order_items, // 分頁後的訂單資料，Vue 可以直接用
             // 'shippingFee' => $shippingFee
