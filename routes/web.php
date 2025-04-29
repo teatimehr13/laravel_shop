@@ -107,7 +107,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/news/delete_news', [BackNewsController::class, 'delete_news'])->name('news.delete_news');
     
         Route::resource('backorder', BackOrderController::class)->only(['index', 'show']);
-        
+        Route::put('/backorder/{order}/status', [BackOrderController::class, 'changeOrderStatus']);
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -8,7 +8,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-
+use Illuminate\Validation\Rule;
 class OrderController extends Controller
 {
     public function index(Request $request)
@@ -46,10 +46,13 @@ class OrderController extends Controller
         $shippingFee = $this->calculateShippingFee($order_items->amount);
         $order_items->shippingFee = $shippingFee;
         $paymentMethodOptions = Order::paymentMethodOptions();
+        $order_status_select = Order::orderStatusSelect();
+
         $order_items->payment_method_label = $paymentMethodOptions[$order_items->payment_method] ?? '未知';
         $order_items->order_status_label = $order_items->order_status_label;
         return Inertia::render('Back/Orders/Show', [
             'order_items' => $order_items, // 分頁後的訂單資料，Vue 可以直接用
+            'order_status_select' => $order_status_select
             // 'shippingFee' => $shippingFee
         ]);
     }
@@ -94,5 +97,22 @@ class OrderController extends Controller
     private function calculateShippingFee($subtotal)
     {
         return $subtotal >= 490 ? 0 : 100;
+    }
+
+    public function changeOrderStatus($id, Request $request) {
+        $order = Order::findOrFail($id);
+        $validated = $request->validate([
+            // 'order_status' => ['required', Rule::in(Order::statusKeys())],
+            'order_status' => ['required', 'integer', Rule::in(array_keys(Order::statusKeys()))],
+        ]);
+
+        $order->order_status = $validated['order_status'];
+        $order->save();
+
+        // return back()->with('success', '訂單狀態更新成功');
+
+        // return Inertia::render('Back/Orders/Show', [
+        //     'order' => $order,
+        // ]);
     }
 }
