@@ -82,10 +82,13 @@ Route::middleware('auth')->group(function () {
         // Route::post('/product_options/{product_option_id}/updateProdCo', [BackProductController::class, 'updateProdCo']);
         // Route::post('/product_options/addProdCo', [BackProductController::class, 'addProdCo']);
         // Route::post('/product_options/{product_option_id}', [BackProductController::class, 'delProdCo']);
+        Route::get('/products/{id}/images', [BackProductController:: class, 'images']);
+        Route::post('/products/updateProductImages', [BackProductController::class, 'updateProductImages'])->name('updateProductImages');
+
 
         Route::resource('product_options', BackProductOptionController::class)->only('destroy', 'store', 'update');
         Route::post('/products/product_images', [BackProductOptionController::class, 'product_images'])->name('product_images');
-        Route::post('/products/updateProductImages', [BackProductOptionController::class, 'updateProductImages'])->name('updateProductImages');
+        // Route::post('/products/updateProductImages', [BackProductOptionController::class, 'updateProductImages'])->name('updateProductImages');
         // checkProductOptionImages
         Route::get('/product_options/{id}/checkImgs', [BackProductOptionController::class, 'checkProductOptionImages'])->name('checkProductOptionImages');
 

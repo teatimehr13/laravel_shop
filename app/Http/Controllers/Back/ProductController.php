@@ -8,6 +8,7 @@ use App\Http\Requests\Back\ProductOptionRequest;
 use App\Http\Resources\Back\ProductResource;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\ProductOption;
 use App\Models\Subcategory;
 use Illuminate\Http\Request;
@@ -444,4 +445,118 @@ class ProductController extends Controller
     }
 
 
+    //取值拿到產品圖片
+    public function images($id, Request $request)
+    {
+        // 根據 productOptionId 獲取相應的產品選項數據
+        $productImages = ProductOption::with('productImages')->where('product_id', $id)->get();
+
+        // 返回數據給前端
+        // return response()->json($productImages);
+        return Inertia::render('Back/Product/Images',[
+            'productImages' => $productImages,
+            'productId' => $id
+        ]);
+    }
+
+
+        //增刪改版本
+        public function updateProductImages(Request $request)
+        {
+            try {
+                $validated = $request->validate([
+                    'product_id' => 'required|integer|exists:products,id',
+                    'product_options' => 'required|array', //支援多個顏色圖片
+                    'product_options.*.po_id' => 'required|integer|exists:product_options,id',
+                    'product_options.*.product_images' => 'required|array',
+                    'product_options.*.product_images.*.id' => 'nullable|integer|exists:product_images,id',
+                    'product_options.*.product_images.*.alt_text' => 'nullable|string|max:255',
+                    'product_options.*.product_images.*.is_combination' => 'required|boolean',
+                    'product_options.*.product_images.*.image' => 'nullable|image',
+                    'product_options.*.product_images.*._delete' => 'nullable|boolean',
+                ]);
+    
+                $productId = $validated['product_id'];
+                // $validated = [
+                //     'product_options' => [
+                //         'po_id' => '',
+                //         'product_images' => [
+                //             'id' => '',
+                //             'alt_text' => '',
+                //             'is_combination' => ''
+                //         ]
+                //     ],
+                // ];
+                // Log::info($validated);
+    
+                // return;
+    
+                foreach ($validated['product_options'] as $productOptionData) {
+                    // 找到對應的 Product Option
+                    $productOption = ProductOption::findOrFail($productOptionData['po_id']);
+                    $currentMaxOrder = ProductImage::where('product_id', $productOption->product_id)->max('order') ?? 0;
+    
+                    // Log::info($productOptionData);
+                    foreach ($productOptionData['product_images'] as $productImage) {
+                        if (!empty($productImage['_delete']) && isset($productImage['id'])) {
+                            // 刪除圖片
+                            $existingImage = ProductImage::findOrFail($productImage['id']);
+                            $path = str_replace('/storage/', '', $existingImage->image);
+                            if (Storage::disk('public')->exists($path)) {
+                                Storage::disk('public')->delete($path);
+                            }
+                            $existingImage->delete();
+                        } elseif (isset($productImage['id'])) {
+                            // 更新圖片
+                            $existingImage = ProductImage::findOrFail($productImage['id']);
+                            $existingImage->update([
+                                'alt_text' => $productImage['alt_text'],
+                                'is_combination' => $productImage['is_combination'],
+                            ]);
+
+                        } else {
+                            // 新增圖片
+                            $path = null;
+                            if (isset($productImage['image'])) {
+                                $name = mt_rand() . '_' . $productImage['image']->getClientOriginalName();
+                                $path = '/storage/' . $productImage['image']->storeAs(
+                                    'product_options',
+                                    $name,
+                                    'public'
+                                );
+                            }
+    
+                            // $isCombination = ($productOption->color_name === "combo") ? 1 : $productImage['is_combination'];
+    
+                            $currentMaxOrder++;
+                            $productOption->productImages()->create([
+                                'product_option_id' => $productOption->id,
+                                'product_id' => $productOption->product_id,
+                                'alt_text' => $productImage['alt_text'],
+                                'is_combination' => $productImage['is_combination'],
+                                'image' => $path,
+                                'order' => $currentMaxOrder,
+                            ]);
+                        }
+                    }
+                }
+    
+                // ajax的方法
+                return response()->json([
+                    'message' => 'success',
+                    'updated_product_options' => ProductOption::with('productImages')->where('product_id', $productId)->get()
+    
+                ]);
+
+
+                // return Inertia::render('Back/Product/Images', [
+                //     'productImages' => ProductOption::with('productImages')->where('product_id', $productId)->get(),
+                //     'productId' => $productId,
+                // ]);
+
+                // return response()->noContent(); // 204 No Content
+            } catch (QueryException $e) {
+                return response()->json(['message' => $e->getMessage()], 500);
+            }
+        }
 }

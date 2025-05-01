@@ -22,7 +22,7 @@
 
             <div v-for="(product_option, idx) in sort_product_options" :key="product_option.id" class="images-outside">
                 <h1>{{ product_option.color_code }}</h1>
-                <el-scrollbar >
+                <el-scrollbar>
                     <div class="images scrollbar-flex-content">
                         <div v-for="(image, index) in product_option.product_images" :key="image.uid || image.id"
                             class="image-wrapper">
@@ -157,7 +157,7 @@ const productImages = async () => {
 const sort_product_options = computed(() => {
     return [...product_options].sort((a, b) => {
         return a.color_code === "combo" ? 1 : b.color_code === "combo" ? -1 : 0;
-      });
+    });
 })
 
 // 上傳圖片
@@ -183,7 +183,7 @@ const handleFileUpload = (event, optionId) => {
 
     // console.log(Array.from(files));
     console.log(option);
-    
+
 
     Array.from(files).forEach(file => {
         const newImage = {
@@ -314,7 +314,7 @@ const submitData = () => {
     loading_status.value = true;
 
     axios.post("/back/products/updateProductImages", formData, {
-        headers: { "Content-Type": "multipart/form-data" }  
+        headers: { "Content-Type": "multipart/form-data" }
     }).then(response => {
         console.log(response.data);
         Object.assign(product_options, response.data.updated_product_options || []);
