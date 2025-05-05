@@ -58,11 +58,11 @@
                                 顏色管理
                             </el-button>
 
+                            <Link :href="route('images.show', scope.row.id)" style="padding: 5px 11px;">
                             <el-button size="small" color="#626aef" plain>
-                                <Link :href="route('images.show', scope.row.id)">
-                                    附圖管理
-                                </Link>
+                                附圖管理
                             </el-button>
+                            </Link>
 
                             <el-popover :placement="popoverPlacement" trigger="click" :width="700" transition="none"
                                 v-model:visible="popoverVisible[scope.row.id]" popper-class="custom-scrollbar"
@@ -70,8 +70,7 @@
                                 :popper-style="popoverStyle" @before-leave="enableScroll" :offset="offSet"
                                 ref="popoverRef" @before-enter="openEditPopover(scope.row)">
                                 <template #reference>
-                                    <el-button size="small" 
-                                        :ref="el => (triggerRefs[scope.row.id] = el)"
+                                    <el-button size="small" :ref="el => (triggerRefs[scope.row.id] = el)"
                                         :class="{ activeButton: activeRow === scope.row.id }">編輯</el-button>
                                 </template>
 
@@ -302,22 +301,22 @@ const openEditPopover = (row) => {
     console.log(row);
     nextTick(() => {
         // setTimeout(() => {
-            formRef2.value.resetForm();
-            formRef2.value.setFormData(row); //popForm
+        formRef2.value.resetForm();
+        formRef2.value.setFormData(row); //popForm
 
-            fileList.value = row.image ? [
-                {
-                    name: row.name,
-                    url: row.image,
-                    uid: genFileId(),
-                },
-            ] : [];
+        fileList.value = row.image ? [
+            {
+                name: row.name,
+                url: row.image,
+                uid: genFileId(),
+            },
+        ] : [];
 
-            uploadList.value = [
-                {
-                    delete_image: false
-                },
-            ]
+        uploadList.value = [
+            {
+                delete_image: false
+            },
+        ]
         // }, 100)
     })
 
