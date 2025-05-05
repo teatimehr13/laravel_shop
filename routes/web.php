@@ -82,7 +82,7 @@ Route::middleware('auth')->group(function () {
         // Route::post('/product_options/{product_option_id}/updateProdCo', [BackProductController::class, 'updateProdCo']);
         // Route::post('/product_options/addProdCo', [BackProductController::class, 'addProdCo']);
         // Route::post('/product_options/{product_option_id}', [BackProductController::class, 'delProdCo']);
-        Route::get('/products/{id}/images', [BackProductController:: class, 'images']);
+        Route::get('/products/{id}/images', [BackProductController:: class, 'images'])->name('images.show');
         Route::post('/products/updateProductImages', [BackProductController::class, 'updateProductImages'])->name('updateProductImages');
 
 

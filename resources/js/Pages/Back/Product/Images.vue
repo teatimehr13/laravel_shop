@@ -1,56 +1,95 @@
 <template>
-    <div v-for="(val, key) in sort_product_options" :key="val.id" class="images-outside">
-        <h1>{{ val.color_name }}</h1>
+    <Header />
+    <main>
+        <div class="containers">
+            <p style="margin-bottom: 32px;">
+                <el-button link @click="goBack">
+                    <el-icon>
+                        <ArrowLeft />
+                    </el-icon>
+                    回上一頁
+                </el-button>
+                <hr style="margin-top: 8px;">
+            </p>
 
-        <div class="images scrollbar-flex-content">
-            <div v-for="(img_val, img_key) in val.product_images" :key="img_val.uid || img_val.id"
-                class="image-wrapper">
-                <div class="image-container" :class="{ 'image-deleted': img_val._delete }">
-                    <div class="demo-image__preview">
-                        <el-image v-if="val.product_images.length" style="width: 100px; height: 100px"
-                            :src="img_val.image" :preview-src-list="getPreviewList(val.product_images)" show-progress
-                            fit="cover" :initial-index="img_key" />
-                    </div>
-                    <!-- 浮水印，只有當 `_delete: true` 才顯示 -->
-                    <div v-if="img_val._delete" class="watermark">
-                        <span>刪除</span>
-                    </div>
-                </div>
+            <div v-if="productImages.length" v-for="(val, key) in sort_product_options" :key="val.id" class="images-outside">
+                <h1>{{ val.color_name }}</h1>
+                <div class="scroll-wrapper" style="position: relative">
+                    <el-scrollbar class="scroll-container" :ref="el => scrollbarRefs[val.id] = el"
+                        @scroll="checkScrollEnd(val.id)">
+                        <div class="scrollbar-flex-content images">
+                            <div v-for="(img_val, img_key) in val.product_images" :key="img_val.uid || img_val.id"
+                                class="image-wrapper">
+                                <div class="image-container" :class="{ 'image-deleted': img_val._delete }">
+                                    <div class="demo-image__preview">
+                                        <el-image v-if="val.product_images.length" style="width: 100px; height: 100px"
+                                            :src="img_val.image" :preview-src-list="getPreviewList(val.product_images)"
+                                            show-progress fit="cover" :initial-index="img_key" />
+                                    </div>
+                                    <!-- 浮水印，只有當 `_delete: true` 才顯示 -->
+                                    <div v-if="img_val._delete" class="watermark">
+                                        <span>刪除</span>
+                                    </div>
+                                </div>
 
-                <el-input v-model="img_val.alt_text" @change="img_val.alt_text = normalizeText(img_val.alt_text)"
-                    style="width: 200px" placeholder="Alt Text" />
+                                <el-input v-model="img_val.alt_text"
+                                    @change="img_val.alt_text = normalizeText(img_val.alt_text)" style="width: 200px"
+                                    placeholder="Alt Text" />
 
-                <!-- 刪除 & 還原按鈕 -->
-                <div class="toggle_btn">
-                    <el-button v-if="img_val.id === null" @click="removeImage(val.id, null, img_val.uid)">刪除</el-button>
-                    <el-button v-else-if="!img_val._delete" @click="removeImage(val.id, img_val.id)">標記刪除</el-button>
-                    <el-button v-else @click="restoreImage(val.id, img_val.id)" type="danger" plain
-                        class="del_btn">還原</el-button>
+                                <!-- 刪除 & 還原按鈕 -->
+                                <div class="toggle_btn">
+                                    <el-button v-if="img_val.id === null" class="upload-delete-btn"
+                                        @click="removeImage(val.id, null, img_val.uid)">
+                                        <span class="default-text">待上傳</span>
+                                        <span class="hover-text">刪除</span></el-button>
+                                    <el-button v-else-if="!img_val._delete"
+                                        @click="removeImage(val.id, img_val.id)">標記刪除</el-button>
+                                    <el-button v-else @click="restoreImage(val.id, img_val.id)" type="danger" plain
+                                        class="del_btn">還原</el-button>
+                                </div>
+                            </div>
+
+
+                            <input type="file" multiple class="hidden-input" :ref="el => fileInputs[val.id] = el"
+                                @change="handleFileUpload($event, val.id)" />
+
+                            <div class="upload-placeholder" @click="triggerUpload(val.id)">
+                                <el-tooltip class="box-item" effect="dark" content="新增檔案" placement="top">
+                                    <el-button>
+                                        <el-icon>
+                                            <Plus />
+                                        </el-icon>
+                                    </el-button>
+                                </el-tooltip>
+                            </div>
+                        </div>
+
+
+                        <el-button class="scroll-to-end-btn" @click="scrollToRight(val.id)"
+                            v-if="hasOverflow[val.id] && !atScrollEnd[val.id]">
+                            <el-icon>
+                                <ArrowRight />
+                            </el-icon>
+                        </el-button>
+
+                    </el-scrollbar>
                 </div>
             </div>
 
-            <input type="file" multiple class="hidden-input" :ref="el => fileInputs[val.id] = el"
-                @change="handleFileUpload($event, val.id)" />
+            <div v-else>
+                尚無附圖資料
+            </div>
 
-            <div class="upload-placeholder" @click="triggerUpload(val.id)">
-                <el-tooltip class="box-item" effect="dark" content="新增檔案" placement="top">
-                    <el-button>
-                        <el-icon>
-                            <Plus />
-                        </el-icon>
-                    </el-button>
-                </el-tooltip>
+            <div>
+                <el-button type="danger" v-if="productImages.length" @click="submitData" class="submit-button">更新</el-button>
             </div>
         </div>
-    </div>
-
-    <div>
-        <el-button type="danger" @click="submitData">更新</el-button>
-    </div>
+    </main>
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue';
+import Header from '@/Components/Back/Header.vue';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -249,6 +288,59 @@ const submitData = () => {
 
 }
 
+
+const scrollbarRefs = reactive({});
+const hasOverflow = reactive({}); // 每組是否 overflow
+const atScrollEnd = reactive({});
+
+
+const scrollToRight = (id) => {
+    // console.log(scrollbarRef.value[3]?.wrapRef);
+
+    const wrap = scrollbarRefs[id]?.wrapRef;
+    if (wrap) {
+        wrap.scrollTo({
+            left: wrap.scrollWidth,
+            behavior: 'smooth',
+        });
+
+        setTimeout(() => checkScrollEnd(id), 500);
+    }
+};
+
+onMounted(() => {
+    scrollbuttonVisible();
+});
+
+
+function scrollbuttonVisible() {
+    Object.keys(scrollbarRefs).forEach((key) => {
+        // console.log(scrollbarRefs[key].wrapRef);
+        const wrap = scrollbarRefs[key]?.wrapRef;
+        if (wrap) {
+            hasOverflow[key] = wrap.scrollWidth > wrap.clientWidth;
+        }
+    });
+}
+
+watch(
+    () => productImages,
+    () => {
+        nextTick(() => scrollbuttonVisible());
+    },
+    { deep: true }
+);
+
+
+function checkScrollEnd(id) {
+    const wrap = scrollbarRefs[id]?.wrapRef;
+    if (!wrap) return;
+
+    const isEnd = Math.abs(wrap.scrollLeft + wrap.clientWidth - wrap.scrollWidth) < 1;
+
+    atScrollEnd[id] = isEnd;
+}
+
 function normalizeText(value) {
     const trimmed = (value ?? '').trim();
     return trimmed === '' ? null : trimmed;
@@ -261,12 +353,22 @@ const showMessage = (type, title) => {
         position: 'bottom-left',
     });
 };
+
+function goBack() {
+    window.history.back();
+}
+
 </script>
 
 <style scoped>
+.containers {
+    padding: 2rem 1.5rem;
+}
+
 .images-outside {
     border-bottom: 1px solid #ededed;
     padding-bottom: 5px;
+    margin-bottom: 1.25rem;
 }
 
 .scrollbar-flex-content {
@@ -382,5 +484,56 @@ h1 {
 ::v-deep(.toggle_btn > button:not(.del_btn)) {
     color: #172B4D;
     background: #091E420F;
+}
+
+.scroll-to-end-btn {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    right: 0;
+    z-index: 10;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    background-color: rgba(0, 0, 0, .3);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+.upload-delete-btn {
+    background: #3ba141 !important;
+    color: white !important;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s;
+}
+
+.upload-delete-btn:hover {
+    background: #d82f2f !important;
+}
+
+.upload-delete-btn:hover span {
+    color: white;
+    /* 紅色文字 */
+}
+
+.upload-delete-btn .hover-text {
+    display: none;
+}
+
+.upload-delete-btn:hover .default-text {
+    display: none;
+}
+
+.upload-delete-btn:hover .hover-text {
+    display: inline;
+}
+
+::v-deep(.submit-button) {
+    width: 7rem;
+    padding: 1.25rem;
+    display: flex;
+    margin: auto;
 }
 </style>

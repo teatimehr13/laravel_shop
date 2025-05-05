@@ -58,6 +58,12 @@
                                 顏色管理
                             </el-button>
 
+                            <el-button size="small" color="#626aef" plain>
+                                <Link :href="route('images.show', scope.row.id)">
+                                    附圖管理
+                                </Link>
+                            </el-button>
+
                             <el-popover :placement="popoverPlacement" trigger="click" :width="700" transition="none"
                                 v-model:visible="popoverVisible[scope.row.id]" popper-class="custom-scrollbar"
                                 @show="handlePopoverShow(scope.row.id)" :show-after="100" :hide-after="0"
@@ -92,6 +98,7 @@
                                 </template>
                             </el-popconfirm>
 
+
                         </template>
                     </el-table-column>
                 </el-table>
@@ -117,8 +124,8 @@
                     :color_options_data="color_options_data" @toggle-add="toggleAdd" @toggle-add-btn="toggleAddBtn"
                     @remove-verify="removeVerify" />
 
-                <ProductCoAttPicForm :colorOptions="color_options_data" :productId="productId"
-                    v-model:dialogColorVisible="dialogColorVisible" />
+                <!-- <ProductCoAttPicForm :colorOptions="color_options_data" :productId="productId"
+                    v-model:dialogColorVisible="dialogColorVisible" /> -->
             </el-dialog>
         </template>
     </BackendLayout>
@@ -136,6 +143,7 @@ import ProductCoAttPicForm from "./FormComponent/ProductCoAttPicForm.vue";
 import debounce from "lodash.debounce";
 import { genFileId, valueEquals } from 'element-plus'
 import DOMPurify from 'dompurify';
+import { Link } from '@inertiajs/vue3';
 
 
 const props = defineProps({
