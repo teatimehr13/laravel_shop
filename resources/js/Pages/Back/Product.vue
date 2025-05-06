@@ -58,13 +58,19 @@
                                 顏色管理
                             </el-button>
 
-                            <Link :href="route('images.show', scope.row.id)" style="padding: 5px 11px;">
+                            <Link :href="route('images.show', scope.row.id)" style="margin:0 11px;">
                             <el-button size="small" color="#626aef" plain>
                                 附圖管理
                             </el-button>
                             </Link>
 
-                            <el-popover :placement="popoverPlacement" trigger="click" :width="700" transition="none"
+                            <Link :href="route('products.edit', scope.row.id)" style="margin-right:11px;">
+                            <el-button size="small">
+                                編輯
+                            </el-button>
+                            </Link>
+
+                            <!-- <el-popover :placement="popoverPlacement" trigger="click" :width="700" transition="none"
                                 v-model:visible="popoverVisible[scope.row.id]" popper-class="custom-scrollbar"
                                 @show="handlePopoverShow(scope.row.id)" :show-after="100" :hide-after="0"
                                 :popper-style="popoverStyle" @before-leave="enableScroll" :offset="offSet"
@@ -74,15 +80,14 @@
                                         :class="{ activeButton: activeRow === scope.row.id }">編輯</el-button>
                                 </template>
 
-                                <ProductForm v-model:file-list="fileList" v-model:form-data="popForm"
-                                    v-model:uploadList="uploadList" @submit="onSubmitEdit" @uploadList="emitUploadList"
-                                    ref="formRef2" />
+    <ProductForm v-model:file-list="fileList" v-model:form-data="popForm" v-model:uploadList="uploadList"
+        @submit="onSubmitEdit" @uploadList="emitUploadList" ref="formRef2" />
 
-                                <el-form-item>
-                                    <el-button type="primary" @click="onSubmitEdit(scope.row.id)">儲存</el-button>
-                                    <el-button @click="closePopover(scope.row.id)">關閉</el-button>
-                                </el-form-item>
-                            </el-popover>
+    <el-form-item>
+        <el-button type="primary" @click="onSubmitEdit(scope.row.id)">儲存</el-button>
+        <el-button @click="closePopover(scope.row.id)">關閉</el-button>
+    </el-form-item>
+    </el-popover> -->
 
                             <el-popconfirm title="確定移除此筆資料?" @confirm="onSubmitDel(scope.row.id)" :width="170"
                                 :hide-after="100" v-model:visible="popconfirmVisible[scope.row.id]">
@@ -114,6 +119,7 @@
 
             <!-- 增刪改查product color -->
             <el-dialog v-model="dialogColorVisible" :title="product_dialog_title" width="1000" align-center>
+
                 <ProductCoEditForm v-model:color_options_data="color_options_data" v-model:fileList_co="fileList_co"
                     v-model:tempRow="tempRow" :editingRow="editingRow" @toggle-edit="toggleEdit"
                     @cancel-edit="cancelEdit" @del-co="chkCoImgs" ref="colorFormRef" />
@@ -156,7 +162,7 @@ const props = defineProps({
     }
 });
 
-// console.log(props);
+console.log(props);
 
 const products = ref([...props.products]);
 const categories = ref([...props.categories]);

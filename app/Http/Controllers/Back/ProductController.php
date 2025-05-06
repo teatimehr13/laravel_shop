@@ -131,7 +131,13 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $product = Product::find($id);
+        $subcategories = $product->subcategory->category->subcategories;
+
+        return Inertia::render('Back/Product/Edit', [
+            'product' => $product,
+            'subcategories' => $subcategories
+        ]);
     }
 
     /**

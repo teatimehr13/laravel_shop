@@ -76,7 +76,7 @@ Route::middleware('auth')->group(function () {
         //     return Inertia::render('Back/Product');
         // })->name('products');
 
-        Route::resource('products', BackProductController::class)->only(['index', 'update', 'destroy', 'store']);
+        Route::resource('products', BackProductController::class)->only(['index', 'update', 'destroy', 'store', 'edit']);
         Route::post('/categories/{category_id}/subsel', [BackProductController::class, 'getSubSel']);
         Route::get('/products/{product_id}/prod_options', [BackProductController::class, 'prod_options']);
         // Route::post('/product_options/{product_option_id}/updateProdCo', [BackProductController::class, 'updateProdCo']);

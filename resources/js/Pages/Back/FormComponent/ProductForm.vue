@@ -101,6 +101,9 @@ const props = defineProps({
         default: "edit", // 預設為編輯模式
     },
 });
+
+// console.log(props);
+
 // console.log(props.formData);
 
 //傳給父組件資料
