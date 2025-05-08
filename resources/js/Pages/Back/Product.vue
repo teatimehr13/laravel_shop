@@ -1,12 +1,24 @@
 <template>
     <BackendLayout>
         <template #switch>
-            <div>
+            <div class="main-container">
                 <div>
                     <el-button type="" @click="dialogToggle" style="margin: 10px 0;">新增產品</el-button>
                 </div>
 
-                <el-table :data="products" style="width: 100%; height: calc(100vh - 250px)"
+                <div class="filters">
+                    <el-input v-model="filters.name" placeholder="輸入訂單編號" style="width: 240px"
+                        @keyup.enter="changePage()" />
+
+                    <el-select v-model="filters.subcategory_id" placeholder="選擇類別" @change="changePage()"
+                        style="width: 150px">
+                        <el-option label="全部類別" value="" />
+                        <el-option v-for="(val, idx) in subcategories" :key="val.id" :value="Number(val.id)"
+                            :label="val.name" />
+                    </el-select>
+                </div>
+
+                <el-table :data="products" style="width: 100%; "
                     :row-class-name="getRowClass" border>
                     <el-table-column width="220" :fixed="isFixedStore ? 'left' : false" prop="name">
                         <template #header>
@@ -106,6 +118,12 @@
                         </template>
                     </el-table-column>
                 </el-table>
+
+                <div class="example-pagination-block">
+                    <div class="example-demonstration">When you have more than 7 pages</div>
+                    <el-pagination layout="prev, pager, next" :total="data.total" :page-size="data.per_page"
+                        v-model:current-page="data.current_page" @current-change="goToPage" />
+                </div>
             </div>
 
             <el-dialog v-model="dialogFormToggle" title="新增" class="productForm-dialog" align-center>
@@ -148,7 +166,7 @@ import ProductCoAttPicForm from "./FormComponent/ProductCoAttPicForm.vue";
 import debounce from "lodash.debounce";
 import { genFileId, valueEquals } from 'element-plus'
 import DOMPurify from 'dompurify';
-import { Link } from '@inertiajs/vue3';
+import { Link, router,usePage } from '@inertiajs/vue3';
 
 
 const props = defineProps({
@@ -159,16 +177,29 @@ const props = defineProps({
     categories: {
         type: Object,
         required: true
-    }
+    },
+    filters: Object,
+    subcategories: Array
 });
 
 console.log(props);
 
-const products = ref([...props.products]);
-const categories = ref([...props.categories]);
-console.log(categories.value);
+const page = usePage();
+console.log(page);
 
+const data = reactive({ ...props.products });
+const products = ref(data.data);
+const categories = ref([...props.categories]);
+const filters = page.props.filters;
+filters.subcategory_id = filters.subcategory_id != null ? Number(filters.subcategory_id) : filters.subcategory_id;
+
+console.log(categories.value);
 console.log(products.value);
+
+
+
+
+// const currentPage = ref(data.current_page);
 
 const emitUploadList = (data) => {
     uploadList.value = data;
@@ -922,6 +953,34 @@ watch(
 );
 
 
+const changePage = (p = 1) => {
+
+    // console.log(filters.value);
+    console.log(filters);
+
+    const cleanFilters = Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== '' && v !== null));
+    console.log(cleanFilters);
+    // router.get(route('backorder.index'),
+    //     ...cleanFilters,
+    //     // page: p
+    //  {
+    //     preserveState: true,
+    //     preserveScroll: true
+    // });
+    // router.get(route('backorder.index'), { order_number: filters.value.order_number })
+    router.get(route('products.index'), cleanFilters);
+};
+
+function goToPage(p) {
+    p = data.current_page;
+    const cleanFilters = Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== '' && v !== null));
+
+    router.get('/back/products', {
+        cleanFilters,
+        page: p
+    });
+}
+
 
 function formatDate(input) {
     if (!input) return null;
@@ -1039,9 +1098,27 @@ function formatDate(input) {
     min-width: 700px;
 }
 
+.filters {
+    margin: 10px 0 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.example-pagination-block+.example-pagination-block {
+    margin-top: 10px;
+}
+
+.example-pagination-block .example-demonstration {
+    margin-bottom: 16px;
+}
 
 /* ::v-deep(.productForm-dialog) {
   max-height: 100vh;
   overflow: hidden;
 } */
+
+ .main-container{
+    height: 100%;
+    overflow-y: auto;
+ }
 </style>

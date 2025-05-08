@@ -19,12 +19,11 @@
                 <span>products</span>
             </el-menu-item>
 
-            <el-menu-item index="/back/news" @click="navigateTo('news.index')">
+            <!-- <el-menu-item index="/back/news" @click="navigateTo('news.index')">
                 <el-icon>
-                    <!-- <document /> -->
                 </el-icon>
                 <span>news</span>
-            </el-menu-item>
+            </el-menu-item> -->
             <el-menu-item index="/back/categories" @click="navigateTo('categories.index')">
                 <el-icon>
                     <!-- <setting /> -->
@@ -65,3 +64,14 @@ const navigateTo = (routeName) => {
 
 // } from '@element-plus/icons-vue'
 </script>
+
+<style scoped>
+.aside {
+  /* position: fixed;
+  top: 60px;
+  left: 0;
+  width: 200px;
+  bottom: 0;
+  overflow-y: auto; */
+}
+</style>

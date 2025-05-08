@@ -48,12 +48,19 @@ main {
     flex-grow: 1;
     padding: 20px;
 } */
- 
+
 .el-header {
     background-color: #ffffff;
     color: #333;
     text-align: center;
     line-height: 60px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    /* 根據實際高度調整 */
+    z-index: 1000;
 }
 
 /* .el-aside {
@@ -69,6 +76,11 @@ main {
     color: #333;
     border-top: 1px solid rgb(237, 240, 247);
     padding: 20px;
+    margin-left: 200px;
+    margin-top: 60px;
+    height: calc(100vh - 60px); 
+    overflow: hidden;
+    /* position: fixed; */
 }
 
 .el-main>div:first-of-type {
@@ -76,6 +88,20 @@ main {
     border-radius: 8px;
     box-shadow: 0 1px 4px 0 rgba(74, 91, 109, .1);
     padding: 16px 24px 24px;
+}
+
+.el-aside {
+    margin-top: 100px;
+    position: fixed;
+    left: 0;
+    width: 200px;
+    bottom: 0;
+    overflow-y: auto;
+    top: 0;
+}
+
+.el-menu {
+    border: none;
 }
 
 body>.el-container {
