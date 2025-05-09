@@ -79,8 +79,7 @@ main {
     margin-left: 200px;
     margin-top: 60px;
     height: calc(100vh - 60px); 
-    overflow: hidden;
-    /* position: fixed; */
+    overflow: auto;
 }
 
 .el-main>div:first-of-type {
@@ -88,16 +87,18 @@ main {
     border-radius: 8px;
     box-shadow: 0 1px 4px 0 rgba(74, 91, 109, .1);
     padding: 16px 24px 24px;
+
 }
 
 .el-aside {
-    margin-top: 100px;
+    margin-top: 60px;
     position: fixed;
     left: 0;
     width: 200px;
     bottom: 0;
     overflow-y: auto;
     top: 0;
+    border-top: 1px solid #f3f3f3;
 }
 
 .el-menu {

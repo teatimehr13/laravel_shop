@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
+
 class OrderController extends Controller
 {
     public function index(Request $request)
@@ -18,7 +19,7 @@ class OrderController extends Controller
         //     return response()->json($this->fetchData($request));
         // }
         // return response()->json($this->fetchData($request));
-        
+
 
         $orders = $this->fetchData($request); // 包含條件篩選 + 分頁
         $order_status_select = Order::orderStatusSelect();
@@ -27,16 +28,16 @@ class OrderController extends Controller
 
         return Inertia::render('Back/Orders/Index', [
             'orders' => $orders, // 分頁後的訂單資料，Vue 可以直接用
-            'order_status_select' =>$order_status_select,
+            'order_status_select' => $order_status_select,
             'payment_method_select' => $payment_method_select,
             'filters' => $request->only([
-                'order_number', 
-                'order_status', 
-                'payment_method', 
+                'order_number',
+                'order_status',
+                'payment_method',
                 'created_at',
                 'sort_by',
                 'sort_dir'
-            ]), 
+            ]),
         ]);
     }
 
@@ -72,20 +73,20 @@ class OrderController extends Controller
             ->when(!is_null($order_status), fn($q) => $q->where('order_status', $order_status))
             ->when($payment_method, fn($q) => $q->where('payment_method', $payment_method))
             ->when($created_date, fn($q) => $q->whereDate('created_at', $created_date));
-            
-            $sort_by = $request->input('sort_by', 'created_at'); //預設用時間
-            $sort_dir = $request->input('sort_dir', 'desc'); //預設desc
 
-            $validSorts = ['created_at', 'amount'];
-            $validDirs = ['asc', 'desc'];
+        $sort_by = $request->input('sort_by', 'created_at'); //預設用時間
+        $sort_dir = $request->input('sort_dir', 'desc'); //預設desc
 
-            if (in_array($sort_by, $validSorts) && in_array($sort_dir, $validDirs)) {
-                $query->orderBy($sort_by, $sort_dir);
-            }
+        $validSorts = ['created_at', 'amount'];
+        $validDirs = ['asc', 'desc'];
 
-            $orders = $query->latest()->paginate(10); // 加上 eager loading 與分頁（可自訂
+        if (in_array($sort_by, $validSorts) && in_array($sort_dir, $validDirs)) {
+            $query->orderBy($sort_by, $sort_dir);
+        }
 
-            $orders->through(function ($order) use ($paymentMethodOptions) {
+        $orders = $query->latest()->paginate(2)->withQueryString(); // 加上 eager loading 與分頁（可自訂
+
+        $orders->through(function ($order) use ($paymentMethodOptions) {
             // getCollection()->transform // through可替代成getCollection()->transform (ver8.0以下)
             $order->payment_method_label = $paymentMethodOptions[$order->payment_method] ?? '未知';
             $order->order_status_label = $order->order_status_label;
@@ -99,7 +100,8 @@ class OrderController extends Controller
         return $subtotal >= 490 ? 0 : 100;
     }
 
-    public function changeOrderStatus($id, Request $request) {
+    public function changeOrderStatus($id, Request $request)
+    {
         $order = Order::findOrFail($id);
         $validated = $request->validate([
             // 'order_status' => ['required', Rule::in(Order::statusKeys())],

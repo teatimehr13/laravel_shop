@@ -1,22 +1,24 @@
 <template>
     <BackendLayout>
         <template #switch>
-            <el-button style="margin: 10px 0;" @click="addCgToggle">添加類別</el-button>
-            <el-tooltip class="box-item" effect="dark" :content="isCgDraggable === false ? '進行拖曳表格調整' : '結束拖曳表格調整'"
-                placement="top-start">
-                <el-button v-show="!NewSubRowButton" style="margin: 10px;" @click="toggleDraggable(TypeEnum.CATEGORY)"
-                    :type="isCgDraggable === false ? '' : 'primary'">
-                    {{ isCgDraggable === false ? "調整順序" : "退出調整" }}
-                </el-button>
-            </el-tooltip>
-
             <div>
+                <div style="margin: 10px 0 15px;">
+                    <el-button  @click="addCgToggle">添加類別</el-button>
+                    <el-tooltip class="box-item" effect="dark" :content="isCgDraggable === false ? '進行拖曳表格調整' : '結束拖曳表格調整'"
+                        placement="top-start">
+                        <el-button v-show="!NewSubRowButton"
+                            @click="toggleDraggable(TypeEnum.CATEGORY)" :type="isCgDraggable === false ? '' : 'primary'">
+                            {{ isCgDraggable === false ? "調整順序" : "退出調整" }}
+                        </el-button>
+                    </el-tooltip>
+                </div>
+
                 <VueDraggable v-model="categories.data" target="tbody" @end="(evt) => onDragEnd(evt, TypeEnum.CATEGORY)"
                     :animation="150" ghostClass="ghost" :disabled="!isCgDraggable">
                     <el-form :model="tempCgRow" :rules="rules" ref="cgFormRef">
-                        <el-table :data="categories.data" style="width: 100%; height: calc(100vh - 250px)"
-                            v-el-table-infinite-scroll="loadMore" v-loading="loading"
-                            :infinite-scroll-disabled="loading" element-loading-text="加載中..." border>
+                        <el-table :data="categories.data" style="width: 100%;" v-el-table-infinite-scroll="loadMore"
+                            v-loading="loading" :infinite-scroll-disabled="loading" element-loading-text="加載中..."
+                            border>
 
                             <el-table-column width="220" :fixed="isFixedStore ? 'left' : false" prop="name">
                                 <!-- <template #header>
@@ -208,7 +210,7 @@
 
                 <div v-show="NewSubRow" class="new_sub_row">
                     <el-form :model="NewSubRowData" :rules="rules" ref="newSubFormRef">
-                        <el-row>
+                        <el-row class="new_sub_form_row">
                             <el-col>
                                 <el-form-item prop="name">
                                     <el-input v-model="NewSubRowData.name" placeholder="輸入子類別" size="small" />
@@ -390,7 +392,7 @@ const toggleDraggable = (type) => {
     }
 
 }
-   
+
 const onDragEnd = (evt, type) => {
     let data = type === TypeEnum.SUBCATEGORY ? subcategory.value : categories.data;
 
@@ -825,7 +827,7 @@ const formValidate = (forRef) => {
     box-shadow: none;
 }
 
-::v-deep(.el-row) {
+::v-deep(.new_sub_form_row) {
     display: grid;
     grid-template-columns: 220px 220px 220px 108px 200px;
     align-items: center;
@@ -834,7 +836,7 @@ const formValidate = (forRef) => {
 
 }
 
-::v-deep(.el-row > div) {
+::v-deep(.new_sub_form_row > div) {
     padding: 0 12px !important;
 }
 

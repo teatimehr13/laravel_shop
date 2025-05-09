@@ -36,7 +36,7 @@
                 </div>
 
                 <div>
-                    <el-table :data="order_data" border style="width: 100%; height: calc(100vh - 250px)">
+                    <el-table :data="order_data" border style="width: 100%;">
                         <el-table-column prop="order_number" label="訂單編號" />
                         <el-table-column prop="created_at" label="建立時間">
                             <template #default="scope">
@@ -78,13 +78,19 @@
                         </el-table-column>
                     </el-table>
                 </div>
+
+                <div class="example-pagination-block">
+                    <div class="example-demonstration"></div>
+                    <el-pagination layout="prev, pager, next" :total="props.orders.total" :page-size="props.orders.per_page"
+                        v-model:current-page="props.orders.current_page" @current-change="goToPage" background />
+                </div>
             </div>
         </template>
     </BackendLayout>
 </template>
 
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import { reactive, ref } from 'vue';
 import BackendLayout from '@/Layouts/BackendLayout.vue';
 import { toCurrency, formateDate } from '@/utils/basic_format.js';
@@ -107,7 +113,8 @@ console.log(props.payment_method_select);
 const order_data = ref(props.orders.data);
 console.log(order_data.value);
 
-
+const page = usePage();
+console.log(page);
 
 // const filters = ref({
 //     order_number: '',
@@ -121,7 +128,7 @@ filters.value.order_status = filters.value.order_status != null ? Number(filters
 console.log(filters.value);
 
 
-const page = ref(props.orders.current_page);
+// const page = ref(props.orders.current_page);
 
 
 
@@ -141,6 +148,19 @@ const changePage = (p = 1) => {
     // router.get(route('backorder.index'), { order_number: filters.value.order_number })
     router.get(route('backorder.index'), cleanFilters);
 };
+
+function goToPage(p) {
+    p = page.props.orders.current_page;
+    console.log(p);
+    
+    const cleanFilters = Object.fromEntries(Object.entries(filters.value).filter(([_, v]) => v !== '' && v !== null));
+
+    router.get(route('backorder.index'), {
+        ...cleanFilters,
+        page: p
+    });
+}
+
 
 //篩選
 
@@ -188,5 +208,18 @@ const handleSortChange = (key) => {
     margin: 10px 0 15px;
     display: flex;
     gap: 10px;
+}
+
+.example-pagination-block+.example-pagination-block {
+    margin-top: 10px;
+}
+
+.example-pagination-block .example-demonstration {
+    margin-bottom: 16px;
+}
+
+.el-pagination {
+    justify-content: center;
+    padding-top: 10px;
 }
 </style>

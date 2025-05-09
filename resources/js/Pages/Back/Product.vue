@@ -7,7 +7,7 @@
                 </div>
 
                 <div class="filters">
-                    <el-input v-model="filters.name" placeholder="輸入訂單編號" style="width: 240px"
+                    <el-input v-model="filters.name" placeholder="輸入產品名稱" style="width: 240px"
                         @keyup.enter="changePage()" />
 
                     <el-select v-model="filters.subcategory_id" placeholder="選擇類別" @change="changePage()"
@@ -18,8 +18,7 @@
                     </el-select>
                 </div>
 
-                <el-table :data="products" style="width: 100%; "
-                    :row-class-name="getRowClass" border>
+                <el-table :data="products" style="width: 100%; " :row-class-name="getRowClass" border>
                     <el-table-column width="220" :fixed="isFixedStore ? 'left' : false" prop="name">
                         <template #header>
                             <div style="display: flex; align-items: center; gap: 8px;">
@@ -120,9 +119,9 @@
                 </el-table>
 
                 <div class="example-pagination-block">
-                    <div class="example-demonstration">When you have more than 7 pages</div>
+                    <div class="example-demonstration"></div>
                     <el-pagination layout="prev, pager, next" :total="data.total" :page-size="data.per_page"
-                        v-model:current-page="data.current_page" @current-change="goToPage" />
+                        v-model:current-page="data.current_page" @current-change="goToPage" background />
                 </div>
             </div>
 
@@ -166,7 +165,7 @@ import ProductCoAttPicForm from "./FormComponent/ProductCoAttPicForm.vue";
 import debounce from "lodash.debounce";
 import { genFileId, valueEquals } from 'element-plus'
 import DOMPurify from 'dompurify';
-import { Link, router,usePage } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 
 
 const props = defineProps({
@@ -976,7 +975,7 @@ function goToPage(p) {
     const cleanFilters = Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== '' && v !== null));
 
     router.get('/back/products', {
-        cleanFilters,
+        ...cleanFilters,
         page: p
     });
 }
@@ -1117,8 +1116,13 @@ function formatDate(input) {
   overflow: hidden;
 } */
 
- .main-container{
-    height: 100%;
+.main-container {
+    /* height: 100%; */
     overflow-y: auto;
- }
+}
+
+.el-pagination {
+    justify-content: center;
+    padding-top: 10px;
+}
 </style>

@@ -380,7 +380,7 @@ class ProductController extends Controller
         }
 
         if (!is_null($subcategory_id)) {
-            $query->where('subcategory_id', 'LIKE', "%{$subcategory_id}%");
+            $query->where('subcategory_id', '=', "$subcategory_id");
         }
 
         $products = $query->paginate(10)->withQueryString(); // 保留 query string 分頁切換不掉查詢

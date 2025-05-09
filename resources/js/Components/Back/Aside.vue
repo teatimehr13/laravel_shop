@@ -67,6 +67,7 @@ const navigateTo = (routeName) => {
 
 <style scoped>
 .aside {
+    padding: 20px 0;
   /* position: fixed;
   top: 60px;
   left: 0;
