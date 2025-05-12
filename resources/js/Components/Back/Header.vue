@@ -33,11 +33,14 @@
           </div>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item>Action 1</el-dropdown-item>
-              <el-dropdown-item>Action 2</el-dropdown-item>
-              <el-dropdown-item>Action 3</el-dropdown-item>
-              <el-dropdown-item disabled>Action 4</el-dropdown-item>
-              <el-dropdown-item divided>Action 5</el-dropdown-item>
+              <el-dropdown-item>
+                <a :href="route('categories.front.index')">
+                  去前台
+                </a>
+              </el-dropdown-item>
+              <el-dropdown-item @click="logout">
+                登出
+              </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -48,10 +51,12 @@
 </template>
 
 <script setup>
-import { usePage } from '@inertiajs/vue3';
+import { usePage, Link, router } from '@inertiajs/vue3';
 const user = usePage().props.auth.user;
 console.log(user);
-
+function logout() {
+  router.post(route('logout'))
+}
 </script>
 
 <style scoped>

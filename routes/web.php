@@ -20,10 +20,14 @@ use App\Models\Order;
 use Illuminate\Foundation\Application;
 use Inertia\Inertia;
 
+use App\Http\Controllers\Auth\AuthController;
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+
+use App\Libraries\UserAuth;
 
 /*
 |--------------------------------------------------------------------------
@@ -140,8 +144,15 @@ Route::get('/order/fetchOrderData/{order_number}', [OrderController::class, 'fet
 Route::post('/return/returnRequest', [ReturnRequestController::class, 'store'])->name('return.returnRequest');
 Route::get('/return/return-history/{orderId}', [ReturnRequestController::class, 'fetch_return_history']);
 
-require __DIR__ . '/auth.php';
 
+Route::get('/login', function () {
+    // return UserAuth::login($request);
+    return Inertia::render('Auth/Login');
+})->name('login'); 
+
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// require __DIR__ . '/auth.php';
 
 // Route::get('/products', function () {
 //     return Inertia::render('Products', [

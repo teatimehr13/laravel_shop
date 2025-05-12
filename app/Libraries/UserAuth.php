@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use App\Models\User;
+use Inertia\Inertia;
 
 class UserAuth
 {
@@ -36,10 +37,16 @@ class UserAuth
             }
 
             // Log::info('Session Data:', session()->all());
-            return response()->json(['message' => 'Logged in!'], 200);
+            // return response()->json(['message' => 'Logged in!'], 200);
+            return redirect()->intended('/back/categories');
+            // return Inertia::location('/back/categories'); 
+
         }
 
-        return response()->json(['message' => 'Invalid credentials'], 401);
+        // return response()->json(['message' => 'Invalid credentials'], 401);
+        return back()->withErrors([
+            'email' => '帳號或密碼輸入錯誤',
+        ]);
     }
 
 
@@ -48,9 +55,10 @@ class UserAuth
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        Log::info('Session Data:', session()->all());
+        // Log::info('Session Data:', session()->all());
         self::$user = null;
-        return response()->json(['message' => 'Logged out!'], 200);
+        // return response()->json(['message' => 'Logged out!'], 200);
+        return redirect()->intended('/login');
     }
 
     public static function register(Request $request)

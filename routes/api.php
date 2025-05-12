@@ -72,15 +72,15 @@ Route::prefix('cart')->name('cart.')->group(function () {
 });
 
 //auth
-Route::middleware(['web'])->group(function () {
-    Route::post('/login_access', function (Request $request) {
-        return UserAuth::login($request);
-    });
+// Route::middleware(['web'])->group(function () {
+//     Route::post('/login_access', function (Request $request) {
+//         return UserAuth::login($request);
+//     });
 
-    Route::post('/logout', function (Request $request) {
-        return UserAuth::logout($request);
-    });
-});
+//     Route::post('/logout', function (Request $request) {
+//         return UserAuth::logout($request);
+//     });
+// });
 
 
 // Route::post('/returnRequest', [ReturnRequestController::class, 'store'])->name('returnRequest');
