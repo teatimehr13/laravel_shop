@@ -129,7 +129,7 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::get('/getCartItems', [CartController::class, 'getCartItems']);
     Route::patch('/updateCartItem', [CartController::class, 'updateCartItem']);
     Route::delete('/deleteCartItem', [CartController::class, 'deleteCartItem']);
-    Route::get('/', [CartController::class, 'index']);
+    Route::get('/', [CartController::class, 'index'])->name('cart');
 });
 
 

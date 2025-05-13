@@ -24,7 +24,7 @@ import Header from '@/Components/Front/Header.vue';
     background-color: #ffffff;
     color: #333;
     text-align: center;
-    line-height: 60px;
+    height: 60px;
 }
 
 .el-main {
