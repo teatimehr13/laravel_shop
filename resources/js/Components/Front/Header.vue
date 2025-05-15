@@ -20,7 +20,6 @@
           <el-button link >
             <a :href="route('cart.cart')">
               <el-icon><ShoppingCart /></el-icon>
-              購物車
             </a>
           </el-button>
         </div>
@@ -69,7 +68,7 @@
 <script setup>
 import { usePage, Link, router } from '@inertiajs/vue3';
 const user = usePage().props.auth.user;
-console.log(user);
+// console.log(user);
 function logout() {
   router.post(route('logout'))
 }

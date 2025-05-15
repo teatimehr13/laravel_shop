@@ -276,8 +276,9 @@ function formateDate(rawTime) {
 }
 
 .grid-header {
-    background-color: #3d3d3d;
-    color: white;
+    /* background-color: #3d3d3d; */
+    /* color: white; */
+    color: #909399;
     font-weight: bold;
     padding: 8px;
     text-align: center;
@@ -288,6 +289,11 @@ function formateDate(rawTime) {
     padding: 8px;
     text-align: center;
     border-bottom: 1px solid #eee;
+}
+
+.grid-header + .grid-header,
+.grid-cell + .grid-cell {
+    border-left: 1px solid #ebeef5;
 }
 
 .list {

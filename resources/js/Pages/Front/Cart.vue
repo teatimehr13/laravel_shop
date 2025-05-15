@@ -7,13 +7,15 @@
                 購物車
             </h1>
         </div>
-        <div class="cart-con-layout">
-            <div style="grid-column: span 1; margin: auto; ">
-                <el-checkbox :model-value="selectedIds.length === cartItems.length" @change="toggleAll"></el-checkbox>
-            </div>
-        </div>
-
+        
         <div v-if="cartItems.length">
+            <div class="cart-con-layout">
+                <div style="grid-column: span 1; margin: auto; ">
+                    <el-checkbox :model-value="selectedIds.length === cartItems.length"
+                        @change="toggleAll"></el-checkbox>
+                </div>
+            </div>
+
             <div v-for="(item, index) in cartItems" class="cart-con-layout">
                 <div class="cart-chk">
                     <el-checkbox-group v-model="selectedIds">
@@ -139,7 +141,7 @@ async function checkout() {
         router.visit('/checkout', {
             method: 'get',
             data: {
-                selected_ids:selectedIds.value
+                selected_ids: selectedIds.value
             }
         })
     } else {

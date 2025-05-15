@@ -135,6 +135,7 @@ Route::prefix('cart')->name('cart.')->group(function () {
 
 Route::get('/checkout', [CheckoutController::class, 'index']);
 Route::post('/checkout/placeOrder', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
+Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 Route::get('/order/{order}', [OrderController::class, 'show'])->name('order.show');
 Route::get('/order/fetchOrderData/{order_number}', [OrderController::class, 'fetchOrderData'])->name('order.fetchOrderData');
 // Route::resource('order', [OrderController::class, 'order'])->only(['index', 'show']);

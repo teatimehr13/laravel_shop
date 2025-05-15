@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\ReturnItem;
 use App\Models\ReturnRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -17,7 +18,9 @@ class OrderController extends Controller
     public function index()
     {
         // Order::all();
-        return Inertia::render('Front/Order');
+        // return Inertia::render('Front/Order');
+        
+        return Inertia::render('Front/OrderList', $this->getOrderLists());
     }
 
     /**
@@ -93,5 +96,29 @@ class OrderController extends Controller
             'total_qty' => $order->orderItems->sum('quantity'),
             'return_reasons' => ReturnItem::returnReasonOptions(),
         ];
+    }
+
+    private function getOrderLists(){
+        $user_id = auth()->id();
+        $orders = Order::with('orderItems')->where('user_id', $user_id)->orderBy('created_at', 'desc')->get();
+        // $orderDatas = $orders->toArray();
+        // foreach ($orderDatas as $key => $orderData) {
+        //     $orderDatas[$key]['payment_method_label'] = Order::paymentMethodOptions()[$orderData['payment_method']] ?? '未知';
+        //     $orderDatas[$key]['step_index'] = Order::orderStatusStepMap()[$orderData['order_status']] ?? 0;
+        //     $orderDatas[$key]['total_qty'] = collect($orderData['orderItems'])->sum('quantity');
+        // }
+
+        //toArray後就不能再關聯，故用laravel中的transform方式
+        $orders->transform(function ($order) {
+            $data = $order->toArray();
+            unset($data['order_items']);
+            return [
+                ...$data,
+                'payment_method_label' => Order::paymentMethodOptions()[$order->payment_method] ?? '',
+                'step_index' => Order::orderStatusStepMap()[$order->order_status] ?? 0,
+                'total_qty' => $order->orderItems->sum('quantity'),
+            ];
+        });
+        return ['orders' => $orders];
     }
 }

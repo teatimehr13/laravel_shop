@@ -4,9 +4,10 @@
             <Breadcrumb :category="category" />
 
             <section>
-                <div style="max-width: 1200px; margin: auto;">
+                <div class="category-container">
                     <el-row :gutter="10" v-for="(category, idx) in categories" :key="category.id">
-                        <el-col :span="24" style="border-bottom: 3px solid #e5e7eb; margin-bottom: 1.875rem; padding-bottom: 1rem;">
+                        <el-col :span="24"
+                            style="border-bottom: 3px solid #e5e7eb; margin-bottom: 1.875rem; padding-bottom: 1rem;">
                             <h1>
                                 {{ category.name }}
                             </h1>
@@ -14,8 +15,10 @@
 
                         <el-col v-for="subcategory in category.subcategories" :key="subcategory.id" class="block"
                             :xs="12" :sm="6" :md="3" :lg="3">
-                            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; ">
-                                <div class="demo-image" style="border: 1px solid #e8eaef; padding: 5px; margin-bottom: 10px;">
+                            <div
+                                style="display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; ">
+                                <div class="demo-image"
+                                    style="border: 1px solid #e8eaef; padding: 5px; margin-bottom: 10px;">
                                     <el-image style="width: 100px; height: 100px;" :src="subcategory.image"
                                         fit="fill" />
                                 </div>
@@ -82,5 +85,12 @@ const category = {
     color: var(--el-text-color-secondary);
     font-size: 14px;
     margin-bottom: 20px;
+}
+
+.category-container {
+    max-width: 1200px;
+    margin: auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
 }
 </style>

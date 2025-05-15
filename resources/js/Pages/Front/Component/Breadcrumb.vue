@@ -4,10 +4,12 @@
       <el-breadcrumb separator=">">
         <el-breadcrumb-item>
           <a href="/categories">
-            <el-icon>
-              <HomeFilled />
-            </el-icon>
-            所有產品類別
+            <strong>
+              <el-icon style="vertical-align: text-top;">
+                <HomeFilled />
+              </el-icon>
+              所有產品類別
+            </strong>
           </a>
         </el-breadcrumb-item>
 
@@ -25,7 +27,7 @@
         <el-breadcrumb-item v-else-if="subcategory">
           <a :href="`/product/list/${subcategory.search_key}`">{{ subcategory.name }}</a>
         </el-breadcrumb-item>
-        
+
         <el-breadcrumb-item v-if="product">
           {{ product.name }}
         </el-breadcrumb-item>
