@@ -5,10 +5,6 @@
 
             <section>
                 <div style="max-width: 1200px; margin: auto;">
-                    <div>
-                        <h1>所有產品類別</h1>
-                    </div>
-
                     <el-row :gutter="10" v-for="(category, idx) in categories" :key="category.id">
                         <el-col :span="24" style="border-bottom: 3px solid #e5e7eb; margin-bottom: 1.875rem; padding-bottom: 1rem;">
                             <h1>

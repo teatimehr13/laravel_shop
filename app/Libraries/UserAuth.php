@@ -58,7 +58,8 @@ class UserAuth
         // Log::info('Session Data:', session()->all());
         self::$user = null;
         // return response()->json(['message' => 'Logged out!'], 200);
-        return redirect()->intended('/login');
+        // return redirect()->route('categories.front.index');
+        return Inertia::location(route('categories.front.index'));
     }
 
     public static function register(Request $request)

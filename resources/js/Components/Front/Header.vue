@@ -2,7 +2,11 @@
   <div class="header">
     <el-row>
       <el-col :span="4" style="margin: auto;">
-        <div class="left-title">前面管理</div>
+        <div class="left-title">
+          <a :href="route('categories.front.index')">
+            前台
+          </a>
+        </div>
       </el-col>
       <el-col :span="4">
         <div></div>
@@ -15,7 +19,7 @@
         <div>
           <el-button link >
             <a :href="route('cart.cart')">
-              <el-icon style="margin-right: 5px;"><ShoppingCart /></el-icon>
+              <el-icon><ShoppingCart /></el-icon>
               購物車
             </a>
           </el-button>
@@ -78,7 +82,7 @@ function logout() {
   background-color: #ffffff;
   color: #333;
   text-align: center;
-  height: 60px;
+  height: 100%;
   display: grid;
   align-items: center;
 }
