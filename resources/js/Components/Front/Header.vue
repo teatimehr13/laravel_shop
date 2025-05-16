@@ -19,7 +19,7 @@
         <div>
           <el-button link >
             <a :href="route('cart.cart')">
-              <el-icon><ShoppingCart /></el-icon>
+              <el-icon size="20"><ShoppingCart /></el-icon>
             </a>
           </el-button>
         </div>
@@ -44,8 +44,8 @@
                 <el-dropdown-item @click="logout">
                   登出
                 </el-dropdown-item>
-                <el-dropdown-item >
-                  訂單
+                <el-dropdown-item>
+                  <a :href="route('orders.index')">訂單</a>
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>

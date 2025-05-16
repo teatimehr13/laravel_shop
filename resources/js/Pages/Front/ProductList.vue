@@ -9,6 +9,23 @@
 
                     <div style="margin: auto; width: 100%;" class="product-container">
 
+                        <div class="shows-text">
+                            <div style="align-content: center;">
+                                共
+                                <span>{{ productLists.length }}</span>
+                                件商品
+                            </div>
+
+                            <div class="filters">
+                                <el-select v-model="selectedSortKey" @change="handleSortChange" placeholder="排序依據"
+                                    style="width: 200px; margin-right: 10px">
+                                    <el-option label="最新上市優先" :value="0" />
+                                    <el-option label="價格由高到低" :value="1" />
+                                    <el-option label="價格由低到高" :value="2" />
+                                </el-select>
+                            </div>
+                        </div>
+
                         <div class="product-list-card-con">
                             <div class="product-list-card" v-for="(productList, idx) in productLists"
                                 :key="productList.id">
@@ -64,6 +81,7 @@ import FrontendLayout from '@/Layouts/FrontendLayout.vue';
 import { ref, onMounted } from "vue";
 import Breadcrumb from './Component/Breadcrumb.vue';
 import Sidebar from './Component/Sidebar.vue';
+import { usePage, router } from '@inertiajs/vue3';
 
 
 const props = defineProps({
@@ -94,8 +112,39 @@ console.log(productLists);
 console.log(subcategory_name);
 console.log(props.category);
 console.log(props.subcategory);
+const search_key = props.subcategory.search_key;
 // console.log(props.categoryLists);
 
+const page = usePage();
+const filters = page.props.filters;
+console.log(filters);
+
+
+const sortOptionsMap = {
+    0: { by: 'created_at', dir: 'desc' },
+    // 1: { by: 'created_at', dir: 'asc' },
+    1: { by: 'price', dir: 'desc' },
+    2: { by: 'price', dir: 'asc' },
+};
+
+//清掉不需要的
+const entry = Object.entries(sortOptionsMap).find(
+    ([_, val]) => val.by === filters.sort_by && val.dir === filters.sort_dir
+);
+
+console.log(entry);
+
+
+const selectedSortKey = ref(entry ? Number(entry[0]) : 0); // 預設值為 0：時間新到舊
+
+const handleSortChange = (key) => {
+    const option = sortOptionsMap[key];
+    if (option) {
+        filters.sort_by = option.by;
+        filters.sort_dir = option.dir;
+        router.get(route('product.front.index', search_key), filters)
+    }
+}
 
 function toCurrency(num) {
     if (!num && num !== 0) return "$"; // 避免 null 或 undefined
@@ -220,10 +269,11 @@ function toCurrency(num) {
     margin-bottom: 7px;
 }
 
-.price-text{
+.price-text {
     color: #666666;
     padding: 5px 0;
 }
+
 .price-text span {
     color: #282828;
     font-size: 1.25rem;
@@ -235,4 +285,15 @@ function toCurrency(num) {
         "left-space aside gap product-con right-space";
 }
 
+.shows-text {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+}
+
+.shows-text span {
+    font-size: 1.25rem;
+    color: #626aef;
+}
 </style>

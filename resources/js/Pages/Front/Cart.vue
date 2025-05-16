@@ -235,7 +235,7 @@ const toggleAll = () => {
 .cart-container {
     max-width: 1200px;
     margin: auto;
-    padding: 0px 40px;
+    padding: 1rem 2rem;
 }
 
 .cart-con-layout {

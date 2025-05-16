@@ -69,9 +69,9 @@
                                 </div>
 
                                 <div class="button-group">
-                                    <el-button color="#626aef" size="large" class="addTocart"
+                                    <el-button  size="large" class="add_check_button"
                                         @click="addTOCart">加入購物車</el-button>
-                                    <el-button size="large" class="addTocart" @click="testCart">測試</el-button>
+                                    <el-button color="#626aef" size="large" class="add_check_button" @click="goChekcOut">立即結帳</el-button>
                                 </div>
                             </div>
                         </div>
@@ -88,6 +88,7 @@ import FrontendLayout from '@/Layouts/FrontendLayout.vue';
 import { computed, ref, onMounted, reactive } from 'vue';
 import Breadcrumb from './Component/Breadcrumb.vue';
 import axios from 'axios';
+import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
     product: {
@@ -189,6 +190,23 @@ const addTOCart = async () => {
             const response = await axios.post('/cart/addToCart', productOptionCartData);
             // console.log(response);
             await msg_feedback(response.data.msg, 'success')
+        } else {
+            await msg_feedback('請選擇商品規格', 'info')
+        }
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+    }
+}
+
+const goChekcOut = async () => {
+    try {
+        productOptionCartData.id = selectedProductOptionId.value;
+        if (productOptionCartData.id) {
+            const response = await axios.post('/cart/addToCart', productOptionCartData);
+            if(response.data){
+                // window.location.href = '/cart'
+                router.visit('/cart');
+            }
         } else {
             await msg_feedback('請選擇商品規格', 'info')
         }
@@ -356,7 +374,7 @@ const msg_feedback = (msg, type) => {
     color: #bd0000;
 }
 
-.addTocart {
+.add_check_button {
     font-size: 1.25rem;
     padding: 25px 40px;
 }

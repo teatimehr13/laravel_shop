@@ -14,7 +14,7 @@ use Inertia\Inertia;
 
 class ProductController extends Controller
 {
-    public function index($search_key)
+    public function index(Request $request, $search_key)
     {
         // $subcategory = Subcategory::where('search_key', $search_key)->first();
         $subcategory = Subcategory::where('search_key', $search_key)
@@ -29,15 +29,38 @@ class ProductController extends Controller
         $subcategory_name = $subcategory->name;
         $category_id = $subcategory->category_id;
 
-        $productLists = Product::where('subcategory_id', $subcategory_id)->get();
+        // $productLists = Product::where('subcategory_id', $subcategory_id)->get();
+
+        //建立 query builder
+        $query = Product::where('subcategory_id', $subcategory_id);
+
+        //加入排序條件
+        $sort_by = $request->input('sort_by', 'created_at'); // 預設用時間
+        $sort_dir = $request->input('sort_dir', 'desc');     // 預設 desc
+
+        $validSorts = ['created_at', 'price'];
+        $validDirs = ['asc', 'desc'];
+
+        if (in_array($sort_by, $validSorts) && in_array($sort_dir, $validDirs)) {
+            $query->orderBy($sort_by, $sort_dir);
+        }
+
+        $productLists = $query->get();
+
+        // Log::info('sort_by', [$sort_by]);
+        // Log::info('query sql', [$query->toSql()]);
+        // Log::info('bindings', $query->getBindings());
+
+
         $categoryLists = Subcategory::where('category_id', $category_id)
-        ->get()
-        ->map(function($category_list){
-            return [
-                'name' => $category_list->name,
-                'search_key' => $category_list->search_key,
-            ];
-        });
+            ->get()
+            ->map(function ($category_list) {
+                return [
+                    'name' => $category_list->name,
+                    'search_key' => $category_list->search_key,
+                ];
+            });
+
 
         // Log::info($productLists);
 
@@ -46,7 +69,11 @@ class ProductController extends Controller
             'subcategory_name' => $subcategory_name,
             'category' => $subcategory->category,
             'subcategory' => $subcategory,
-            'categoryLists' => $categoryLists
+            'categoryLists' => $categoryLists,
+            'filters' => [
+                'sort_by' => $sort_by,
+                'sort_dir' => $sort_dir,
+            ]
 
         ]);
     }
