@@ -2,34 +2,38 @@
     <FrontendLayout>
         <template #switch>
             <Breadcrumb :category="category" />
-
             <section>
-                <div class="category-container">
-                    <el-row :gutter="10" v-for="(category, idx) in categories" :key="category.id">
-                        <el-col :span="24"
-                            style="border-bottom: 3px solid #e5e7eb; margin-bottom: 1.875rem; padding-bottom: 1rem;">
-                            <h1>
+                <div class="category-container max-w-screen-xl mx-auto px-4">
+                    <div v-for="(category, idx) in categories" :key="category.id" class="mb-8">
+                        <!-- 分類名稱 -->
+                        <div class="border-b border-gray-200 mb-6 pb-4">
+                            <h1 class="text-xl font-semibold">
                                 {{ category.name }}
                             </h1>
-                        </el-col>
+                        </div>
 
-                        <el-col v-for="subcategory in category.subcategories" :key="subcategory.id" class="block"
-                            :xs="12" :sm="6" :md="3" :lg="3">
-                            <div
-                                style="display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; ">
-                                <div class="demo-image"
-                                    style="border: 1px solid #e8eaef; padding: 5px; margin-bottom: 10px;">
-                                    <el-image style="width: 100px; height: 100px;" :src="subcategory.image"
-                                        fit="fill" />
+                        <!-- 子分類卡片區塊 -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            <div v-for="subcategory in category.subcategories" :key="subcategory.id"
+                                class="flex flex-col items-center mb-2">
+                                <!-- 圖片區塊 -->
+                                <div class="border border-gray-200 p-2 mb-2 aspect-square w-full overflow-hidden">
+                                    <a :href="`/product/list/${subcategory.search_key}`">
+                                        <el-image :src="subcategory.image" fit="contain" class="w-full h-full transition duration-300 ease-in-out hover:scale-110" />
+                                    </a>
                                 </div>
+
+                                <!-- 文字連結 -->
                                 <a :href="`/product/list/${subcategory.search_key}`">
-                                    <span class="demonstration">{{ subcategory.name }}</span>
+                                    <span class="text-sm text-gray-600 hover:text-black">
+                                        {{ subcategory.name }}
+                                    </span>
                                 </a>
                             </div>
-                        </el-col>
-                    </el-row>
-
+                        </div>
+                    </div>
                 </div>
+
             </section>
         </template>
     </FrontendLayout>
@@ -69,7 +73,6 @@ const category = {
 .demo-image .block {
     padding: 30px 0;
     text-align: center;
-    /* border-right: solid 1px var(--el-border-color); */
     display: inline-block;
     width: 10%;
     box-sizing: border-box;
@@ -87,10 +90,10 @@ const category = {
     margin-bottom: 20px;
 }
 
-.category-container {
+/* .category-container {
     max-width: 1200px;
     margin: auto;
     padding-left: 2rem;
     padding-right: 2rem;
-}
+} */
 </style>

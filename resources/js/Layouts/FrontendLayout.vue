@@ -29,10 +29,15 @@ import Header from '@/Components/Front/Header.vue';
 }
 
 .el-main {
-    /* background-color: rgb(238, 241, 248);
-    color: #333;
-    border-top: 1px solid rgb(237, 240, 247);
-    padding: 20px; */
+  --el-main-padding: 0px;
+  padding: 0 !important;
+}
+
+.el-container,
+.el-header,
+.el-footer {
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 :root {
