@@ -1,6 +1,6 @@
 <template>
-  <div class="layout-container">
-    <div class="breadcrumb-con">
+  <div class="mx-auto px-4 sm:py-8 max-w-[1680px] md:px-12 lg:px-16 xl:px-20 2xl:px-24">
+    <div class="my-4 md:my-8 breadcrumb-con">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item>
           <a href="/categories">
@@ -52,13 +52,8 @@ console.log(props.category);
 </script>
 
 <style scoped>
-.breadcrumb-con {
-  margin: 2rem 0;
-}
-
 .breadcrumb-con span {
   font-size: 1rem;
-  line-height: 2;
 }
 
 .breadcrumb-con {

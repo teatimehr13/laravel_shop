@@ -3,78 +3,73 @@
         <template #switch>
             <Breadcrumb :category="category" :subcategory="subcategory" />
 
-            <div class="md:hidden mx-auto px-4 py-2 mb-4 border-y border-solid">
-                <button @click="hamTarget" class="md:hidden ">
-                    <el-icon size="22">
-                        <Expand />
-                    </el-icon>
-                </button>
+            <section>
+                <div class="layout-container product-list">
+                    <Sidebar :categoryLists="categoryLists" />
 
-                <Hamburger :categoryLists="categoryLists" ref="hamref" class="md:hidden col-span-12" />
-            </div>
-
-            <div
-                class="grid grid-cols-12 gap-4 max-w-[1680px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
-                <aside class="hidden md:block col-span-12 md:col-span-3 xl:col-span-2 ">
-                    <div class="mr-4">
-                        <Sidebar :categoryLists="categoryLists" />
-                    </div>
-                </aside>
-
-
-                <main class="col-span-12 md:col-span-9 xl:col-span-10">
-                    <div class="shows-text">
-                        <div style="align-content: center;">
-                            共
-                            <span>{{ productLists.length }}</span>
-                            件商品
-                        </div>
-
-                        <div class="filters">
-                            <el-select v-model="selectedSortKey" @change="handleSortChange" placeholder="排序依據"
-                                style="width: 200px; margin-right: 10px">
-                                <el-option label="最新上市優先" :value="0" />
-                                <el-option label="價格由高到低" :value="1" />
-                                <el-option label="價格由低到高" :value="2" />
-                            </el-select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        <div class="product-list-card" v-for="(productList, idx) in productLists" :key="productList.id">
-                            <div class="border border-gray-200 p-2 mb-2 aspect-square w-full overflow-hidden">
-                                <a :href="`/product/show/${productList.slug}`">
-                                    <el-image :src="productList.image" fit="contain"
-                                        class="w-full h-full transition duration-300 ease-in-out hover:scale-110" />
-                                </a>
+                    <div style="margin: auto; width: 100%;" class="product-container">
+                        <div class="shows-text">
+                            <div style="align-content: center;">
+                                共
+                                <span>{{ productLists.length }}</span>
+                                件商品
                             </div>
 
-                            <div class="product-text-content">
-                                <div>
-                                    <h1>
-                                        {{ productList.name }}
-                                    </h1>
-                                </div>
-                                <h3>
-                                    {{ productList.title }}
-                                </h3>
-                                <div class="price-text">
-                                    售價: <span>{{ toCurrency(productList.price) }}</span>
-                                </div>
+                            <div class="filters">
+                                <el-select v-model="selectedSortKey" @change="handleSortChange" placeholder="排序依據"
+                                    style="width: 200px; margin-right: 10px">
+                                    <el-option label="最新上市優先" :value="0" />
+                                    <el-option label="價格由高到低" :value="1" />
+                                    <el-option label="價格由低到高" :value="2" />
+                                </el-select>
+                            </div>
+                        </div>
 
-                                <div>
-                                    <a :href="`/product/show/${productList.slug}`" style="display: grid;">
-                                        <el-button color="#626aef" plain size="large">查看商品</el-button>
+                        <div class="product-list-card-con">
+                            <div class="product-list-card" v-for="(productList, idx) in productLists"
+                                :key="productList.id">
+                                <div class="demo-image">
+                                    <a v-if="productList.image" :href="`/product/show/${productList.slug}`">
+                                        <img :src="productList.image" fit="fill" />
                                     </a>
-                                </div>
-                            </div>
 
+                                    <a v-else :href="`/product/show/${productList.slug}`">
+                                        <div class="empty-image">
+                                            <div>
+                                                <span>
+                                                    尚無圖片
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </a>
+
+                                </div>
+
+                                <div class="product-text-content">
+                                    <div>
+                                        <h1>
+                                            {{ productList.name }}
+                                        </h1>
+                                    </div>
+                                    <h3>
+                                        {{ productList.title }}
+                                    </h3>
+                                    <div class="price-text">
+                                        售價: <span>{{ toCurrency(productList.price) }}</span>
+                                    </div>
+
+                                    <div>
+                                        <a :href="`/product/show/${productList.slug}`" style="display: grid;">
+                                            <el-button color="#626aef" plain size="large">查看商品</el-button>
+                                        </a>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
                     </div>
-
-                </main>
-            </div>
-
+                </div>
+            </section>
         </template>
     </FrontendLayout>
 </template>
@@ -85,7 +80,6 @@ import FrontendLayout from '@/Layouts/FrontendLayout.vue';
 import { ref, onMounted } from "vue";
 import Breadcrumb from './Component/Breadcrumb.vue';
 import Sidebar from './Component/productList/Sidebar.vue';
-import Hamburger from './Component/productList/Hamburger.vue';
 import { usePage, router } from '@inertiajs/vue3';
 
 
@@ -141,13 +135,6 @@ console.log(entry);
 
 
 const selectedSortKey = ref(entry ? Number(entry[0]) : 0); // 預設值為 0：時間新到舊
-
-const hamref = ref();
-const hamTarget = () => {
-    // console.log(hamref.value.toggleHam);
-    hamref.value.toggleHam();
-}
-
 
 const handleSortChange = (key) => {
     const option = sortOptionsMap[key];
