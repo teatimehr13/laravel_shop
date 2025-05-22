@@ -13,8 +13,7 @@
                 <Hamburger :categoryLists="categoryLists" ref="hamref" class="md:hidden col-span-12" />
             </div>
 
-            <div
-                class="grid grid-cols-12 gap-4 max-w-[1680px] mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24">
+            <div class="page-container">
                 <aside class="hidden md:block col-span-12 md:col-span-3 xl:col-span-2 ">
                     <div class="mr-4">
                         <Sidebar :categoryLists="categoryLists" />

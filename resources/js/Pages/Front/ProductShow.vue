@@ -4,78 +4,103 @@
             <Breadcrumb :category="category" :subcategory="subcategory" :product="product" />
 
             <section>
-                <div class="layout-container">
-                    <div class="product-show">
-                        <div class="product-img-con">
-                            <div class="prodcut-main-img">
-                                <!-- 主要圖片 -->
-                                <el-image :src="selectedImage" style="width: 400px; height: 400px;" />
-                            </div>
-
-                            <!-- 縮圖列表 -->
-                            <div class="thumbnail-container">
-                                <img v-for="(image, index) in filteredThumbnails" :key="index" :src="image.image"
-                                    class="thumbnail" @click="selectedImage = image.image"
-                                    :class="{ active: selectedImage === image.image }">
-                            </div>
+                <div class="page-container">
+                    <div class="col-span-12 lg:col-span-6 md:col-span-12">
+                        <div class="prodcut-main-img">
+                            <!-- 主要圖片 -->
+                            <el-image :src="selectedImage" style="width: 400px; height: 400px;" />
                         </div>
 
-                        <div class="product-details-con">
-                            <div>
-                                <h1 class="product-title">
-                                    <strong>
-                                        {{ product.name }}
-                                    </strong>
-                                </h1>
+                        <!-- 縮圖列表 -->
+                        <!-- <div class="gap-2.5 grid grid-cols-7">
+                            <img v-for="(image, index) in filteredThumbnails" :key="index" :src="image.image"
+                                class="thumbnail" @click="selectedImage = image.image"
+                                :class="{ active: selectedImage === image.image }">
+                        </div> -->
+                        <div class="relative">
+                            <!-- 左箭頭 -->
+                            <button @click="scrollLeft" :disabled="atStart"
+                                class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 shadow"
+                                :class="{ 'opacity-50 cursor-not-allowed': atStart }">
+                                ‹
+                            </button>
 
-                                <div v-if="isInEventPeriod(product.special_start_at, product.special_end_at)">
-                                    <div v-html="product.special_message" class="special_msg product-describe"></div>
-                                </div>
-
-                                <div>
-                                    <div v-html="product.description" class="product-describe"></div>
-                                </div>
-
-                                <hr>
-
-                                <div>
-                                    <!-- 顏色選擇 -->
-                                    <div style="display: block; margin-bottom: 10px;">
-                                        <span style="margin-right: 10px;">
-                                            <strong>顏色</strong>
-                                        </span>
-                                        <span>
-                                            {{ selectedColorName }}
-                                        </span>
-                                    </div>
-
-                                    <div class="color-options color-cube-outner color-box"
-                                        v-for="option in productOptions"
-                                        :class="{ active: selectedColor === option.color_code }"
-                                        :style="{ '--border-color': option.color_code }" :key="option.id"
-                                        @click="changeColor(option)" @mouseenter="changeBigImage(option)">
-                                        <span class="color-cube ">
-                                            <span class="color-cube-inner"
-                                                :style="{ backgroundColor: option.color_code }">
-                                            </span>
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="product-text-content">
-                                    <div class="price-text">
-                                        優惠價: <span>{{ toCurrency(product.price) }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="button-group">
-                                    <el-button  size="large" class="add_check_button"
-                                        @click="addTOCart">加入購物車</el-button>
-                                    <el-button color="#626aef" size="large" class="add_check_button" @click="goChekcOut">立即結帳</el-button>
-                                </div>
+                            <!-- 可滾動的圖片列 -->
+                            <div ref="slider" class="flex overflow-x-hidden gap-2.5 scroll-smooth mx-7">
+                                <img v-for="(image, index) in filteredThumbnails" :key="index" :src="image.image"
+                                    class="thumbnail w-16 sm:w-20 md:w-24 lg:w-20 aspect-square object-cover flex-shrink-0 cursor-pointer"
+                                    @click="selectedImage = image.image"
+                                    :class="{ active: selectedImage === image.image }" />
                             </div>
+
+                            <!-- 右箭頭 -->
+                            <button @click="scrollRight" :disabled="atEnd"
+                                class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 shadow"
+                                :class="{ 'opacity-50 cursor-not-allowed': atEnd }">
+                                ›
+                            </button>
                         </div>
                     </div>
+
+                    <div class="product-details-con col-span-12 lg:col-span-6 md:col-span-12 lg:px-12">
+                        <div>
+                            <h1 class="product-title">
+                                <strong>
+                                    {{ product.name }}
+                                </strong>
+                            </h1>
+
+                            <div v-if="isInEventPeriod(product.special_start_at, product.special_end_at)">
+                                <div v-html="product.special_message" class="special_msg product-describe"></div>
+                            </div>
+
+                            <div>
+                                <div v-html="product.description" class="product-describe"></div>
+                            </div>
+
+                            <hr>
+
+                            <div>
+                                <!-- 顏色選擇 -->
+                                <div style="display: block; margin-bottom: 10px;">
+                                    <span style="margin-right: 10px;">
+                                        <strong>顏色</strong>
+                                    </span>
+                                    <span>
+                                        {{ selectedColorName }}
+                                    </span>
+                                </div>
+
+                                <div class="color-options color-cube-outner color-box" v-for="option in productOptions"
+                                    :class="{ active: selectedColor === option.color_code }"
+                                    :style="{ '--border-color': option.color_code }" :key="option.id"
+                                    @click="changeColor(option)" @mouseenter="changeBigImage(option)">
+                                    <span class="color-cube ">
+                                        <span class="color-cube-inner" :style="{ backgroundColor: option.color_code }">
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="product-text-content">
+                                <div class="price-text">
+                                    優惠價: <span>{{ toCurrency(product.price) }}</span>
+                                </div>
+                            </div>
+
+                            <div class="button-group grid grid-cols-1 md:grid-cols-2 gap-2 my-4">
+                                <el-button size="large" class="w-full" @click="addTOCart">
+                                    加入購物車
+                                </el-button>
+                                <el-button color="#626aef" size="large" class="w-full"
+                                    @click="goChekcOut">
+                                    立即結帳
+                                </el-button>
+                            </div>
+
+                        </div>
+                    </div>
+
                 </div>
             </section>
         </template>
@@ -144,6 +169,31 @@ const filteredThumbnails = computed(() => {
     return colorOption ? colorOption.product_images : [];
 });
 
+const slider = ref(null)
+const atStart = ref(null)
+const atEnd = ref(null)
+
+const updateScrollState = () => {
+    const el = slider.value
+    atStart.value = el.scrollLeft === 0
+    atEnd.value = el.scrollLeft + el.clientWidth >= el.scrollWidth - 5
+}
+
+const scrollLeft = () => {
+    slider.value.scrollLeft -= 200
+    setTimeout(updateScrollState, 100)
+}
+
+const scrollRight = () => {
+    slider.value.scrollLeft += 200
+    setTimeout(updateScrollState, 100)
+}
+
+onMounted(() => {
+    updateScrollState()
+})
+
+
 // **切換顏色時**
 const changeColor = (color) => {
     console.log(color);
@@ -203,7 +253,7 @@ const goChekcOut = async () => {
         productOptionCartData.id = selectedProductOptionId.value;
         if (productOptionCartData.id) {
             const response = await axios.post('/cart/addToCart', productOptionCartData);
-            if(response.data){
+            if (response.data) {
                 // window.location.href = '/cart'
                 router.visit('/cart');
             }
@@ -220,7 +270,7 @@ const testCart = async () => {
         console.log(123);
         // const response = await axios.get('/cart/getCartFromCookie');
         const response = await axios.get('/cart');
-        
+
         console.log(response.data);
         // await msg_feedback(response.data.msg, 'success')
 
@@ -239,15 +289,7 @@ const msg_feedback = (msg, type) => {
 </script>
 
 <style scoped>
-.thumbnail-container {
-    display: flex;
-    gap: 10px;
-}
-
 .thumbnail {
-    width: 50px;
-    height: 50px;
-    cursor: pointer;
     border: 2px solid transparent;
 }
 
@@ -283,6 +325,10 @@ const msg_feedback = (msg, type) => {
     padding-left: 1rem;
 }
 
+::v-deep(.el-button) {
+    margin-left: 0;
+}
+
 .product-describe>ul>li {}
 
 .product-title {
@@ -293,7 +339,6 @@ const msg_feedback = (msg, type) => {
     font-size: 2rem;
 }
 
-.product-img-con {}
 
 .prodcut-main-img {
     border: 1px solid #e4e7ec;
@@ -307,7 +352,7 @@ const msg_feedback = (msg, type) => {
 }
 
 .product-details-con {
-    padding-left: 3rem;
+    /* padding-left: 3rem; */
 }
 
 .product-details-con hr {
@@ -374,8 +419,5 @@ const msg_feedback = (msg, type) => {
     color: #bd0000;
 }
 
-.add_check_button {
-    font-size: 1.25rem;
-    padding: 25px 40px;
-}
+
 </style>
