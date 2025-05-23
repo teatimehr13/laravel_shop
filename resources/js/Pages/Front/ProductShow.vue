@@ -51,11 +51,11 @@
                             </h1>
 
                             <div v-if="isInEventPeriod(product.special_start_at, product.special_end_at)">
-                                <div v-html="product.special_message" class="special_msg product-describe"></div>
+                                <div v-html="product.special_message" class="special_msg product-describe leading-relaxed"></div>
                             </div>
 
                             <div>
-                                <div v-html="product.description" class="product-describe"></div>
+                                <div v-html="product.description" class="product-describe leading-relaxed "></div>
                             </div>
 
                             <hr>
