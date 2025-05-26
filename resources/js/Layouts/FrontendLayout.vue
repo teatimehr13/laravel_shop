@@ -2,8 +2,11 @@
     <el-container>
         <!-- Header 固定 -->
         <el-header>
-            <Header />
-
+            <Header>
+                <template #extraRight>
+                    <slot name="headerRight" />
+                </template>
+            </Header>
         </el-header>
         <!-- Main 動態插槽 -->
         <el-main>
@@ -29,15 +32,15 @@ import Header from '@/Components/Front/Header.vue';
 }
 
 .el-main {
-  --el-main-padding: 0px;
-  padding: 0 !important;
+    --el-main-padding: 0px;
+    padding: 0 !important;
 }
 
 .el-container,
 .el-header,
 .el-footer {
-  padding: 0 !important;
-  margin: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 :root {
@@ -51,14 +54,9 @@ import Header from '@/Components/Front/Header.vue';
 .layout-container {
     display: grid;
     grid-template-columns:
-        [left-space] var(--left-space)
-        [aside] var(--aside-width)
-        [gap] var(--gap-width)
-        [product-con] var(--product-width)
-        [right-space] var(--right-space);
+        [left-space] var(--left-space) [aside] var(--aside-width) [gap] var(--gap-width) [product-con] var(--product-width) [right-space] var(--right-space);
 
     padding-left: 2rem;
     padding-right: 2rem;
 }
-
 </style>

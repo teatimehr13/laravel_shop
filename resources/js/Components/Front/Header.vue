@@ -1,26 +1,32 @@
 <template>
   <div class="header">
     <el-row>
-      <el-col :span="4" style="margin: auto;">
+      <el-col :span="12" style="margin: auto;">
         <div class="left-title">
           <a :href="route('categories.front.index')">
             前台
           </a>
+
+          <div>
+            <slot name="extraRight" />
+          </div>
         </div>
       </el-col>
-      <el-col :span="4">
-        <div></div>
-      </el-col>
-      <el-col :span="4">
-        <div></div>
-      </el-col>
+
 
       <el-col :span="12" class="right-content">
         <div>
-          <el-button link >
-            <a :href="route('cart.cart')">
-              <el-icon size="20"><ShoppingCart /></el-icon>
-            </a>
+          <el-button link>
+            <!-- <a :href="route('cart.cart')">
+              <el-icon size="20">
+                <ShoppingCart />
+              </el-icon>
+            </a> -->
+            <Link :href="route('cart.cart')">
+             <el-icon size="20">
+                <ShoppingCart />
+              </el-icon>
+            </Link>
           </el-button>
         </div>
 
@@ -29,7 +35,7 @@
             <div class="el-dropdown-link right-text" style="display: flex; align-items: center;">
               <div class="right-text-content">
                 <div class="right-text">
-                  <el-avatar src="/storage/user/5556468.png" size="small"/>
+                  <el-avatar src="/storage/user/5556468.png" size="small" />
                 </div>
                 <div class="right-text">
                   {{ user.name }}
@@ -53,13 +59,13 @@
         </div>
 
         <div v-else>
-          <el-button link >
+          <el-button link>
             <a :href="route('login')">
               登入
             </a>
           </el-button>
         </div>
-        
+
       </el-col>
     </el-row>
   </div>
@@ -96,6 +102,7 @@ function logout() {
   font-weight: bold;
   font-size: 20px;
   color: #55595c;
+  display: flex;
 }
 
 .right-text {

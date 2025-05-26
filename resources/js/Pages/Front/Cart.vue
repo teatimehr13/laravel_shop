@@ -1,13 +1,25 @@
 <template>
-    <FrontendLayout />
+    <FrontendLayout>
+        <template #headerRight>
+            <div class="header-text1">
+                購物車
+            </div>
+        </template>
+    </FrontendLayout>
 
+    <div class="page-container">
+        <p class="my-8">
+            <Link :href="route('categories.front.index')">
+            <el-icon>
+                <ArrowLeft />
+            </el-icon>
+            繼續購物
+            </Link>
+        </p>
+
+    </div>
 
     <div class="page-container cart-container-basic">
-        <!-- 標題區塊 -->
-        <div class="bg-gray-100 rounded-md px-4 py-3 shadow-sm mb-6 col-span-12">
-            <h1 class="text-xl md:text-2xl font-semibold text-gray-800">購物車</h1>
-        </div>
-
         <div v-if="cartItems.length" class="grid grid-cols-1 md:grid-cols-3 gap-6 col-span-12">
             <!-- 左側：商品列表 -->
             <div class="md:col-span-2 space-y-4">
@@ -31,8 +43,13 @@
                     <div class="cart-info py-2 flex-1">
                         <div class="cart-info-con flex justify-between items-start">
                             <div>
-                                <div class="cart-info-title font-semibold text-base md:text-lg font-semibold">{{ item.productOption.product.name }}</div>
-                                <div class="text-sm text-gray-500">{{ item.productOption.color_name }}</div>
+                                <!-- 商品標題 -->
+                                <div class="cart-info-title font-semibold text-base md:text-lg">{{
+                                    item.productOption.product.name }}</div>
+                                <!-- 顏色 -->
+                                <div class="text-base text-sm md:text-base text-gray-500">{{
+                                    item.productOption.color_name
+                                }}</div>
                             </div>
                             <el-popconfirm title="確認要刪除這個商品嗎？" @confirm="deleteCartItem(item)" :width="200"
                                 :hide-after="100" v-model:visible="popconfirmVisible[item.productOption.id]">
@@ -51,7 +68,8 @@
                         </div>
 
                         <div class="cart-info-bottom mt-2 flex justify-between items-end">
-                            <div class="cart-price text-red-600 font-bold text-lg text-gray-800">
+                            <!-- 結帳小計 -->
+                            <div class="cart-price font-bold text-lg md:text-xl text-gray-800">
                                 {{ toCurrency(parseInt(item.productOption.price) * parseInt(item.quantity)) }}
                             </div>
                             <div class="cart-quantity">
@@ -79,90 +97,23 @@
                     {{ isLoggedIn ? '結帳' : '登入後結帳' }}
                 </el-button>
             </div>
+        </div>
 
-
+        <div v-else class="col-span-12 m-auto min-h-[calc(100vh-60px-88px)] content-center">
+            <div class="flex flex-col items-center gap-7">
+                <el-icon style="font-size: 96px;">
+                    <ShoppingTrolley />
+                </el-icon>
+                <div class="text-xl md:text-2xl">
+                    您的購物車尚無任何商品，快來挑選一些吧！
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- <div v-if="cartItems.length">
-            <div class="cart-con-layout">
-                <div style="grid-column: span 1; margin: auto; ">
-                    <el-checkbox :model-value="selectedIds.length === cartItems.length"
-                        @change="toggleAll"></el-checkbox>
-                </div>
-            </div>
-
-            <div v-for="(item, index) in cartItems" class="cart-con-layout">
-                <div class="cart-chk">
-                    <el-checkbox-group v-model="selectedIds">
-                        <el-checkbox size="large" :value="item.productOption.id" :key="item.productOption.id" />
-                    </el-checkbox-group>
-                </div>
-                <div class="cart-img">
-                    <img :src="item.productOption.image">
-                </div>
-                <div class="cart-info py-2">
-                    <div class="cart-info-con">
-                        <div class="cart-info-title">{{ item.productOption.product.name }} </div>
-                        <el-popconfirm title="確認要刪除這個商品嗎？" @confirm="deleteCartItem(item)" :width="200"
-                            :hide-after="100" v-model:visible="popconfirmVisible[item.productOption.id]">
-                            <template #reference>
-                                <el-button size="small">
-                                    <el-icon>
-                                        <Close />
-                                    </el-icon>
-                                </el-button>
-                            </template>
-                            <template #actions="{ confirm, cancel }">
-                                <el-button size="small" @click="cancel">沒有</el-button>
-                                <el-button type="danger" size="small" @click="confirm">
-                                    是
-                                </el-button>
-                            </template>
-                        </el-popconfirm>
-                    </div>
-                    <div>{{ item.productOption.color_name }}</div>
-                    <div class="cart-info-bottom">
-                        <div class="cart-price">
-                            {{ toCurrency(parseInt(item.productOption.price) * parseInt(item.quantity)) }}
-                        </div>
-                        <div class="cart-quantity">
-                            <el-input-number v-model="item.quantity" :min="1" :max="20"
-                                @change="updateCartItem(item)" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="cart-con-layout summary">
-                <div class="cart-price-total">
-                    <div class="count-text">
-                        <span>小計</span>
-                    </div>
-                    <div class="count-price">
-                        ({{ selectedCount }} 個商品)
-                        {{ toCurrency(cartTotal) }}
-                    </div>
-                </div>
-            </div>
-            <div class="chkout">
-                <el-button type="primary" size="large" @click="checkout" :disabled="selectedItems.length === 0"
-                    class="bg-gray-300 text-white">
-                    {{ isLoggedIn ? '結帳' : '登入後結帳' }}
-                </el-button>
-            </div>
-        </div>
-        <div v-else>
-            沒有任何商品。
-        </div> -->
-
-    <div>
-        <!-- <el-button type="primary" @click="logout">登出</el-button> -->
-    </div>
-
 
     <div class="fixed bottom-0 left-0 w-full bg-gray-100 shadow-t p-2 flex justify-between items-center md:hidden z-10">
-        <span class="font-bold">結帳金額 
-            <span :class="{'text-red-600': selectedItems.length != 0}">
+        <span class="font-bold">結帳金額
+            <span :class="{ 'text-red-600': selectedItems.length != 0 }">
                 {{ toCurrency(cartTotal) }}
             </span>
         </span>
@@ -171,6 +122,7 @@
         </el-button>
     </div>
 
+
 </template>
 
 <script setup>
@@ -178,7 +130,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import FrontendLayout from '@/Layouts/FrontendLayout.vue';
 import axios from 'axios';
 import { debounce } from 'lodash';
-import { router, useForm } from '@inertiajs/vue3';
+import { router, useForm, Link } from '@inertiajs/vue3';
 
 const cartForm = useForm({})
 
@@ -265,6 +217,10 @@ const deleteCartItem = async (item) => {
 
 }
 
+function goHome() {
+    // window.history.back();
+}
+
 // Popconfirm 的顯示狀態
 const popconfirmVisible = ref({});
 
@@ -319,11 +275,11 @@ const toggleAll = () => {
     --grid-span-3: span 3 / span 3;
 }
 
-.cart-container {
+/* .cart-container {
     max-width: 1200px;
     margin: auto;
     padding: 1rem 2rem;
-}
+} */
 
 .cart-con-layout {
     display: grid;
@@ -380,9 +336,6 @@ const toggleAll = () => {
 .cart-price {
     flex: 1 1 auto;
     overflow: hidden;
-    font-size: 1.25rem;
-    font-weight: bold;
-    color: #55595c;
 }
 
 .cart-quantity {
@@ -436,5 +389,21 @@ const toggleAll = () => {
     margin-inline-start: var(--offset-col-4);
     grid-template-columns: 100%;
     padding-left: 0;
+}
+
+.header-text1 {
+    position: relative;
+    margin-left: 16px;
+    padding-left: 12px;
+}
+
+.header-text1::before {
+    content: ' ';
+    width: 1px;
+    height: 50%;
+    background: #9b9fa1;
+    position: absolute;
+    left: 0;
+    top: 6px;
 }
 </style>
