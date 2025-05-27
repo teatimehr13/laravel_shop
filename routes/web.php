@@ -16,6 +16,8 @@ use App\Http\Controllers\Back\NewsController as BackNewsController;
 use App\Http\Controllers\Back\CategoryController as BackCategoryController;
 use App\Http\Controllers\Back\OrderController as BackOrderController;
 
+use App\Http\Controllers\Auth\GoogleController;
+
 use App\Models\Order;
 use Illuminate\Foundation\Application;
 use Inertia\Inertia;
@@ -28,6 +30,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 use App\Libraries\UserAuth;
+use Laravel\Socialite\Facades\Socialite;
 
 /*
 |--------------------------------------------------------------------------
@@ -153,6 +156,21 @@ Route::get('/login', function () {
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle']);
+// Route::get('/auth/google', function () {
+//     return Socialite::drive('google')->redirect();
+// });
+
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+
+// Route::get('/test-env', function () {
+//     return response()->json([
+//         'env_raw' => env('GOOGLE_CLIENT_ID'),
+//         'config_loaded' => config('services.google.client_id'),
+//     ]);
+// });
+
 // require __DIR__ . '/auth.php';
 
 // Route::get('/products', function () {

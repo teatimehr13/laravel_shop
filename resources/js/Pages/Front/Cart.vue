@@ -8,14 +8,14 @@
     </FrontendLayout>
 
     <div class="page-container">
-        <p class="my-8">
+        <div class="my-8 col-span-12">
             <Link :href="route('categories.front.index')">
             <el-icon>
                 <ArrowLeft />
             </el-icon>
             繼續購物
             </Link>
-        </p>
+        </div>
 
     </div>
 
