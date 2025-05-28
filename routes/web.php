@@ -17,7 +17,7 @@ use App\Http\Controllers\Back\CategoryController as BackCategoryController;
 use App\Http\Controllers\Back\OrderController as BackOrderController;
 
 use App\Http\Controllers\Auth\GoogleController;
-
+use App\Http\Controllers\Auth\FaceBookController;
 use App\Models\Order;
 use Illuminate\Foundation\Application;
 use Inertia\Inertia;
@@ -158,11 +158,11 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle']);
-// Route::get('/auth/google', function () {
-//     return Socialite::drive('google')->redirect();
-// });
-
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+
+Route::get('/auth/facebook', [FaceBookController::class, 'redirectToFacebook']);
+Route::get('/auth/facebook/callback', [FaceBookController::class, 'handleFacebookCallback']);
+
 
 // Route::get('/test-env', function () {
 //     return response()->json([

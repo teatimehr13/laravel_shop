@@ -21,7 +21,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'is_admin'
+        'is_admin',
+        'avatar',
+        'password',
+        'provider',
+        'provider_id',
+        'phone',
     ];
 
     /**
@@ -44,18 +49,21 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function carts(){
+    public function carts()
+    {
         return $this->hasMany(Cart::class);
     }
 
     //一個使用者一個購物車
-    public function purchase_cart(){
+    public function purchase_cart()
+    {
         return $this->hasOne(Cart::class)->where('cart_type', Cart::typeIndex(Cart::PURCHASE));
     }
 
-    public function getPurchaseCartOrCreate(){
+    public function getPurchaseCartOrCreate()
+    {
         $purchase_cart = $this->purchase_cart()->first();
-        if(!$purchase_cart){
+        if (!$purchase_cart) {
             $purchase_cart = Cart::create([
                 'user_id' => $this->id,
                 'cart_type' => Cart::typeIndex(Cart::PURCHASE)

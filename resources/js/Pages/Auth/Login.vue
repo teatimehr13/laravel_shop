@@ -80,6 +80,10 @@ const submit = () => {
             <!-- <img src="/google-icon.svg" class="inline w-4 mr-2" /> -->
             使用 Google 登入
             </a>
+            <a href="/auth/facebook" class="btn btn-google">
+            <!-- <img src="/google-icon.svg" class="inline w-4 mr-2" /> -->
+            使用 FaceBook 登入
+            </a>
         </div>
     </GuestLayout>
 </template>

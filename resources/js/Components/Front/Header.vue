@@ -35,7 +35,7 @@
             <div class="el-dropdown-link right-text" style="display: flex; align-items: center;">
               <div class="right-text-content">
                 <div class="right-text">
-                  <el-avatar src="/storage/user/5556468.png" size="small" />
+                  <el-avatar :src="user.avatar || '/storage/user/5556468.png'" size="small" />
                 </div>
                 <div class="right-text">
                   {{ user.name }}
