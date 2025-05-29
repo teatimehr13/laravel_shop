@@ -15,6 +15,11 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                'form-hover': '#f3f4f6', 
+                // 'form': '#f9fafb',
+                'strong': '#111827',
+            }
         },
     },
 
