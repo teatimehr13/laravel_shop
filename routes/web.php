@@ -23,7 +23,7 @@ use Illuminate\Foundation\Application;
 use Inertia\Inertia;
 
 use App\Http\Controllers\Auth\AuthController;
-
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -164,6 +164,11 @@ Route::get('/auth/facebook', [FaceBookController::class, 'redirectToFacebook']);
 Route::get('/auth/facebook/callback', [FaceBookController::class, 'handleFacebookCallback']);
 
 
+// Route::middleware('guest')->group(function () {
+//     Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+//     Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']) ->name('password.email');
+// });
+
 // Route::get('/test-env', function () {
 //     return response()->json([
 //         'env_raw' => env('GOOGLE_CLIENT_ID'),
@@ -171,7 +176,7 @@ Route::get('/auth/facebook/callback', [FaceBookController::class, 'handleFaceboo
 //     ]);
 // });
 
-// require __DIR__ . '/auth.php';
+require __DIR__ . '/auth.php';
 
 // Route::get('/products', function () {
 //     return Inertia::render('Products', [

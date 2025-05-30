@@ -140,7 +140,7 @@ const submit = () => {
                             </div>
 
                             <div class="flex items-center justify-end mb-4">
-                                <Link href="#"
+                                <Link :href="route('password.request')"
                                     class="underline text-sm text-blue-700 hover:text-blue-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 忘記密碼?
                                 </Link>
