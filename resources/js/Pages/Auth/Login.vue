@@ -103,7 +103,7 @@ const submit = () => {
                             </h1>
                         </div>
                         <div class="px-6 py-4">
-                            <!-- <form @submit.prevent="submit"> -->
+                            <form @submit.prevent="submit">
                             <div class="mb-4">
                                 <label class="block">
                                     <span class="block text-sm font-medium text-slate-700">帳號</span>
@@ -187,8 +187,7 @@ const submit = () => {
                                 </button>
                             </div>
 
-
-                            <!-- </form> -->
+                            </form>
                         </div>
 
                         <div class="text-center py-4 px-6">

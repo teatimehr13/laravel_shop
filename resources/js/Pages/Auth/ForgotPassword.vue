@@ -10,6 +10,7 @@ defineProps({
 
 const countdown = ref(0)
 const error = ref(null)
+const hit_status = ref(true);
 
 const form = useForm({
     email: '',
@@ -22,21 +23,35 @@ const form = useForm({
 
 const submit = () => {
     error.value = null
+
     form.post(route('password.email'), {
         onError: (errors) => {
+            console.log(123);
+            const messages = errors.email || []
+            // console.log(messages);
+
+            if (typeof messages === 'string' && messages.includes('寄送上限')) {
+                hit_status.value = false
+            }
             // 429 節流錯誤會被包含在 response error 裡（用 fetch intercept 的話）
         },
         onFinish: () => {
             // Laravel 429 不會進錯誤欄位，而是 HTTP 例外
         },
         onBefore: () => {
-            // 這邊改為自己判斷
+            if (!hit_status.value) {
+                // error.value = `你今天已達寄送上限，請明天再試。`
+                return false
+            }
+
             if (countdown.value > 0) {
                 error.value = `請稍後再試，還有 ${countdown.value} 秒才能再次寄送。`
                 return false
             }
         },
         onSuccess: () => {
+            hit_status.value = true
+            form.submitted = true;
             countdown.value = 60
             const interval = setInterval(() => {
                 countdown.value--
@@ -48,43 +63,6 @@ const submit = () => {
 </script>
 
 <template>
-    <!-- <GuestLayout>
-        <Head title="Forgot Password" />
-
-        <div class="mb-4 text-sm text-gray-600">
-            Forgot your password? No problem. Just let us know your email address and we will email you a password reset
-            link that will allow you to choose a new one.
-        </div>
-
-        <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
-            {{ status }}
-        </div>
-
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Email Password Reset Link
-                </PrimaryButton>
-            </div>
-        </form>
-    </GuestLayout> -->
-
     <div class="bg-base h-full flex flex-col min-h-screen">
         <div class="flex-1">
             <nav class="my-8 flex items-center justify-center">
@@ -121,10 +99,11 @@ const submit = () => {
                                 </div>
                                 <div>
                                     <button
-                                        class="bg-sky-500 hover:bg-sky-600 inline-flex h-9 w-full justify-center items-center rounded-md border border-transparent text-sm text-slate-50 font-bold">
-                                        {{ countdown > 0 ? `請稍後 ${countdown} 秒` : '送出' }}
+                                        class="bg-sky-500 hover:bg-sky-600 disabled:bg-sky-200 inline-flex h-9 w-full justify-center items-center rounded-md border border-transparent text-sm text-slate-50 font-bold"
+                                        :disabled="countdown > 0 || form.errors.email">
+                                        {{ form.submitted ? (countdown > 0 ? `重新發送 ${countdown}` : '重新發送') : '送出' }}
                                     </button>
-                                    <div v-if="form.errors.email" class="text-red-600 text-sm">
+                                    <div v-if="form.errors.email" class="mt-2 text-red-600 text-sm">
                                         {{ form.errors.email }}
                                     </div>
 
@@ -132,7 +111,7 @@ const submit = () => {
                                         {{ error }}
                                     </div>
 
-                                    <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
+                                    <div v-if="status" class="mb-4 font-medium text-sm text-green-600 mt-2">
                                         {{ status }}
                                     </div>
                                 </div>

@@ -29,9 +29,9 @@ class RouteServiceProvider extends ServiceProvider
         //     return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         // });
 
-        RateLimiter::for('password-email-limit', function ($request) {
-            return Limit::perDay(3)->by($request->input('email') ?: $request->ip());  //一天只能請求三次reset link
-        });
+        // RateLimiter::for('password-email-limit', function ($request) {
+        //     return Limit::perHour(3)->by($request->input('email') ?: $request->ip());  //一天只能請求三次reset link
+        // });
 
         $this->routes(function () {
             Route::middleware('api')
