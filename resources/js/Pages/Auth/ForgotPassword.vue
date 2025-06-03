@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 defineProps({
     status: {
@@ -11,25 +11,28 @@ defineProps({
 const countdown = ref(0)
 const error = ref(null)
 const hit_status = ref(true);
+const invalid_style = ref(false);
 
 const form = useForm({
     email: '',
     submitted: false
 });
 
-// const submit = () => {
-//     form.post(route('password.email'));
-// };
+//email 格式驗證
+const isEmailFormat = computed(() => {
+  const email = form.email
+  const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/  
+  return pattern.test(email)
+})
 
 const submit = () => {
     error.value = null
+    invalid_style.value = false
 
     form.post(route('password.email'), {
         onError: (errors) => {
             console.log(123);
             const messages = errors.email || []
-            // console.log(messages);
-
             if (typeof messages === 'string' && messages.includes('寄送上限')) {
                 hit_status.value = false
             }
@@ -39,6 +42,13 @@ const submit = () => {
             // Laravel 429 不會進錯誤欄位，而是 HTTP 例外
         },
         onBefore: () => {
+            form.submitted = true;
+            //前端驗證不要雙向綁定
+            if (!form.email || !isEmailFormat.value) {
+                invalid_style.value = true;
+                return false
+            }
+
             if (!hit_status.value) {
                 // error.value = `你今天已達寄送上限，請明天再試。`
                 return false
@@ -51,7 +61,6 @@ const submit = () => {
         },
         onSuccess: () => {
             hit_status.value = true
-            form.submitted = true;
             countdown.value = 60
             const interval = setInterval(() => {
                 countdown.value--
@@ -84,28 +93,30 @@ const submit = () => {
                                     <label class="block">
                                         <span class="block text-sm font-medium text-slate-700">Email</span>
                                         <div class="relative">
-                                            <input type="text" v-model="form.email" class="input-style"
+                                            <input type="text" v-model="form.email" class="input-style" 
                                                 placeholder="yourEmail@example.com" autofocus
-                                                :class="{ 'input-invalid': form.submitted && !form.email }" />
-                                            <el-icon v-if="form.submitted && !form.email" class="input-invalid-mark"
+                                                :class="{ 'input-invalid': invalid_style || form.errors.email }" />
+                                            <el-icon v-if="invalid_style || form.errors.email" class="input-invalid-mark"
                                                 size="large">
                                                 <WarnTriangleFilled />
                                             </el-icon>
                                         </div>
-                                        <p v-if="form.submitted && !form.email" class="mt-2 text-pink-600 text-sm">
+                                        <p v-if="invalid_style " class="mt-2 text-red-600 text-sm">
                                             請輸入正確的Email
                                         </p>
+
+                                        <div v-else-if="form.errors.email" class="mt-2 text-red-600 text-sm">
+                                            {{ form.errors.email }}
+                                        </div>
                                     </label>
                                 </div>
                                 <div>
                                     <button
                                         class="bg-sky-500 hover:bg-sky-600 disabled:bg-sky-200 inline-flex h-9 w-full justify-center items-center rounded-md border border-transparent text-sm text-slate-50 font-bold"
-                                        :disabled="countdown > 0 || form.errors.email">
-                                        {{ form.submitted ? (countdown > 0 ? `重新發送 ${countdown}` : '重新發送') : '送出' }}
+                                        :disabled="countdown > 0 || !hit_status">
+                                        {{ form.submitted && countdown > 0 ? `重新發送 ${countdown} 秒` : '送出' }}
                                     </button>
-                                    <div v-if="form.errors.email" class="mt-2 text-red-600 text-sm">
-                                        {{ form.errors.email }}
-                                    </div>
+
 
                                     <div v-if="error" class="text-orange-600 text-sm mt-2">
                                         {{ error }}
@@ -144,11 +155,11 @@ const submit = () => {
 }
 
 .input-invalid {
-    @apply border-pink-500 text-pink-600 focus:border-pink-500 focus:ring-pink-500
+    @apply border-red-500  focus:border-red-500 focus:ring-red-500
 }
 
 .input-invalid-mark {
-    @apply text-pink-600;
+    @apply text-red-600;
     position: absolute;
     right: 0;
     top: 0;
