@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 defineProps({
     status: {
@@ -69,6 +69,13 @@ const submit = () => {
         }
     })
 }
+
+watch(() => form.email, (newVal) => {
+  if (form.submitted && isEmailFormat.value) {
+    invalid_style.value = false
+  }
+})
+
 </script>
 
 <template>

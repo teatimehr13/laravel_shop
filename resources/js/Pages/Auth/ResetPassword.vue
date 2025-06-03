@@ -5,6 +5,8 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
+
 
 const props = defineProps({
     email: {
@@ -25,19 +27,33 @@ const form = useForm({
     submitted: false
 });
 
+
 const submit = () => {
     form.submitted = true;
     console.log(form);
 
-    if (!form.password || !form.password_confirmation || !form.email) {
-        return;
-    }
 
     form.post(route('password.store'), {
+        onBefore: () => {
+            if (!form.password || !form.password_confirmation || !form.email) {
+                return false;
+            }
+        },
+        onError: (errors) => {
+            console.log(form);
+            
+            // form.reset('password', 'password_confirmation')
+        },
         onSuccess: () => form.reset('password', 'password_confirmation'),
-        // onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
+
+
+watch(() => form.password, (newVal) => {
+    if (form.errors.password) {
+        form.errors.password = ''
+    }
+})
 </script>
 
 <template>
@@ -61,18 +77,20 @@ const submit = () => {
                                 <div class="mb-4">
                                     <label class="block">
                                         <span class="block text-sm font-medium text-slate-700">Email</span>
-                                        <div class="relative">
-                                            <input type="text" v-model="form.email" class="input-style"
-                                                placeholder="yourEmail@example.com" autofocus
-                                                :class="{ 'input-invalid': form.submitted && !form.email }" />
+                                        <p class="mt-2">
+                                            {{ form.email }}
+                                        </p>
+                                        <!-- <div class="relative">
+                                            <input type="hidden" v-model="form.email" class="input-style"
+                                                placeholder="yourEmail@example.com"                                                 :class="{ 'input-invalid': form.submitted && !form.email }" />
                                             <el-icon v-if="form.submitted && !form.email" class="input-invalid-mark"
                                                 size="large">
                                                 <WarnTriangleFilled />
                                             </el-icon>
                                         </div>
-                                        <p v-if="form.submitted && !form.email" class="mt-2 text-pink-600 text-sm">
+                                        <p v-if="form.submitted && !form.email" class="mt-2 text-red-600 text-sm">
                                             請輸入正確的Email
-                                        </p>
+                                        </p> -->
                                     </label>
                                 </div>
 
@@ -88,7 +106,7 @@ const submit = () => {
                                             </el-icon>
                                         </div>
                                         <p v-if="form.submitted && (!form.password || form.errors.password)"
-                                            class="mt-2 text-pink-600 text-sm">
+                                            class="mt-2 text-red-600 text-sm">
                                             {{ !form.password ? '請輸入正確的密碼' : form.errors.password }}
                                         </p>
                                     </label>
@@ -106,20 +124,20 @@ const submit = () => {
                                                 <WarnTriangleFilled />
                                             </el-icon>
                                         </div>
-                                        <p v-if="form.submitted && !form.password_confirmation"
-                                            class="mt-2 text-pink-600 text-sm">
-                                            請輸入正確的密碼
-                                        </p>
-
-                                        <p v-if="form.errors.password_confirmation" class="mt-2 text-pink-600 text-sm">
-                                            {{ form.errors.password_confirmation }}
+                                         <p v-if="form.submitted && !form.password_confirmation"
+                                            class="mt-2 text-red-600 text-sm">
+                                            {{ !form.password_confirmation? '請輸入正確的密碼' : form.errors.password }}
                                         </p>
                                     </label>
                                 </div>
 
+                                <div v-if="form.errors.email"  class="my-2 text-red-600 text-sm">
+                                    {{ form.errors.email }}
+                                </div>
+
                                 <div>
-                                    <button
-                                        class="bg-sky-500 hover:bg-sky-600 inline-flex h-9 w-full justify-center items-center rounded-md border border-transparent text-sm text-slate-50 font-bold">
+                                    <button :disabled="form.errors.email"
+                                        class="bg-sky-500 hover:bg-sky-600 disabled:bg-sky-200 inline-flex h-9 w-full justify-center items-center rounded-md border border-transparent text-sm text-slate-50 font-bold">
                                         送出
                                     </button>
                                 </div>
@@ -153,11 +171,11 @@ const submit = () => {
 }
 
 .input-invalid {
-    @apply border-pink-500 text-pink-600 focus:border-pink-500 focus:ring-pink-500
+    @apply border-red-500 focus:border-red-500 focus:ring-red-500
 }
 
 .input-invalid-mark {
-    @apply text-pink-600;
+    @apply text-red-600;
     position: absolute;
     right: 0;
     top: 0;
