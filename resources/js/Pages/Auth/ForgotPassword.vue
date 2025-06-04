@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
+import HelloAnimation from '@/Components/HelloAnimation.vue';
 
 defineProps({
     status: {
@@ -81,10 +82,11 @@ watch(() => form.email, (newVal) => {
 <template>
     <div class="bg-base h-full flex flex-col min-h-screen">
         <div class="flex-1">
-            <nav class="my-8 flex items-center justify-center">
-                <h1 class="text-2xl text-slate-700">
+            <nav class="mt-10 mb-6 flex items-center justify-center">
+                <!-- <h1 class="text-2xl text-slate-700">
                     hello
-                </h1>
+                </h1> -->
+                <HelloAnimation />
             </nav>
             <main>
                 <div class="mx-auto max-w-96 space-y-4 p-4 mb-4">

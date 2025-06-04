@@ -6,7 +6,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
-
+import HelloAnimation from '@/Components/HelloAnimation.vue';
 
 const props = defineProps({
     email: {
@@ -59,10 +59,11 @@ watch(() => form.password, (newVal) => {
 <template>
     <div class="bg-base h-full flex flex-col min-h-screen">
         <div class="flex-1">
-            <nav class="my-8 flex items-center justify-center">
-                <h1 class="text-2xl text-slate-700">
+            <nav class="mt-10 mb-6  flex items-center justify-center">
+                <!-- <h1 class="text-2xl text-slate-700">
                     hello
-                </h1>
+                </h1> -->
+                    <HelloAnimation />
             </nav>
             <main>
                 <div class="mx-auto max-w-96 space-y-4 p-4 mb-4">

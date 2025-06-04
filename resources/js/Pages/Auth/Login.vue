@@ -1,11 +1,8 @@
 <script setup>
-import Checkbox from '@/Components/Checkbox.vue';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import { ref, onMounted } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import HelloAnimation from '@/Components/HelloAnimation.vue';
+
 
 defineProps({
     canResetPassword: {
@@ -30,69 +27,15 @@ const submit = () => {
         onFinish: () => form.reset('password'),
     });
 };
+
+
 </script>
 
 <template>
-    <!-- <GuestLayout>
-
-        <Head title="Log in" />
-        <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
-            {{ status }}
-        </div>
-
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput id="email" type="email" class="mt-1 block w-full" v-model="form.email" required autofocus
-                    autocomplete="username" />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput id="password" type="password" class="mt-1 block w-full" v-model="form.password" required
-                    autocomplete="current-password" />
-
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
-
-            <div class="block mt-4">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600">Remember me</span>
-                </label>
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                <Link v-if="canResetPassword" :href="route('password.request')"
-                    class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Forgot your password?
-                </Link>
-
-                <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Log in
-                </PrimaryButton>
-            </div>
-        </form>
-        <div>
-            <a href="/auth/google" class="btn btn-google">
-            使用 Google 登入
-            </a>
-            <a href="/auth/facebook" class="btn btn-google">
-            使用 FaceBook 登入
-            </a>
-        </div>
-    </GuestLayout> -->
-
     <div class="bg-base h-full flex flex-col min-h-screen">
         <div class="flex-1">
-            <nav class="my-8 flex items-center justify-center">
-                <h1 class="text-2xl text-slate-700">
-                    hello
-                </h1>
+            <nav class="mt-10 mb-6 flex items-center justify-center">
+               <HelloAnimation />
             </nav>
             <main>
                 <div class="mx-auto max-w-96 space-y-4 p-4 mb-4">
@@ -104,88 +47,88 @@ const submit = () => {
                         </div>
                         <div class="px-6 py-4">
                             <form @submit.prevent="submit">
-                            <div class="mb-4">
-                                <label class="block">
-                                    <span class="block text-sm font-medium text-slate-700">帳號</span>
-                                    <div class="relative">
-                                        <input type="text" v-model="form.email" class="input-style"
-                                            placeholder="yourEmail@example.com"
-                                            :class="{ 'input-invalid': form.submitted && !form.email }" />
-                                        <el-icon v-if="form.submitted && !form.email" class="input-invalid-mark"
-                                            size="large">
-                                            <WarnTriangleFilled />
-                                        </el-icon>
-                                    </div>
-                                    <p v-if="form.submitted && !form.email" class="mt-2 text-pink-600 text-sm">
-                                        請輸入正確的Email
-                                    </p>
-                                </label>
-                            </div>
+                                <div class="mb-4">
+                                    <label class="block">
+                                        <span class="block text-sm font-medium text-slate-700">帳號</span>
+                                        <div class="relative">
+                                            <input type="text" v-model="form.email" class="input-style"
+                                                placeholder="yourEmail@example.com"
+                                                :class="{ 'input-invalid': form.submitted && !form.email }" />
+                                            <el-icon v-if="form.submitted && !form.email" class="input-invalid-mark"
+                                                size="large">
+                                                <WarnTriangleFilled />
+                                            </el-icon>
+                                        </div>
+                                        <p v-if="form.submitted && !form.email" class="mt-2 text-pink-600 text-sm">
+                                            請輸入正確的Email
+                                        </p>
+                                    </label>
+                                </div>
 
-                            <div class="mb-4">
-                                <label class="block">
-                                    <span class="block text-sm font-medium text-slate-700">密碼</span>
-                                    <div class="relative">
-                                        <input type="password" v-model="form.password" class="input-style"
-                                            :class="{ 'input-invalid': form.submitted && !form.password }" />
-                                        <el-icon v-if="form.submitted && !form.password" class="input-invalid-mark"
-                                            size="large">
-                                            <WarnTriangleFilled />
-                                        </el-icon>
-                                    </div>
-                                    <p v-if="form.submitted && !form.password" class="mt-2 text-pink-600 text-sm">
-                                        請輸入正確的密碼
-                                    </p>
-                                </label>
-                            </div>
+                                <div class="mb-4">
+                                    <label class="block">
+                                        <span class="block text-sm font-medium text-slate-700">密碼</span>
+                                        <div class="relative">
+                                            <input type="password" v-model="form.password" class="input-style"
+                                                :class="{ 'input-invalid': form.submitted && !form.password }" />
+                                            <el-icon v-if="form.submitted && !form.password" class="input-invalid-mark"
+                                                size="large">
+                                                <WarnTriangleFilled />
+                                            </el-icon>
+                                        </div>
+                                        <p v-if="form.submitted && !form.password" class="mt-2 text-pink-600 text-sm">
+                                            請輸入正確的密碼
+                                        </p>
+                                    </label>
+                                </div>
 
-                            <div class="flex items-center justify-end mb-4">
-                                <Link :href="route('password.request')"
-                                    class="underline text-sm text-blue-700 hover:text-blue-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                忘記密碼?
-                                </Link>
-                            </div>
+                                <div class="flex items-center justify-end mb-4">
+                                    <Link :href="route('password.request')"
+                                        class="underline text-sm text-blue-700 hover:text-blue-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    忘記密碼?
+                                    </Link>
+                                </div>
 
-                            <div>
-                                <button
-                                    class="bg-sky-500 hover:bg-sky-600 inline-flex h-9 w-full justify-center items-center rounded-md border border-transparent text-sm text-slate-50 font-bold">
-                                    提交
-                                </button>
-                            </div>
+                                <div>
+                                    <button
+                                        class="bg-sky-500 hover:bg-sky-600 inline-flex h-9 w-full justify-center items-center rounded-md border border-transparent text-sm text-slate-50 font-bold">
+                                        提交
+                                    </button>
+                                </div>
 
-                            <div class="flex items-center my-4">
-                                <hr class="flex-grow border-t border-gray-300" />
-                                <span class="mx-4 text-gray-500 text-sm">or</span>
-                                <hr class="flex-grow border-t border-gray-300" />
-                            </div>
+                                <div class="flex items-center my-4">
+                                    <hr class="flex-grow border-t border-gray-300" />
+                                    <span class="mx-4 text-gray-500 text-sm">or</span>
+                                    <hr class="flex-grow border-t border-gray-300" />
+                                </div>
 
-                            <div class="mb-2">
-                                <button
-                                    class="bg-transparent inline-flex h-9 w-full justify-center items-center rounded-md border border-gray-300 text-sm  font-bold bg-form-hover hover:border-neutral-400">
+                                <div class="mb-2">
+                                    <button
+                                        class="bg-transparent inline-flex h-9 w-full justify-center items-center rounded-md border border-gray-300 text-sm  font-bold bg-form-hover hover:border-neutral-400">
 
-                                    <span
-                                        class="inline-flex items-center gap-1.5 focus-within:outline-none focus-visible:outline-none">
-                                        <img alt="Google"
-                                            class="object-contain object-center leading-none shrink-0 size-5"
-                                            src="/storage/app/public/svg_icon/0df9a2ae114efbe63df9.svg">
-                                        使用google帳號登入
-                                    </span>
-                                </button>
-                            </div>
+                                        <span
+                                            class="inline-flex items-center gap-1.5 focus-within:outline-none focus-visible:outline-none">
+                                            <img alt="Google"
+                                                class="object-contain object-center leading-none shrink-0 size-5"
+                                                src="/storage/app/public/svg_icon/0df9a2ae114efbe63df9.svg">
+                                            使用google帳號登入
+                                        </span>
+                                    </button>
+                                </div>
 
-                            <div class="mb-2">
-                                <button
-                                    class="bg-transparent inline-flex h-9 w-full justify-center items-center rounded-md border border-gray-300 text-sm  font-bold bg-form-hover hover:border-neutral-400">
-                                    <span
-                                        class="inline-flex items-center gap-1.5 focus-within:outline-none focus-visible:outline-none">
-                                        <img alt="Google"
-                                            class="object-contain object-center leading-none shrink-0 size-5"
-                                            src="/storage/app/public/svg_icon/facebook-1-svgrepo-com.svg">
-                                        使用Facebook帳號登入
-                                    </span>
+                                <div class="mb-2">
+                                    <button
+                                        class="bg-transparent inline-flex h-9 w-full justify-center items-center rounded-md border border-gray-300 text-sm  font-bold bg-form-hover hover:border-neutral-400">
+                                        <span
+                                            class="inline-flex items-center gap-1.5 focus-within:outline-none focus-visible:outline-none">
+                                            <img alt="Google"
+                                                class="object-contain object-center leading-none shrink-0 size-5"
+                                                src="/storage/app/public/svg_icon/facebook-1-svgrepo-com.svg">
+                                            使用Facebook帳號登入
+                                        </span>
 
-                                </button>
-                            </div>
+                                    </button>
+                                </div>
 
                             </form>
                         </div>
@@ -235,4 +178,6 @@ const submit = () => {
     margin-right: 10px;
     margin-left: 10px;
 }
+
+
 </style>
