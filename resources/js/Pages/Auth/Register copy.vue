@@ -1,52 +1,85 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { route } from 'ziggy-js'; // 引入 ziggy-js 中的 route 函數
 import HelloAnimation from '@/Components/HelloAnimation.vue';
+import { watch } from 'vue';
+import { usePage, useForm, Link } from '@inertiajs/vue3'
+const page = usePage();
 
-
-defineProps({
-    canResetPassword: {
-        type: Boolean,
-    },
-    status: {
-        type: String,
-    },
-});
+// defineProps({
+//     status: {
+//         type: String,
+//     },
+// });
 
 const form = useForm({
+    name: '',
     email: '',
     password: '',
-    remember: false,
-    submitted: false
+    password_confirmation: '',
+    submitted: false,
+    phone: '3'
 });
 
 const submit = () => {
     form.submitted = true;
-    if (!form.email || !form.password) return;
-    form.post(route('login'), {
-        onFinish: () => form.reset('password'),
+
+    form.post(route('register'), {
+        onBefore: () => {
+            console.log(form);
+
+            if (!form.password || !form.password_confirmation || !form.email || !form.name) {
+                console.log(123);
+
+                return false;
+            }
+        },
+        onSuccess: () => {
+            console.log(status);
+
+        },
     });
 };
 
-
+watch(() => form.password, (newVal) => {
+    if (form.errors.password) {
+        form.errors.password = ''
+    }
+})
 </script>
 
 <template>
     <div class="bg-base h-full flex flex-col min-h-screen">
         <div class="flex-1">
             <nav class="mt-10 mb-6 flex items-center justify-center">
-               <HelloAnimation />
+                <HelloAnimation />
             </nav>
             <main>
                 <div class="mx-auto max-w-96 space-y-4 p-4 mb-4">
                     <div class="border-card border divide-y rounded-md">
                         <div class="px-6 py-3">
                             <h1 class="text-strong font-medium text-2xl font-bold">
-                                登入
+                                註冊
                             </h1>
                         </div>
                         <div class="px-6 py-4">
                             <form @submit.prevent="submit">
+                                <div class="mb-4">
+                                    <label class="block">
+                                        <span class="block text-sm font-medium text-slate-700">用戶名稱</span>
+                                        <div class="relative">
+                                            <input type="text" v-model="form.name" class="input-style"
+                                                :class="{ 'input-invalid': form.submitted && !form.name }" />
+                                            <el-icon v-if="form.submitted && !form.name" class="input-invalid-mark"
+                                                size="large">
+                                                <WarnTriangleFilled />
+                                            </el-icon>
+                                        </div>
+
+                                        <p v-if="form.submitted && !form.name" class="mt-2 text-red-600 text-sm">
+                                            {{ !form.name ? '請輸入用戶稱名' : form.errors.name }}
+                                        </p>
+                                    </label>
+                                </div>
                                 <div class="mb-4">
                                     <label class="block">
                                         <span class="block text-sm font-medium text-slate-700">帳號</span>
@@ -70,29 +103,47 @@ const submit = () => {
                                         <span class="block text-sm font-medium text-slate-700">密碼</span>
                                         <div class="relative">
                                             <input type="password" v-model="form.password" class="input-style"
-                                                :class="{ 'input-invalid': form.submitted && !form.password }" />
-                                            <el-icon v-if="form.submitted && !form.password" class="input-invalid-mark"
-                                                size="large">
+                                                :class="{ 'input-invalid': form.submitted && (!form.password || form.errors.password) }" />
+                                            <el-icon v-if="form.submitted && (!form.password || form.errors.password)"
+                                                class="input-invalid-mark" size="large">
                                                 <WarnTriangleFilled />
                                             </el-icon>
                                         </div>
-                                        <p v-if="form.submitted && !form.password" class="mt-2 text-pink-600 text-sm">
-                                            請輸入正確的密碼
+                                        <p v-if="form.submitted && (!form.password || form.errors.password)"
+                                            class="mt-2 text-red-600 text-sm">
+                                            {{ !form.password ? '請輸入正確的密碼' : form.errors.password }}
                                         </p>
                                     </label>
                                 </div>
 
-                                <div class="flex items-center justify-end mb-4">
-                                    <Link :href="route('password.request')"
-                                        class="underline text-sm text-blue-700 hover:text-blue-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    忘記密碼?
-                                    </Link>
+                                <div class="mb-4">
+                                    <label class="block">
+                                        <span class="block text-sm font-medium text-slate-700">再次確認密碼</span>
+                                        <div class="relative">
+                                            <input type="password" v-model="form.password_confirmation"
+                                                class="input-style"
+                                                :class="{ 'input-invalid': form.submitted && !form.password_confirmation }" />
+                                            <el-icon v-if="form.submitted && !form.password_confirmation"
+                                                class="input-invalid-mark" size="large">
+                                                <WarnTriangleFilled />
+                                            </el-icon>
+                                        </div>
+                                        <p v-if="form.submitted && !form.password_confirmation"
+                                            class="mt-2 text-red-600 text-sm">
+                                            {{ !form.password_confirmation ? '請輸入正確的密碼' : form.errors.password }}
+                                        </p>
+                                    </label>
                                 </div>
+
+                                <div v-if="page.props.status" class="mb-4 font-medium text-sm text-green-600 mt-2">
+                                    {{ page.props.status }}
+                                </div>
+
 
                                 <div>
                                     <button
                                         class="bg-sky-500 hover:bg-sky-600 inline-flex h-9 w-full justify-center items-center rounded-md border border-transparent text-sm text-slate-50 font-bold">
-                                        提交
+                                        註冊
                                     </button>
                                 </div>
 
@@ -111,7 +162,7 @@ const submit = () => {
                                             <img alt="Google"
                                                 class="object-contain object-center leading-none shrink-0 size-5"
                                                 src="/storage/app/public/svg_icon/0df9a2ae114efbe63df9.svg">
-                                            使用google帳號登入
+                                            使用google帳號註冊
                                         </span>
                                     </button>
                                 </div>
@@ -124,7 +175,7 @@ const submit = () => {
                                             <img alt="Google"
                                                 class="object-contain object-center leading-none shrink-0 size-5"
                                                 src="/storage/app/public/svg_icon/facebook-1-svgrepo-com.svg">
-                                            使用Facebook帳號登入
+                                            使用Facebook帳號註冊
                                         </span>
 
                                     </button>
@@ -134,11 +185,11 @@ const submit = () => {
                         </div>
 
                         <div class="text-center py-4 px-6">
-                            <Link :href="route('register')">
-                                <button
-                                    class="text-slate-700 bg-transparent inline-flex h-9 w-full justify-center items-center rounded-md border border-gray-300 text-sm font-bold bg-form-hover hover:border-neutral-400">
-                                    註冊會員
-                                </button>
+                            <Link :href="route('login')">
+                            <button
+                                class="text-slate-700 bg-transparent inline-flex h-9 w-full justify-center items-center rounded-md border border-gray-300 text-sm font-bold bg-form-hover hover:border-neutral-400">
+                                去登入
+                            </button>
                             </Link>
                         </div>
                     </div>
@@ -146,6 +197,7 @@ const submit = () => {
             </main>
         </div>
     </div>
+
 </template>
 
 <style scoped>
@@ -167,11 +219,11 @@ const submit = () => {
 }
 
 .input-invalid {
-    @apply border-pink-500 text-pink-600 focus:border-pink-500 focus:ring-pink-500
+    @apply border-red-500 text-red-600 focus:border-red-500 focus:ring-red-500
 }
 
 .input-invalid-mark {
-    @apply text-pink-600;
+    @apply text-red-600;
     position: absolute;
     right: 0;
     top: 0;
@@ -180,6 +232,4 @@ const submit = () => {
     margin-right: 10px;
     margin-left: 10px;
 }
-
-
 </style>

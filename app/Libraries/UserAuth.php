@@ -26,11 +26,19 @@ class UserAuth
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             $_user = Auth::user();
+
+            if (!$_user->hasVerifiedEmail()) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => '請先完成 Email 驗證後再登入。',
+                ]);
+            }
+
             self::$user = $_user;
             session(['userId' => Crypt::encryptString(self::$user->id)]);
-            
+
             //如果有改更密碼的話重新加密
-            if(Hash::needsRehash(self::$user->password)){
+            if (Hash::needsRehash(self::$user->password)) {
                 self::$user->password = Hash::make($credentials['password']);
                 self::$user->save();
                 // Log::info(self::$user->save());
@@ -38,7 +46,7 @@ class UserAuth
 
             // Log::info('Session Data:', session()->all());
             // return response()->json(['message' => 'Logged in!'], 200);
-            return redirect()->intended('/back/categories');
+            return redirect()->intended('/categories');
             // return Inertia::location('/back/categories'); 
 
         }
@@ -97,8 +105,7 @@ class UserAuth
                 //解密session，獲取id並拿到該會員資料
                 $userId = Crypt::decryptString(session('userId'));
                 self::$user = User::find($userId);
-            }catch (DecryptException $e){
-
+            } catch (DecryptException $e) {
             }
         }
         return self::$user;
