@@ -3,9 +3,9 @@ import { route } from 'ziggy-js'; // 引入 ziggy-js 中的 route 函數
 import HelloAnimation from '@/Components/HelloAnimation.vue';
 import { ref, watch } from 'vue';
 import { usePage, useForm, Link } from '@inertiajs/vue3'
-import StepPhone from './RegisterForm/StepPhone.vue';
-import StepPassword from './RegisterForm/StepPassword.vue';
-import StepInfo from './RegisterForm/StepInfo.vue';
+import StepPhone from './RegisterForm/RegisterPhone.vue';
+import StepPassword from './RegisterForm/RegisterPassword.vue';
+import StepInfo from './RegisterForm/RegisterInfo.vue';
 
 
 const page = usePage();
