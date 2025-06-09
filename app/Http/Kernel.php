@@ -68,6 +68,10 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
     ];
 
+    protected $routeMiddleware = [
+        'register.step' => \App\Http\Middleware\EnsureRegisterStepIsComplete::class,
+    ];
+
     // protected $except = [
     //     'api/returnRequest'
     // ];

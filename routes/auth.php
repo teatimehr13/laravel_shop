@@ -21,17 +21,7 @@ Route::middleware('guest')->group(function () {
 
     Route::post('register', [RegisteredUserController::class, 'store']);
 
-    //自定義註冊
-    Route::get('/register/phone', fn() => Inertia::render('Auth/RegisterForm/RegisterPhone'))->name('register.phone');
-    Route::post('/register/phone', [RegisterController::class, 'phoneStep'])->name('register.post.phone');
 
-    Route::get('/register/password', fn() => Inertia::render('Auth/RegisterForm/RegisterPassword', ['phone' => session('register.phone')]))->name('register.password');
-    Route::post('/register/password', [RegisterController::class, 'passwordStep'])->name('register.post.password');
-
-    Route::get('/register/info', fn() => Inertia::render('Auth/RegisterForm/RegisterInfo'))->name('register.info');
-    Route::post('/register/info', [RegisterController::class, 'infoStep'])->name('register.post.info');
-
-    Route::get('/register/success', fn() => Inertia::render('Auth/RegisterForm/RegisterSuccess'))->name('register.success');
 
 
     // Route::get('login', [AuthenticatedSessionController::class, 'create'])
@@ -52,6 +42,23 @@ Route::middleware('guest')->group(function () {
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
 });
+
+
+Route::middleware(['register.step','guest'])->group(function () {
+        //自定義註冊
+    Route::get('/register/phone', fn() => Inertia::render('Auth/RegisterForm/RegisterPhone'))->name('register.phone');
+    Route::post('/register/phone', [RegisterController::class, 'phoneStep'])->name('register.post.phone');
+
+    Route::get('/register/password', fn() => Inertia::render('Auth/RegisterForm/RegisterPassword', ['phone' => session('register.phone')]))->name('register.password');
+    Route::post('/register/password', [RegisterController::class, 'passwordStep'])->name('register.post.password');
+
+    Route::get('/register/info', fn() => Inertia::render('Auth/RegisterForm/RegisterInfo'))->name('register.info');
+    Route::post('/register/info', [RegisterController::class, 'infoStep'])->name('register.post.info');
+
+    // Route::get('/register/success', fn() => Inertia::render('Auth/RegisterForm/RegisterSuccess'))->name('register.success');
+    Route::get('/register/success', [RegisterController::class, 'showSuccess'])->name('register.success');
+});
+
 
 Route::middleware('auth')->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)

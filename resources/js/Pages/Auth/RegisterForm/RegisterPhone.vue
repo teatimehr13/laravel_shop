@@ -9,7 +9,7 @@
                 </div>
                 <div class="px-6 py-4">
                     <el-form :model="form" class="demo-ruleForm" :rules="formRules" ref="internalFormRef">
-                        <div class="mb-4">
+                        <div>
                             <label class="block mb-2">
                                 <div class="flex gap-2">
                                     <el-form-item label="" prop="phone" class="relative w-[70%]">
@@ -51,9 +51,16 @@
 import { reactive, ref, computed, onMounted } from 'vue';
 import { usePage, useForm, Link, router } from '@inertiajs/vue3';
 import RegisterLayout from './RegisterLayout.vue';
-// console.log(usePage().props);
+// console.log(usePage().props.errors.step_message);
 
 const register = usePage().props.register || {};
+const step_error = usePage().props.errors.step_message || '';
+
+onMounted(() => {
+  if (step_error) {
+    ElMessage.error(step_error);
+  }
+});
 
 const form = useForm({
     verify_num: register.verify_num || '',
@@ -103,6 +110,9 @@ const formValidate = async () => {
         return false;
     }
 }
+
+
+
 </script>
 
 <style scoped></style>

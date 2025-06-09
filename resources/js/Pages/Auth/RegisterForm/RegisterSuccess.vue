@@ -18,6 +18,8 @@
 </template>
 
 <script setup>
+import { usePage, router } from '@inertiajs/vue3';
 import RegisterLayout from './RegisterLayout.vue';
+
 
 </script>
