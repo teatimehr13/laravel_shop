@@ -134,7 +134,7 @@ const submit = () => {
                         </div>
 
                         <div class="text-center py-4 px-6">
-                            <Link :href="route('register')">
+                            <Link :href="route('register.phone')">
                                 <button
                                     class="text-slate-700 bg-transparent inline-flex h-9 w-full justify-center items-center rounded-md border border-gray-300 text-sm font-bold bg-form-hover hover:border-neutral-400">
                                     註冊會員

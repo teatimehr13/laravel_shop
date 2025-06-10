@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
@@ -37,7 +38,7 @@ class RegisterController extends Controller
             'register.password' => $request->password,
             'register.step2_completed' => true
         ]);
-        Log::info(session()->all());
+        // Log::info(session()->all());
         return back(303);
     }
 
@@ -55,28 +56,36 @@ class RegisterController extends Controller
         ]);
 
 
-        // $user = User::create([
-        //     'phone' => session('register.phone'),
-        //     'password' => session('register.password'),
-        //     'name' => session('register.name'),
-        //     'email' => session('register.email'),
-        // ]);
+        $user = User::create([
+            'phone' => session('register.phone'),
+            'password' => session('register.password'),
+            'name' => session('register.name'),
+            'email' => session('register.email'),
+        ]);
 
-        session(['register_success_flag' => true]);
         session()->forget('register');
-        // return back(303);
+        $token = Str::random(32);
+        session([
+            'register_success_token' => $token,
+            'register_success_token_expires' => now()->addMinutes(1)->timestamp // 1分鐘
+        ]);
+
         return to_route('register.success');
     }
 
     public function showSuccess()
     {
-        // 只要 flag 不存在，就不讓進入
-        if (!session('register_success_flag')) {
-            return redirect()->route('register.phone')
-                ->withErrors(['step_message' => '請依序完成註冊流程']);
-        }
+        $sessionToken = session('register_success_token');
+        $expiresAt = session('register_success_token_expires');
+        // Log::info($sessionToken);
+        // Log::info($expiresAt);
+        // Log::info(time());
 
-        session()->forget('register_success_flag');
+        if (!session('register_success_token') || time() > session('register_success_token_expires')) {
+            return $sessionToken
+                ? redirect()->route('login')
+                : redirect()->route('register.phone');
+        }
 
         return Inertia::render('Auth/RegisterForm/RegisterSuccess');
     }

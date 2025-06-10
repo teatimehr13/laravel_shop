@@ -40,13 +40,6 @@ class EnsureRegisterStepIsComplete
                 }
             }
         }
-
-        if ($routeName === 'register.success') {
-            if (empty(session('register_success_flag'))) {
-                return redirect()->route('register.phone')->withErrors(['step_message' => '請依序完成註冊流程']);
-            } 
-        }
-
         return $next($request);
     }
 }
