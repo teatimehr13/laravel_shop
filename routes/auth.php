@@ -53,6 +53,8 @@ Route::middleware(['register.step','guest'])->group(function () {
 
     // Route::get('/register/success', fn() => Inertia::render('Auth/RegisterForm/RegisterSuccess'))->name('register.success');
     Route::get('/register/success', [RegisterController::class, 'showSuccess'])->name('register.success');
+
+    Route::post('/register/send-sms-code', [RegisterController::class, 'sendSmsCode'])->name('register.sendSmsCode');
 });
 
 

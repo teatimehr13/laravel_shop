@@ -43,6 +43,12 @@ class AppServiceProvider extends ServiceProvider
                 }
                 return $register;
             },
+            // 'sms' => function () {
+            //     $sms_verify_code = session('sms.sms_verify_code') ?? '';
+            //     return [
+            //         'sms_verify_code' => $sms_verify_code
+            //     ];
+            // }
         ]);
     }
 }

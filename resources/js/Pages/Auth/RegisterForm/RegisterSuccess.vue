@@ -6,10 +6,12 @@
                     註冊成功
                 </h1>
                 <div class="text-center">
-                    <button
-                        class="text-white bg-indigo-400 inline-flex h-12 w-[60%] justify-center items-center rounded-md border border-indigo-300 text-xl font-bold hover:bg-indigo-500 hover:border-indigo-500">
-                        返回頁面
-                    </button>
+                     <Link :href="route('login')">
+                        <button
+                            class="text-white bg-indigo-400 inline-flex h-12 w-[60%] justify-center items-center rounded-md border border-indigo-300 text-xl font-bold hover:bg-indigo-500 hover:border-indigo-500">
+                            返回頁面
+                        </button>
+                    </Link>
                 </div>
             </div>
 
@@ -18,7 +20,7 @@
 </template>
 
 <script setup>
-import { usePage, router } from '@inertiajs/vue3';
+import { usePage, router, Link } from '@inertiajs/vue3';
 import RegisterLayout from './RegisterLayout.vue';
 
 
