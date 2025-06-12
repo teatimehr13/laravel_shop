@@ -20,19 +20,41 @@ class UserAuth
 
     public static function login(Request $request)
     {
-        //憑證
-        $credentials = $request->only('email', 'password');
+        $account = $request->input('email');
+        $password = $request->input('password');
+
+        // 判斷是 email 還是手機號
+        if (filter_var($account, FILTER_VALIDATE_EMAIL)) {
+            $user = User::where('email', $account)->first();
+            if (!$user) {
+                return back()->withErrors(['email' => '此 Email 尚未註冊']);
+            }
+            $credentials = ['email' => $account, 'password' => $password];
+        } elseif (preg_match('/^09\d{8}$/', $account) || preg_match('/^\+8869\d{8}$/', $account)) {
+            $user = User::where('phone', $account)->first();
+            if (!$user) {
+                return back()->withErrors(['email' => '此手機號碼尚未註冊']);
+            }
+            $credentials = ['phone' => $account, 'password' => $password];
+        } else {
+            return back()->withErrors([
+                'email' => '請輸入正確的 Email 或手機號碼。',
+            ]);
+        }
+
+        // //憑證
+        // $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             $_user = Auth::user();
 
-            if (!$_user->hasVerifiedEmail()) {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => '請先完成 Email 驗證後再登入。',
-                ]);
-            }
+            // if (!$_user->hasVerifiedEmail()) {
+            //     Auth::logout();
+            //     return back()->withErrors([
+            //         'email' => '請先完成 Email 驗證後再登入。',
+            //     ]);
+            // }
 
             self::$user = $_user;
             session(['userId' => Crypt::encryptString(self::$user->id)]);

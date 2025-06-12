@@ -128,17 +128,23 @@ class RegisterController extends Controller
         // session()->forget('sms');
         // return;
         $phone = $request->input('phone');
-        $code = rand(100000, 999999);
 
+        $user = User::where('phone', $phone)->first();
+        if($user){
+            return response()->json(['error' => '此號碼已註冊'], 429);
+        }
+
+
+        $code = rand(100000, 999999);
         if (preg_match('/^09\d{8}$/', $phone)) {
             $phone = '+886' . substr($phone, 1);
         }
 
         // 限制60秒內不能重複發送
         $lastSend = session('sms.sms_last_send_at');
-        // if ($lastSend && now()->diffInSeconds($lastSend) < 60) {
-        //     return response()->json(['error' => '請稍後再試'], 429);
-        // }
+        if ($lastSend && now()->diffInSeconds($lastSend) < 60) {
+            return response()->json(['error' => '請稍後再試'], 429);
+        }
 
         // 限制每天最多5次
         $dailyCount = session('sms.sms_daily_count', 0);

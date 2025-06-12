@@ -11,7 +11,7 @@
                     <el-form :model="form" class="demo-ruleForm" :rules="formRules" ref="internalFormRef">
                         <div class="mb-8">
                             <label class="block mb-2">
-                                <el-form-item label="" prop="password" class="relative w-full">
+                                <el-form-item label="" prop="password" class="relative w-full" :error="form.errors.password">
                                     <el-input v-model="form.password" placeholder="請輸入密碼"
                                         :type="showPassword ? 'text' : 'password'" />
                                     <el-icon @click="toggleShowPassword" class="cursor-pointer"
@@ -22,7 +22,7 @@
                             </label>
 
                             <label class="block">
-                                <el-form-item label="" prop="password_confirmation" class="relative w-full">
+                                <el-form-item label="" prop="password_confirmation" class="relative w-full" :error="form.errors.password">
                                     <el-input v-model="form.password_confirmation" placeholder="請再次輸入密碼"
                                         :type="showPasswordConfirm ? 'text' : 'password'" />
                                     <el-icon @click="toggleShowPasswordConfirm" class="cursor-pointer"
@@ -32,9 +32,9 @@
                                 </el-form-item>
                             </label>
 
-                            <p v-if="form.errors.password" class="back-error">
+                            <!-- <p v-if="form.errors.password" class="back-error">
                                 {{ form.errors.password }}
-                            </p>
+                            </p> -->
                         </div>
                     </el-form>
 

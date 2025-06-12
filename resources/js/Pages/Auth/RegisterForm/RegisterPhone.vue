@@ -34,17 +34,17 @@
                                 </p>
                             </label>
 
-                            <label class="block">
+                            <label class="block mb-2">
                                 <div class="flex gap-2">
-                                    <el-form-item label="" prop="verify_num" class="relative w-full">
+                                    <el-form-item label="" prop="verify_num" :error="form.errors.phone || form.errors.verify_num" class="relative w-full">
                                         <el-input v-model="form.verify_num" placeholder="請輸入驗證碼" />
                                     </el-form-item>
                                 </div>
                             </label>
 
-                            <p v-if="form.errors.phone || form.errors.verify_num" class="back-error">
+                            <!-- <p v-if="form.errors.phone || form.errors.verify_num" class="back-error">
                                 {{ form.errors.phone || form.errors.verify_num }}
-                            </p>
+                            </p> -->
 
                         </div>
                     </el-form>
@@ -191,7 +191,5 @@ const msg = (msg, type) => {
 </script>
 
 <style scoped>
-.back-error {
-    margin: 0 0 10px 0.125rem;
-}
+
 </style>

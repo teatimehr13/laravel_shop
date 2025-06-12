@@ -54,9 +54,9 @@ if (expiredAt) {
                 <HelloAnimation />
             </nav>
             <main>
-                <div class="mx-auto max-w-3xl space-y-4 p-4 mb-4">
+                <div class="mx-auto max-w-md space-y-4 p-4 mb-4">
                     <div>
-                        <el-steps :active="stepActive" finish-status="success" simple>
+                        <el-steps :active="stepActive" finish-status="success" align-center>
                             <el-step title="手機驗證" />
                             <el-step title="設定密碼" />
                             <el-step title="基本資料" />
@@ -65,8 +65,15 @@ if (expiredAt) {
                     </div>
                 </div>
 
-                <div class="mx-auto max-w-96 space-y-4 p-4 mb-4">
+                <div class="mx-auto max-w-96 space-y-4 p-4">
                     <slot name="form" />
+                </div>
+
+                <div class="mx-auto max-w-96 space-y-4 p-4 mb-4 text-center">
+                    已經有帳號了? 
+                    <Link :href="route('login')" class="text-blue-600">
+                        登入
+                    </Link>
                 </div>
             </main>
         </div>
@@ -122,5 +129,6 @@ if (expiredAt) {
     left: 0;
     line-height: 1;
     padding-top: 2px;
+    margin: 0 0 10px 0.125rem;
 }
 </style>
