@@ -310,6 +310,9 @@ const place_order = () => {
         payment_method: paymentMethod.value
     })
 
+    console.log(submit_form);
+    
+
     submit_form.post(route('checkout.placeOrder'));
 
     // const placeOrder = () => {

@@ -76,6 +76,7 @@ const props = defineProps({
     formateDate: Function,
     toCurrency: Function,
 })
+console.log(props.historyData);
 
 const activeNames = ref();
 
@@ -85,7 +86,7 @@ watch(
         if (newVal) {
             const historyData = reactive(props.historyData);
             console.log(historyData);
-            activeNames.value = historyData[0].id;
+            activeNames.value = historyData[0]?.id;
             console.log(activeNames.value);
         }
     },

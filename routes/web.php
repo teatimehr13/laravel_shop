@@ -177,10 +177,4 @@ Route::get('/auth/facebook/callback', [FaceBookController::class, 'handleFaceboo
 // });
 
 require __DIR__ . '/auth.php';
-
-// Route::get('/products', function () {
-//     return Inertia::render('Products', [
-//         'isLoggedIn' => Auth::check(),
-//         'user' => Auth::user(),
-//     ]);
-// })->middleware('auth')->name('products');
+require __DIR__ . '/ecpay.php';
