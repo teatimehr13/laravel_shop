@@ -230,7 +230,7 @@
             </div>
             <div style="display: flex; justify-content: flex-end; margin: 12px auto;">
                 <el-button color="#f56c6c" style="color: white; font-weight: bold;" size="large"
-                    @click="place_order">下訂單</el-button>
+                    @click="submitPlaceOrderForm">下訂單</el-button>
             </div>
         </div>
     </div>
@@ -270,6 +270,7 @@ console.log(props.checkoutSummary);
 // console.log(props.user);
 // console.log(props.shippingFee);
 
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
 
 
 const order_form = reactive({
@@ -330,6 +331,57 @@ const place_order = () => {
     // const response = await axios.post('/checkout/placeOrder', order_form);
     // console.log(response.data);
 
+}
+
+
+function submitPlaceOrderForm() {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/checkout/placeOrder'; // 根據你的 route 寫正確的 URL
+    form.style.display = 'none';
+
+    // CSRF Token
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = '_token';
+    csrf.value = csrfToken;
+    form.appendChild(csrf);
+
+    // address
+    appendInput(form, 'address', props.user.address);
+
+    // name
+    appendInput(form, 'name', props.user.name);
+
+    // phone
+    appendInput(form, 'phone', props.user.phone);
+
+    // note
+    appendInput(form, 'note', order_form.note);
+
+    // order_status
+    appendInput(form, 'order_status', mapToOrderStatus[paymentMethod.value]);
+
+    // payment_method
+    appendInput(form, 'payment_method', paymentMethod.value);
+
+    // selected_ids[] (多選)
+    props.checkoutItems.forEach(item => {
+        appendInput(form, 'selected_ids[]', item.productOption.id);
+    });
+
+    // 加到 body 並送出
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// 工具函式：建立 input 並附加
+function appendInput(form, name, value) {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
 }
 
 </script>

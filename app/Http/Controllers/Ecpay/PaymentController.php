@@ -7,32 +7,42 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Ecpay\Sdk\Factories\Factory;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Ecpay\Sdk\Response\VerifiedArrayResponse;
+
 
 class PaymentController extends Controller
 {
     // 1) 建立訂單並產生自動送出的 HTML Form
     public function checkout(Request $req)
     {
+        $order_number = $req->input('order_number');
+        $amount = $req->input('amount');
+
         $factory = new Factory([
             'hashKey'    => config('services.ecpay.hash_key'),
             'hashIv'     => config('services.ecpay.hash_iv'),
             'merchantId' => config('services.ecpay.merchant_id'),
+            'mode'       => 0,
+            // 'env'        => config('services.ecpay.env')
         ]);
-        $autoSubmit = $factory->create('AutoSubmitFormService');
+        // $autoSubmit = $factory->create('AutoSubmitFormService');
+        $autoSubmitFormService = $factory->create('AutoSubmitFormWithCmvService');
 
         $params = [
             // === 必填 ===
-            'MerchantTradeNo'   => 'LAR' . now()->format('YmdHis') . rand(1000, 9999), //訂單編號
+            'MerchantID'        => config('services.ecpay.merchant_id'),
+            'MerchantTradeNo'   => $order_number, //訂單編號
             'MerchantTradeDate' => now()->format('Y/m/d H:i:s'),
             'PaymentType'       => 'aio',
-            'TotalAmount'       => (int) $req->input('amount'), // 從請求中取得金額
+            'TotalAmount'       => (int) $amount, // 從請求中取得金額
             'TradeDesc'         => urlencode('Laravel 測試訂單'),  //商品描述
             'ItemName'          => '測試商品',  //商品名稱
 
             // === 回傳網址 ===
             'ReturnURL'      => config('services.ecpay.return_url'), // 用來接收綠界後端回傳的付款結果通知
-            'OrderResultURL' => config('services.ecpay.front_url'),  // Client
-            'NotifyURL'      => config('services.ecpay.notify_url'),
+            // 'OrderResultURL' => config('services.ecpay.front_url'),  // Client
+            // 'NotifyURL'      => config('services.ecpay.notify_url'),
 
             // === 付款選項 ===
             'ChoosePayment'  => 'ALL',   // 讓使用者在綠界頁面自行挑
@@ -40,50 +50,75 @@ class PaymentController extends Controller
             // 'BuyerEmail' => $request->email,
         ];
 
-        // 送出 HTML (帶 auto-submit script)
-        return response($autoSubmit->generate($params));
+        $action = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5';
+        $html = $autoSubmitFormService->generate($params, $action);
+        // if (str_starts_with($html, '<!DOCTYPE')) {
+        //     // 找 action
+        //     preg_match('/action="([^"]+)"/', $html, $m);
+        //     Log::info('Form action 用的 URL', ['action' => $m[1] ?? 'N/A']);
+        // }
+        return response($html);
     }
 
     // 2)當消費者付款完成後，特店接受綠界的付款結果訊息，並回應接收訊息
     public function returnUrl(Request $req)
     {
-        // 驗證 CheckMacValue
+
+        // Log::info('Hit returnUrl', [
+        //     'raw' => $req->all(),
+        //     '_POST' => $_POST
+        // ]);
+
         $factory = new Factory([
             'hashKey'    => config('services.ecpay.hash_key'),
             'hashIv'     => config('services.ecpay.hash_iv'),
             'merchantId' => config('services.ecpay.merchant_id'),
         ]);
-        $checker = $factory->create('CheckMacValueService');
 
-        $data = $req->all();
-        if (!$checker->validate($data)) {     // 驗證失敗
-            logger()->warning('ECPay callback MAC invalid', $data);
-            return response('0|FAIL', 200);
-        }
+        $checkoutResponse = $factory->create(VerifiedArrayResponse::class);
+        $data = $checkoutResponse->get($req->all());
+        Log::info('綠界付款成功資料驗證完成', $data);
 
-        //成功後開始進行資料表的處理
-        $order = Order::where('order_no', $data['MerchantTradeNo'])->first();
+        $order = Order::where('order_number', $data['MerchantTradeNo'])->first();
+        $order->update([
+            'order_status' => 2,
+            'payment_method' => $data['PaymentType'] == 'Credit_CreditCard' ? 'credit_card' : $data['PaymentType'],
+            'payment_order_number' => $data['TradeNo']
+            // 'paid_at' => now(),
+            // 'transaction_id' => $data['TradeNo'],
+        ]);
 
-        if ($order && $data['RtnCode'] == 1 && $order->amount == $data['TradeAmt']) {
-            $order->update([
-                'status' => 'PAID',
-                'paid_at' => now(),
-                'ecpay_trade_no' => $data['TradeNo'],
-            ]);
+        return redirect()->route('order.show', ['order' => $data['MerchantTradeNo']]);
 
-            // //呼叫「自己後台」的 API 儲存 log
-            // Http::post(route('order.notify'), [
-            //     'order_id' => $order->id,
-            //     'event'    => 'payment_success',
-            //     'from'     => 'ecpay',
-            //     'data'     => $data,
-            // ]);
-        }
+        // $data = $req->all();
+        // if (!$checker->validate($data)) {     // 驗證失敗
+        //     logger()->warning('ECPay callback MAC invalid', $data);
+        //     return response('0|FAIL', 200);
+        // }
 
-        return response('1|OK', 200);
+        // //成功後開始進行資料表的處理
+        // $order = Order::where('order_no', $data['MerchantTradeNo'])->first();
+
+        // if ($order && $data['RtnCode'] == 1 && $order->amount == $data['TradeAmt']) {
+        //     $order->update([
+        //         'status' => 'PAID',
+        //         'paid_at' => now(),
+        //         'ecpay_trade_no' => $data['TradeNo'],
+        //     ]);
+
+        //     // //呼叫「自己後台」的 API 儲存 log
+        //     // Http::post(route('order.notify'), [
+        //     //     'order_id' => $order->id,
+        //     //     'event'    => 'payment_success',
+        //     //     'from'     => 'ecpay',
+        //     //     'data'     => $data,
+        //     // ]);
+        // }
+
+        // return response('1|OK', 200);
     }
 
-    // 3) Browser redirect（非必要但可用來顯示 UI）
+    // 導回訂單頁
     public function front(Request $req)
     {
         return view('ecpay.result', [

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Ecpay\PaymentController;
 use App\Models\ProductOption;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -37,7 +38,7 @@ class CheckoutController extends Controller
                 'subtotal' => $checkoutItems->sum('subtotal'),
                 'shippingFee' => $shippingFee,
                 'total' => $checkoutTotal
-              ],
+            ],
         ]);
     }
 
@@ -154,14 +155,6 @@ class CheckoutController extends Controller
         $shippingFee = $this->calculateShippingFee($subtotal);
         $total = $subtotal + $shippingFee;
 
-        // Log::info($validated);
-        // return
-        // Log::info($checkoutItems);
-        // Log::info($subtotal);
-        // Log::info($total);
-
-        // return;
-
         // 建立 Order
         $order_number = now()->format('YmdHis') . rand(1000, 9999);
         $order = Order::create([
@@ -172,12 +165,12 @@ class CheckoutController extends Controller
             'note' => $validated['note'],
             'order_number' => $order_number,
             'order_status' => $validated['order_status'], //變數
-            'payment_method' => $validated['payment_method'] 
+            'payment_method' => $validated['payment_method']
         ]);
 
         // 建立 order_items
         foreach ($checkoutItems as $item) {
-            Log::info($item['productOption']['image']);
+            // Log::info($item['productOption']['image']);
             $order->orderItems()->create([
                 'name' => $item['product']['name'] . ' (' . $item['productOption']['color_name'] . ')',
                 'price' => $item['productOption']['price'],
@@ -186,11 +179,13 @@ class CheckoutController extends Controller
                 'product_option_id' => $item['productOption']['id'],
             ]);
         }
-
-        // return redirect()->route('orders.show');
-        return redirect()->route('order.show', ['order' => $order_number]);
-        // return response()->json(['msg' => 'order success']);
-        // return redirect()->route('order.success')->with('message', '訂單已建立');
+        
+        // return redirect()->route('order.show', ['order' => $order_number]);
+        //把參數導到paymentcontroller 
+        return app(PaymentController::class)->checkout(new Request([
+            'order_number' => $order->order_number,
+            'amount' => $order->amount
+        ]));
     }
 
     //拿到購物車全部的金額
