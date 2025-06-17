@@ -41,7 +41,7 @@ class PaymentController extends Controller
 
             // === 回傳網址 ===
             'ReturnURL'      => config('services.ecpay.return_url'), // 用來接收綠界後端回傳的付款結果通知
-            // 'OrderResultURL' => config('services.ecpay.front_url'),  // Client
+            'OrderResultURL' => config('services.ecpay.front_url'),  // Client
             // 'NotifyURL'      => config('services.ecpay.notify_url'),
 
             // === 付款選項 ===
@@ -88,7 +88,7 @@ class PaymentController extends Controller
             // 'transaction_id' => $data['TradeNo'],
         ]);
 
-        return redirect()->route('order.show', ['order' => $data['MerchantTradeNo']]);
+        // return redirect()->route('order.show', ['order' => $data['MerchantTradeNo']]);
 
         // $data = $req->all();
         // if (!$checker->validate($data)) {     // 驗證失敗
@@ -118,13 +118,14 @@ class PaymentController extends Controller
         // return response('1|OK', 200);
     }
 
+
+
     // 導回訂單頁
-    public function front(Request $req)
+    public function frontOrderResultURL(Request $req)
     {
-        return view('ecpay.result', [
-            'status'  => $req->input('RtnCode') == 1 ? 'success' : 'fail',
-            'message' => urldecode($req->input('RtnMsg', '')),
-        ]);
+        Log::info('OrderResult 回傳內容', $req->all());
+        $merchantTradeNo = $req->input('MerchantTradeNo');
+        return redirect()->route('order.show', ['order' => $merchantTradeNo])->with('success', '付款完成！訂單已成立');
     }
 
     public function notifyUrl(Request $req)
