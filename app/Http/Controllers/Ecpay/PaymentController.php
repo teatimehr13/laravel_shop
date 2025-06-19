@@ -115,7 +115,7 @@ class PaymentController extends Controller
         //     // ]);
         // }
 
-        // return response('1|OK', 200);
+        return response('1|OK', 200);
     }
 
 
@@ -128,15 +128,29 @@ class PaymentController extends Controller
         return redirect()->route('order.show', ['order' => $merchantTradeNo])->with('success', '付款完成！訂單已成立');
     }
 
+    //v5版本不需要
     public function notifyUrl(Request $req)
     {
-        // 處理綠界通知
-        // 驗證簽名，確保資料未被竄改 (非常重要)
-        // ...  (參考綠界文件驗證方式) ...
+        Log::info('收到 NotifyURL 回傳', $req->all());
 
-        // 更新訂單狀態
-        // ...
+        $factory = new Factory([
+            'hashKey'    => config('services.ecpay.hash_key'),
+            'hashIv'     => config('services.ecpay.hash_iv'),
+            'merchantId' => config('services.ecpay.merchant_id'),
+        ]);
 
-        return 'success'; // 回傳 success 給綠界
+        $verified = $factory->create(VerifiedArrayResponse::class)->get($req->all());
+
+        $order = Order::where('order_number', $verified['MerchantTradeNo'])->first();
+
+        if ($order && $verified['RtnCode'] == '1') {
+            $order->update([
+                'order_status' => 2,
+                'payment_method' => $verified['PaymentType'],
+                'payment_order_number' => $verified['TradeNo'],
+            ]);
+        }
+
+        return response('1|OK');
     }
 }

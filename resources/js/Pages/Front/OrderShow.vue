@@ -47,7 +47,18 @@
             <div class="grid-cell">{{ state.order.order_number }}</div>
             <div class="grid-cell">{{ total_qty }}</div>
             <div class="grid-cell total-price">{{ toCurrency(state.order.amount) }}</div>
-            <div class="grid-cell">{{ state.order.payment_method_label ?? '-' }}</div>
+            <div class="grid-cell">{{
+                state.order.payment_method_label ?? '-' }}
+                <span v-if="state.order.order_status_label == '待付款'">
+                    <span class="text-blue-600 cursor-pointer" @click="paidDialogVisible = true">
+                        ({{ state.order.order_status_label }})
+                    </span>
+                </span>
+                <span v-else>
+                    ({{ state.order.order_status_label }})
+                </span>
+
+            </div>
             <div class="grid-cell">
                 <el-button link type='primary' @click="dialogReturnToggle">
                     我要退貨
@@ -63,7 +74,8 @@
                     :to-currency="toCurrency" @get-order-num="getOrderNum" />
             </el-tab-pane>
             <el-tab-pane label="退貨紀錄" name="second" v-loading="loading">
-                <ReturnHistory ref="historyRef" :history-data="historyData" :formate-date="formateDate" :to-currency="toCurrency"/>
+                <ReturnHistory ref="historyRef" :history-data="historyData" :formate-date="formateDate"
+                    :to-currency="toCurrency" />
 
             </el-tab-pane>
         </el-tabs>
@@ -72,8 +84,25 @@
             <!-- <el-button type="danger" @click="submitToReturn" :disabled="!canSubmit">提交</el-button> -->
             <!-- <el-button @click="dialogReturnToggle">關閉</el-button> -->
         </template>
+    </el-dialog>
 
+    <el-dialog v-model="paidDialogVisible" title="訂購資訊 / 付款" width="500" align-center>
+        <span>
+            {{ state.order.payment_method_label + `支付繳費期限：` }}
+            <span class="text-base">
+                {{ expireAt }}
+            </span>
+            <p class="text-red-500 text-sm">
+                (若超過繳費期費，仍未付款，訂單將自動取消)
+            </p>
+            <p class="mt-2">
+                信用卡繳費金額: <span class="text-lg text-purple-600">{{ toCurrency(order.amount) }}</span>
+            </p>
+            <div class="grid mt-6">
+                <el-button size="large">前往支付</el-button>
+            </div>
 
+        </span>
     </el-dialog>
 </template>
 
@@ -192,6 +221,8 @@ const getReturnHistory = async () => {
 
 const loading = ref(true);
 
+const paidDialogVisible = ref(false)
+const expireAt = dayjs(state.order.created_at).add(4, 'hour').format('YYYY-MM-DD HH:mm:ss');
 // const handleBeforeLeave = async(tab) => {
 //     console.log(tab);
 
@@ -291,8 +322,8 @@ function formateDate(rawTime) {
     border-bottom: 1px solid #eee;
 }
 
-.grid-header + .grid-header,
-.grid-cell + .grid-cell {
+.grid-header+.grid-header,
+.grid-cell+.grid-cell {
     border-left: 1px solid #ebeef5;
 }
 

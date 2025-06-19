@@ -43,6 +43,12 @@ class AppServiceProvider extends ServiceProvider
                 }
                 return $register;
             },
+            'flash' => function (){
+                $latest_order_number = session('latest_order_number');
+                return [
+                    'latest_order_number' => $latest_order_number
+                ];
+            }
             // 'sms' => function () {
             //     $sms_verify_code = session('sms.sms_verify_code') ?? '';
             //     return [

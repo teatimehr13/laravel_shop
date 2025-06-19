@@ -90,6 +90,7 @@ class OrderController extends Controller
         $orderData = $order->toArray();
         $orderData['payment_method_label'] = Order::paymentMethodOptions()[$order->payment_method];
         $orderData['step_index'] = Order::orderStatusStepMap()[$order->order_status] ?? 0;
+        $orderData['order_status_label'] = $order->order_status_label;
 
         return [
             'order' => $orderData,

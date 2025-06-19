@@ -149,6 +149,13 @@ class CheckoutController extends Controller
         $user = $request->user();
         $checkoutItems = $this->getCheckoutItems($user, $validated['selected_ids']);
 
+        $cart = $user->getPurchaseCartOrCreate();
+        // dd($cart->cartItems()->whereIn('product_option_id',$validated['selected_ids']));
+        //刪掉productOption 裡的id
+
+        // return dd($checkoutItems);
+
+
         // 總金額（商品總額 + 運費）
         $subtotal = $checkoutItems->sum('subtotal');
         // $shippingFee = 60; // 可改成變數
@@ -179,7 +186,12 @@ class CheckoutController extends Controller
                 'product_option_id' => $item['productOption']['id'],
             ]);
         }
+
+        // 購物車變成訂單後，刪除
+        $cart->cartItems()->whereIn('product_option_id',$validated['selected_ids'])->delete();
+
         
+        session()->flash('latest_order_number', $order->order_number);
         // return redirect()->route('order.show', ['order' => $order_number]);
         //把參數導到paymentcontroller 
         return app(PaymentController::class)->checkout(new Request([

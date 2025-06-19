@@ -1,39 +1,4 @@
 <template>
-    <!-- <div class="checkout-page">
-        <h2>訂單商品</h2>
-
-        <div v-for="item in cartItems" :key="item.productOption.id" class="checkout-item">
-            <img :src="item.productOption.image" alt="商品圖片" width="100" />
-            <div>{{ item.productOption.name }} - {{ item.productOption.color_name }}</div>
-            <div>單價：{{ formatCurrency(item.productOption.price) }}</div>
-            <div>數量：{{ item.quantity }}</div>
-            <div>小計：{{ formatCurrency(item.productOption.price * item.quantity) }}</div>
-        </div>
-
-        <hr />
-
-        <h3>寄送資訊</h3>
-        <label>
-            姓名：<input v-model="form.name" type="text" />
-        </label>
-        <label>
-            電話：<input v-model="form.phone" type="text" />
-        </label>
-        <label>
-            地址：<input v-model="form.address" type="text" />
-        </label>
-
-        <label>
-            備註：<input v-model="form.remark" type="text" />
-        </label>
-
-        <div class="total">
-            運費：{{ formatCurrency(shippingFee) }}<br />
-            總付款金額：<strong>{{ formatCurrency(totalPrice + shippingFee) }}</strong>
-        </div>
-
-        <button @click="submitOrder">下訂單</button>
-    </div> -->
     <FrontendLayout />
 
     <div class="checkout-container">
@@ -237,9 +202,16 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, reactive, onMounted } from 'vue';
 import FrontendLayout from '@/Layouts/FrontendLayout.vue';
-import { useForm, router } from '@inertiajs/vue3'
+import { useForm, router, usePage } from '@inertiajs/vue3'
+const page = usePage();
+
+const latestOrder = page.props?.flash?.latest_order_number;
+if (latestOrder) {
+    // router.get(route('order.show', { order: latestOrder }))
+    window.location.replace(route('order.show', { order: latestOrder }));
+}
 
 // 模擬購物車資料（你可從 props 傳入）
 const props = defineProps({
@@ -252,23 +224,11 @@ const props = defineProps({
     checkoutSummary: {
         type: Object
     }
-    // checkoutSubtotal: {
-    //     type: Number
-    // },
-    // shippingFee: {
-    //     type: Number
-    // },
-    // checkoutTotal: {
-    //     type: Number
-    // }
 });
 
 console.log(props.checkoutItems);
 console.log(props.checkoutSummary);
 
-// console.log(props.checkoutSubtotal);
-// console.log(props.user);
-// console.log(props.shippingFee);
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
 
@@ -312,7 +272,7 @@ const place_order = () => {
     })
 
     console.log(submit_form);
-    
+
 
     submit_form.post(route('checkout.placeOrder'));
 
