@@ -60,10 +60,22 @@
 
             </div>
             <div class="grid-cell">
-                <el-button link type='primary' @click="dialogReturnToggle">
-                    我要退貨
+                <!-- 1. 狀態 5：退貨 -->
+                <el-button v-if="state.order.order_status === 5" link type="primary" @click="dialogReturnToggle">
+                    退貨
+                </el-button>
+
+                <!-- 2. 狀態 6：查看（已取消） -->
+                <el-button v-else-if="state.order.order_status === 6" link type="primary" @click="dialogCancelToggle">
+                    查看
+                </el-button>
+
+                <!-- 3. 其他狀態：取消 -->
+                <el-button v-else link type="primary" @click="dialogCancelToggle">
+                    取消
                 </el-button>
             </div>
+
         </div>
     </div>
 
@@ -76,14 +88,12 @@
             <el-tab-pane label="退貨紀錄" name="second" v-loading="loading">
                 <ReturnHistory ref="historyRef" :history-data="historyData" :formate-date="formateDate"
                     :to-currency="toCurrency" />
-
             </el-tab-pane>
         </el-tabs>
+    </el-dialog>
 
-        <template #footer>
-            <!-- <el-button type="danger" @click="submitToReturn" :disabled="!canSubmit">提交</el-button> -->
-            <!-- <el-button @click="dialogReturnToggle">關閉</el-button> -->
-        </template>
+    <el-dialog v-model="dialogCancel" title="" class="cancel-dialog" align-center>
+        <CancelForm :order="state.order" :to-currency="toCurrency" @orderCanceled="orderCanceled" />
     </el-dialog>
 
     <el-dialog v-model="paidDialogVisible" title="訂購資訊 / 付款" width="500" align-center>
@@ -98,18 +108,20 @@
             <p class="mt-2">
                 信用卡繳費金額: <span class="text-lg text-purple-600">{{ toCurrency(order.amount) }}</span>
             </p>
-            <div class="grid mt-6">
+            <div class="grid mt-6" v-if="!isExpired">
                 <el-button size="large">前往支付</el-button>
             </div>
-
         </span>
     </el-dialog>
+
+
 </template>
 
 <script setup>
 import FrontendLayout from '@/Layouts/FrontendLayout.vue';
 import ReturnForm from './Component/ReturnForm.vue';
 import ReturnHistory from './Component/ReturnHistory.vue';
+import CancelForm from './Component/CancelForm.vue';
 import dayjs from 'dayjs';
 import { Memo, Money, Van, Checked } from '@element-plus/icons-vue';
 import { computed, ref, reactive, onMounted, watch, watchEffect } from 'vue';
@@ -180,10 +192,15 @@ const handleClick = (tab, event) => {
 }
 
 const dialogReturn = ref(false);
+const dialogCancel = ref(false);
 // const selectReturnAll = ref(false);
 
 const dialogReturnToggle = () => {
     dialogReturn.value = !dialogReturn.value;
+}
+
+const dialogCancelToggle = () => {
+    dialogCancel.value = !dialogCancel.value;
 }
 
 const returnRef = ref('');
@@ -222,7 +239,19 @@ const getReturnHistory = async () => {
 const loading = ref(true);
 
 const paidDialogVisible = ref(false)
-const expireAt = dayjs(state.order.created_at).add(4, 'hour').format('YYYY-MM-DD HH:mm:ss');
+console.log(state.order.created_at);
+
+const expireAt = dayjs(state.order.created_at.replace('Z', ''))
+    .add(4, 'hour')
+    .format('YYYY-MM-DD HH:mm:ss')
+    
+const isExpired = dayjs().isAfter(expireAt);
+
+const orderCanceled = () => {
+    state.order.order_status = 6;
+    state.order.order_status_label = '已取消';
+}
+
 // const handleBeforeLeave = async(tab) => {
 //     console.log(tab);
 
@@ -409,7 +438,8 @@ function formateDate(rawTime) {
     font-weight: bold;
 }
 
-.return-dialog {
+.return-dialog,
+.cancel-dialog {
     min-width: 600px;
     max-width: max-content;
     min-height: 500px;

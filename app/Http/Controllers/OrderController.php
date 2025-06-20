@@ -19,7 +19,7 @@ class OrderController extends Controller
     {
         // Order::all();
         // return Inertia::render('Front/Order');
-        
+
         return Inertia::render('Front/OrderList', $this->getOrderLists());
     }
 
@@ -99,7 +99,8 @@ class OrderController extends Controller
         ];
     }
 
-    private function getOrderLists(){
+    private function getOrderLists()
+    {
         $user_id = auth()->id();
         $orders = Order::with('orderItems')->where('user_id', $user_id)->orderBy('created_at', 'desc')->get();
         // $orderDatas = $orders->toArray();
@@ -121,5 +122,17 @@ class OrderController extends Controller
             ];
         });
         return ['orders' => $orders];
+    }
+
+    public function cancelOrder(Order $order)
+    {
+        // Log::info($order);
+        // return;
+        $order->update([
+            'order_status' => 6
+        ]);
+
+
+        return response()->json(['msg' => '訂單已取消', 'type' => 'success']);
     }
 }
