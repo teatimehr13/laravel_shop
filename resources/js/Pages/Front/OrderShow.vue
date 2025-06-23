@@ -40,6 +40,7 @@
             <div class="grid-header">數量</div>
             <div class="grid-header">訂購總額</div>
             <div class="grid-header">付款方式</div>
+            <!-- <div class="grid-header">狀態</div> -->
             <div class="grid-header">操作</div>
 
             <div class="grid-cell">宅配</div>
@@ -47,33 +48,39 @@
             <div class="grid-cell">{{ state.order.order_number }}</div>
             <div class="grid-cell">{{ total_qty }}</div>
             <div class="grid-cell total-price">{{ toCurrency(state.order.amount) }}</div>
-            <div class="grid-cell">{{
-                state.order.payment_method_label ?? '-' }}
-                <span v-if="state.order.order_status_label == '待付款'">
-                    <span class="text-blue-600 cursor-pointer" @click="paidDialogVisible = true">
-                        ({{ state.order.order_status_label }})
+            <div class="grid-cell">
+                {{ state.order.payment_method_label ?? '-' }}
+                <span v-if="state.order.payment_status_label == '待付款'">
+                    <span class="text-blue-600 cursor-pointer hover:text-pink-600 hover:underline"
+                        @click="paidDialogVisible = true">
+                        ({{ state.order.payment_status_label }})
                     </span>
                 </span>
                 <span v-else>
                     ({{ state.order.order_status_label }})
                 </span>
-
             </div>
+            <!-- <div class="grid-cell">
+                <span v-if="state.order.payment_status_label == '待付款'">
+                    <span class="text-blue-600 cursor-pointer" @click="paidDialogVisible = true">
+                        {{ state.order.payment_status_label }}
+                    </span>
+                </span>
+                <span v-else>
+                    {{ state.order.order_status_label }}
+                </span>
+            </div> -->
+
             <div class="grid-cell">
-                <!-- 1. 狀態 5：退貨 -->
-                <el-button v-if="state.order.order_status === 5" link type="primary" @click="dialogReturnToggle">
-                    退貨
-                </el-button>
 
-                <!-- 2. 狀態 6：查看（已取消） -->
-                <el-button v-else-if="state.order.order_status === 6" link type="primary" @click="dialogCancelToggle">
-                    查看
-                </el-button>
+                <!-- 操作按鈕 -->
+                <el-button v-if="canCancel" link type="primary" @click="open">取消</el-button>
+                <el-button v-if="canReturn" link type="primary" @click="dialogReturnToggle">退貨</el-button>
 
-                <!-- 3. 其他狀態：取消 -->
-                <el-button v-else link type="primary" @click="dialogCancelToggle">
-                    取消
-                </el-button>
+                <!-- 額外顯示結束標籤 -->
+                <span v-if="state.order.fulfilment_status === 'cancelled'">已取消</span>
+                <span v-if="state.order.fulfilment_status === 'returned'">已退貨</span>
+
             </div>
 
         </div>
@@ -203,6 +210,35 @@ const dialogCancelToggle = () => {
     dialogCancel.value = !dialogCancel.value;
 }
 
+const cancelOrder = async () => {
+    const response = await axios.patch(
+        route('order.cancel', { order: state.order.order_number }),
+        {}
+    );
+    console.log(response.data);
+    if(response.data.msg == '訂單已取消'){
+        state.order.fulfilment_status = 'cancelled';
+        
+    }
+}
+
+
+const open = () => {
+    ElMessageBox.confirm('確定要取消訂單?', '', {
+        confirmButtonText: '是',
+        cancelButtonText: '否',
+        type: 'warning',
+    })
+        .then(() => {
+            cancelOrder() 
+        })
+        .catch(() => {
+            
+        })
+}
+
+
+
 const returnRef = ref('');
 const getOrderNum = async (order_number) => {
     const response = await axios.get(`/order/fetchOrderData/${order_number}`);
@@ -244,13 +280,23 @@ console.log(state.order.created_at);
 const expireAt = dayjs(state.order.created_at.replace('Z', ''))
     .add(4, 'hour')
     .format('YYYY-MM-DD HH:mm:ss')
-    
+
 const isExpired = dayjs().isAfter(expireAt);
 
 const orderCanceled = () => {
     state.order.order_status = 6;
     state.order.order_status_label = '已取消';
 }
+
+// 是否允許取消（物流未出貨前）
+const canCancel = computed(() =>
+    ['shipped', 'pending', 'processing'].includes(state.order.fulfilment_status)
+)
+
+// 是否允許退貨（出貨或送達後）
+const canReturn = computed(() =>
+    ['delivered'].includes(state.order.fulfilment_status)
+)
 
 // const handleBeforeLeave = async(tab) => {
 //     console.log(tab);

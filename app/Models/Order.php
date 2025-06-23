@@ -48,7 +48,9 @@ class Order extends Model
         'amount',
         'address',
         'user_id',
-        'payment_method'
+        'payment_method',
+        'payment_status',
+        'fulfilment_status'
     ];
 
     //初始化模型事件，當Order被new時，自動做這些事
@@ -137,12 +139,12 @@ class Order extends Model
     {
         $keys = self::statusKeys();
         $labels = self::statusChineseLabels();
-    
+
         $result = [];
         foreach ($keys as $index => $statusKey) {
             $result[$index] = $labels[$statusKey] ?? $statusKey;
         }
-    
+
         return $result;
     }
 
@@ -154,6 +156,60 @@ class Order extends Model
     {
         $key = self::statusKeys()[$this->order_status] ?? null;
         return self::statusChineseLabels()[$key] ?? '';
+    }
+
+
+    public function getStepAttribute(): int
+    {
+        if (in_array($this->fulfilment_status, ['cancelled', 'returned'])) {
+            return 3; // 特殊結束狀態 → 統一當成 step 3
+        }
+
+        if ($this->fulfilment_status === 'delivered') {
+            return 3;
+        }
+
+        if ($this->fulfilment_status === 'shipped') {
+            return 2;
+        }
+
+        if ($this->payment_status === 'paid') {
+            return 1;
+        }
+
+        return 0; // 預設為訂單剛成立
+    }
+
+    public static function paymentStatusLabels(): array
+    {
+        return [
+            'pending'        => '待付款',
+            'paid'           => '已付款',
+            'refunded'       => '已退款',
+            'partial_refund' => '部分退款',
+        ];
+    }
+
+    public static function fulfilmentStatusLabels(): array
+    {
+        return [
+            'pending'    => '待出貨',
+            'processing' => '處理中',
+            'shipped'    => '配送中',
+            'delivered'  => '已送達',
+            'cancelled'  => '已取消',
+            'returned'   => '已退貨',
+        ];
+    }
+
+    public function getPaymentStatusLabelAttribute(): string
+    {
+        return self::paymentStatusLabels()[$this->payment_status] ?? $this->payment_status;
+    }
+
+    public function getFulfilmentStatusLabelAttribute(): string
+    {
+        return self::fulfilmentStatusLabels()[$this->fulfilment_status] ?? $this->fulfilment_status;
     }
 
 

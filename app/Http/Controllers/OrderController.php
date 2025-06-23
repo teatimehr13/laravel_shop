@@ -89,8 +89,9 @@ class OrderController extends Controller
 
         $orderData = $order->toArray();
         $orderData['payment_method_label'] = Order::paymentMethodOptions()[$order->payment_method];
-        $orderData['step_index'] = Order::orderStatusStepMap()[$order->order_status] ?? 0;
+        $orderData['step_index'] = $order->step;
         $orderData['order_status_label'] = $order->order_status_label;
+        $orderData['payment_status_label'] = $order->payment_status_label;
 
         return [
             'order' => $orderData,
@@ -126,11 +127,19 @@ class OrderController extends Controller
 
     public function cancelOrder(Order $order)
     {
-        // Log::info($order);
-        // return;
-        $order->update([
-            'order_status' => 6
-        ]);
+        if (!in_array($order->fulfilment_status, ['pending', 'processing', 'shipped'])) {
+            return response()->json(['msg' => '此訂單無法取消', 'type' => 'error'], 422);
+        }
+
+        $order->fulfilment_status = 'cancelled';
+
+        if ($order->payment_status === 'paid') {
+            $order->payment_status = 'refunded';
+        } else {
+            $order->payment_status = 'pending';
+        }
+
+        $order->save();
 
 
         return response()->json(['msg' => '訂單已取消', 'type' => 'success']);
