@@ -161,9 +161,9 @@ class Order extends Model
 
     public function getStepAttribute(): int
     {
-        if (in_array($this->fulfilment_status, ['cancelled', 'returned'])) {
-            return 3; // 特殊結束狀態 → 統一當成 step 3
-        }
+        // if (in_array($this->fulfilment_status, ['cancelled', 'returned'])) {
+        //     return 3; // 特殊結束狀態 → 統一當成 step 3
+        // }
 
         if ($this->fulfilment_status === 'delivered') {
             return 3;
@@ -176,6 +176,14 @@ class Order extends Model
         if ($this->payment_status === 'paid') {
             return 1;
         }
+
+        if ($this->fulfilment_status === 'cancelled') {
+            return -1; 
+        }
+        if ($this->fulfilment_status === 'returned') {
+            return -2;
+        }
+
 
         return 0; // 預設為訂單剛成立
     }

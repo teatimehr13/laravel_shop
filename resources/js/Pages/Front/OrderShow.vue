@@ -6,11 +6,34 @@
                 <div class="line-background"></div>
                 <div class="line-foreground" :style="{ width: progressWidth }"></div>
             </div>
-            <ul class="list-con">
+            <!-- <ul class="list-con">
                 <li v-for="(step, index) in steps" :key="index" :class="{ active: index <= currentStep }">
                     <el-icon>
                         <component :is="step.icon" />
                     </el-icon>
+                    <div>{{ step.title }}</div>
+                </li>
+            </ul> -->
+
+            <ul class="list-con" v-if="currentStep >= 0">
+                <li v-for="(step, index) in steps" :key="index" :class="{ active: index <= currentStep }">
+                    <el-icon>
+                        <component :is="step.icon" />
+                    </el-icon>
+                    <div>{{ step.title }}</div>
+                </li>
+            </ul>
+
+            <!-- 取消狀態 -->
+            <ul v-else-if="currentStep === -1" class="list-con2">
+                <li v-for="(step, index) in cancelSteps" :key="index" :class="{ active: index <= cancelStep }">
+                    <div>{{ step.title }}</div>
+                </li>
+            </ul>
+
+            <!-- 退貨狀態 -->
+            <ul v-else-if="currentStep === -2" class="list-con2">
+                <li v-for="(step, index) in returnSteps" :key="index" :class="{ active: index <= returnStep }">
                     <div>{{ step.title }}</div>
                 </li>
             </ul>
@@ -57,7 +80,7 @@
                     </span>
                 </span>
                 <span v-else>
-                    ({{ state.order.order_status_label }})
+                    ({{ state.order.payment_status_label }})
                 </span>
             </div>
             <!-- <div class="grid-cell">
@@ -170,7 +193,23 @@ const steps = [
 ]
 
 const currentStep = state.order.step_index;
-// console.log(props.order.step_index);
+console.log(currentStep);
+
+const cancelStep = 0;
+const returnStep = 2;
+
+const cancelSteps = [
+    { title: '申請取消' },
+    { title: '已取消' }
+]
+
+const returnSteps = [
+    { title: '寄回商品' },
+    { title: '商品驗收中' },
+    { title: '已退款' },
+]
+
+
 
 
 // 計算進度百分比
@@ -216,9 +255,9 @@ const cancelOrder = async () => {
         {}
     );
     console.log(response.data);
-    if(response.data.msg == '訂單已取消'){
+    if (response.data.msg == '訂單已取消') {
         state.order.fulfilment_status = 'cancelled';
-        
+
     }
 }
 
@@ -230,10 +269,10 @@ const open = () => {
         type: 'warning',
     })
         .then(() => {
-            cancelOrder() 
+            cancelOrder()
         })
         .catch(() => {
-            
+
         })
 }
 
@@ -477,6 +516,49 @@ function formateDate(rawTime) {
     bottom: -40px;
     white-space: nowrap;
     color: #55595c;
+}
+
+.list-con2 {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+}
+
+.list-con2 li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    justify-content: center;
+    font-weight: bolder;
+    background-color: #757575;
+    color: #757575;
+    position: relative;
+}
+
+
+
+.list-con2 li .el-icon {
+    font-size: 2rem;
+}
+
+.list-con2 li div {
+    position: absolute;
+    bottom: -40px;
+    white-space: nowrap;
+    color: #55595c;
+}
+
+.list-con2 li:not(.active) {
+    border-color: #ddd;
+    background-color: #dddddd;
+}
+
+.list-con2 li:not(.active)>div {
+    color: #ddd;
 }
 
 .total-price {

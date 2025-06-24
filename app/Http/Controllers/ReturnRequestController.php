@@ -35,7 +35,18 @@ class ReturnRequestController extends Controller
      */
     public function store(ReturnRequestForm $request)
     {
+
+
         $validated = $request->validated();
+        $order = Order::findOrFail($validated['order_id']);
+        Log::info($order);
+
+        $order->update([
+            'fulfilment_status' => 'returned',
+            'payment_status' => 'refunded'
+        ]);
+
+        return;
         $totalSubtotal = 0;
         $totalDeduct = 0;
         $totalFinalRefund = 0;

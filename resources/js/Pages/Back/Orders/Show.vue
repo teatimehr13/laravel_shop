@@ -28,18 +28,18 @@
                 <el-descriptions-item>
                     <template #label>
                         <div class="cell-item">
-                            訂單狀態
+                            付款狀態
                         </div>
                     </template>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        {{ order_items.order_status_label }}
-                        <el-button link type='r' ref="buttonRef">
+                        {{ order_items.payment_status_label }}
+                        <!-- <el-button link type='r' ref="buttonRef">
                             <el-icon size="20px">
                                 <Edit />
                             </el-icon>
-                        </el-button>
+                        </el-button> -->
 
-                        <el-popover ref="popoverRef" :virtual-ref="buttonRef" trigger="click" title="更改訂單狀態"
+                        <!-- <el-popover ref="popoverRef" :virtual-ref="buttonRef" trigger="click" title="更改訂單狀態"
                             v-model:visible="popoverVisible" virtual-triggering width>
                             <div style="margin-top: 20px">
                                 <el-radio-group v-model="order_items.order_status" class="radio-wrap">
@@ -52,10 +52,18 @@
                             <div style="margin-top: 4px;">
                                 <el-text class="m-2" size="small" type="info">點兩下按鈕進行更新</el-text>
                             </div>
-                        </el-popover>
+                        </el-popover> -->
                     </div>
                 </el-descriptions-item>
-                <el-descriptions-item>
+                <el-descriptions-item >
+                    <template #label>
+                        <div class="cell-item">
+                            貨品狀態
+                        </div>
+                    </template>
+                    {{ order_items.fulfilment_status_label }}
+                </el-descriptions-item>
+                      <el-descriptions-item>
                     <template #label>
                         <div class="cell-item">
                             建立時間
@@ -79,14 +87,14 @@
                     </template>
                     {{ order_items.recipient_phone }}
                 </el-descriptions-item>
-                <el-descriptions-item>
+                <!-- <el-descriptions-item>
                     <template #label>
                         <div class="cell-item">
                             付款方式
                         </div>
                     </template>
                     {{ order_items.payment_method_label }}
-                </el-descriptions-item>
+                </el-descriptions-item> -->
                 <el-descriptions-item>
                     <template #label>
                         <div class="cell-item">
@@ -104,63 +112,6 @@
                     {{ order_items.note }}
                 </el-descriptions-item>
             </el-descriptions>
-
-            <!-- <div class="order-list-layout">
-                 <div style="width: 100%;">
-                     <div class="flex">
-                         <div>訂單編號</div>
-                         <div>
-                             {{ order_items.order_number }}
-                         </div>
-                     </div>
-                     <div class="flex">
-                         <div>建立時間</div>
-                         <div>
-                             {{ order_items.created_at }}
-                         </div>
-                     </div>
-                     <div class="flex">
-                         <div>訂單狀態</div>
-                         <div>
-                             {{ order_items.order_status }}
-                         </div>
-                     </div>
-                 </div>
-                 <div style="width: 100%;">
-                     <div class="flex">
-                         <div>收件人</div>
-                         <div>
-                             {{ order_items.recipient_name }}
-                         </div>
-                     </div>
-                     <div class="flex">
-                         <div>電話</div>
-                         <div>
-                             {{ order_items.recipient_phone }}
-                         </div>
-                     </div>
-                     <div class="flex">
-                         <div>付款方式</div>
-                         <div>
-                             {{ order_items.payment_method }}
-                         </div>
-                     </div>
-                     <div class="flex">
-                         <div>運送地址</div>
-                         <div>
-                             {{ order_items.address }}
-                         </div>
-                     </div>
-                     <div class="flex">
-                         <div>備註</div>
-                         <div>
-                             {{ order_items.note }}
-                         </div>
-                     </div>
-                 </div>
-     
-             </div> -->
-
 
             <div class="order-detail-text">訂單詳情</div>
             <div class="order-detail-layout">
