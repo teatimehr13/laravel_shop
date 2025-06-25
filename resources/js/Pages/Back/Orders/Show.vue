@@ -198,7 +198,8 @@ const popoverVisible = ref(false)
 
 
 function goBack() {
-    window.history.back();
+    router.replace('/back/backorder');
+    // window.history.back();
 }
 
 const buttonRef = ref();

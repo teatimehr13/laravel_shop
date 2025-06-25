@@ -11,7 +11,7 @@ class ProductOption extends Model
 {
     use HasFactory;
     // protected $fillable = ['name', 'image', 'price', 'description', 'enable', 'published_status'];
-    protected $fillable = ['color_name', 'color_code', 'image', 'price', 'description', 'enable', 'published_status', 'product_id'];
+    protected $fillable = ['color_name', 'color_code', 'image', 'price', 'description', 'enable', 'published_status', 'product_id','quantity'];
 
     protected static function boot()
     {

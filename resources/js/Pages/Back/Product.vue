@@ -101,7 +101,7 @@
     </el-popover> -->
 
                             <el-popconfirm title="確定移除此筆資料?" @confirm="onSubmitDel(scope.row.id)" :width="170"
-                                :hide-after="100" v-model:visible="popconfirmVisible[scope.row.id]">
+                                :hide-after="100" v-model:visible="popconfirmVisible[scope.row.id]" placement="left-end">
                                 <template #reference>
                                     <el-button size="small" type="danger">移除</el-button>
                                 </template>

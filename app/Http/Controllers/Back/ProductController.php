@@ -104,19 +104,24 @@ class ProductController extends Controller
             // return;
             // return response()->json($validate_data);
 
+            $product = Product::create($validate_data);
+
             if ($request->hasFile('image')) {
                 // unset($validate_data['image']); //刪除驗證的image字段
 
                 $name = time() . '_' . $request->file('image')->getClientOriginalName(); //避免檔名重複
                 $path = '/storage/' . $request->file('image')->storeAs(
-                    'products',
+                   'products/' . $product->id,
                     $name,
                     'public'
                 );
-                $validate_data["image"] = $path;
+                // $validate_data["image"] = $path;
+                $product->update([
+                    'image' => $path
+                ]);
             }
 
-            $product = Product::create($validate_data);
+            // $product = Product::create($validate_data);
             return response()->json($product, 201); // 回傳成功創建的產品資料
         } catch (QueryException $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -197,7 +202,7 @@ class ProductController extends Controller
                 //上傳新圖
                 $name = time() . '_' . $request->file('image')->getClientOriginalName();
                 $path = "/storage/" . $request->file('image')->storeAs(
-                    'products',
+                    'products/' . $product->id,
                     $name,
                     'public'
                 );
@@ -477,7 +482,7 @@ class ProductController extends Controller
             );
         }
 
-
+        // 'products/' . $product->id,
         if ($request->hasFile('image')) {
             //有新圖片一律把舊的刪掉
             if ($product_option->image) {
@@ -488,7 +493,7 @@ class ProductController extends Controller
             //上傳新圖
             $name = time() . '_' . $request->file('image')->getClientOriginalName();
             $path = "/storage/" . $request->file('image')->storeAs(
-                'product_options',
+                'product_options/' . $product_option->product_id,
                 $name,
                 'public'
             );
@@ -506,20 +511,25 @@ class ProductController extends Controller
             $validated = $request->validated();
             $validated['published_status'] = 1;
             // return response()->json($validated);
+            $product_option = ProductOption::create($validated);
+            Log::info($product_option);
 
             if ($request->hasFile('image')) {
                 // unset($validated['image']); //刪除驗證的image字段
 
                 $name = time() . '_' . $request->file('image')->getClientOriginalName(); //避免檔名重複
                 $path = '/storage/' . $request->file('image')->storeAs(
-                    'product_options',
+                    'product_options/' . $product_option->product_id,
                     $name,
                     'public'
                 );
-                $validated["image"] = $path;
+                // $validated["image"] = $path;
+                $product_option->update([
+                    'image' => $path
+                ]);
             }
 
-            $product_option = ProductOption::create($validated);
+            // $product_option = ProductOption::create($validated);
             return response()->json($product_option, 201); // 回傳成功創建的產品資料
         } catch (QueryException $e) {
             return response()->json(['error' => $e->getMessage()], 500);

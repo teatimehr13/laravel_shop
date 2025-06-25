@@ -24,6 +24,9 @@ Route::middleware('guest')->group(function () {
     //             ->name('login');
 
     // Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::get('/login', function () {
+        return Inertia::render('Auth/Login');
+    })->name('login');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
@@ -40,8 +43,8 @@ Route::middleware('guest')->group(function () {
 });
 
 
-Route::middleware(['register.step','guest'])->group(function () {
-        //自定義註冊
+Route::middleware(['register.step', 'guest'])->group(function () {
+    //自定義註冊
     Route::get('/register/phone', fn() => Inertia::render('Auth/RegisterForm/RegisterPhone'))->name('register.phone');
     Route::post('/register/phone', [RegisterController::class, 'phoneStep'])->name('register.post.phone');
 

@@ -41,6 +41,8 @@ class ProductOptionController extends Controller
         try {
             $validated = $request->validated();
             $validated['published_status'] = 1;
+            $validated['quantity'] = 10; 
+            $product_option = ProductOption::create($validated);
 
             if ($validated['color_name'] === '組合色') {
                 $existingCombination = ProductOption::where('product_id', $validated['product_id'])
@@ -59,14 +61,18 @@ class ProductOptionController extends Controller
             if ($request->hasFile('image')) {
                 $name = time() . '_' . $request->file('image')->getClientOriginalName(); //避免檔名重複
                 $path = '/storage/' . $request->file('image')->storeAs(
-                    'product_options',
+                    'product_options/' . $product_option->product_id,
                     $name,
                     'public'
                 );
-                $validated["image"] = $path;
+                // $validated["image"] = $path;
+                $product_option->update([
+                    'image' => $path
+                ]);
+
             }
 
-            $product_option = ProductOption::create($validated);
+            // $product_option = ProductOption::create($validated);
             return response()->json($product_option, 201); // 回傳成功創建的產品資料
         } catch (QueryException $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -127,7 +133,8 @@ class ProductOptionController extends Controller
                 //上傳新圖
                 $name = time() . '_' . $request->file('image')->getClientOriginalName();
                 $path = "/storage/" . $request->file('image')->storeAs(
-                    'product_options',
+                    // 'product_options',
+                    'product_options/' . $product_option->product_id,
                     $name,
                     'public'
                 );

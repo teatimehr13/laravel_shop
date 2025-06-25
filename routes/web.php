@@ -150,10 +150,9 @@ Route::post('/return/returnRequest', [ReturnRequestController::class, 'store'])-
 Route::get('/return/return-history/{orderId}', [ReturnRequestController::class, 'fetch_return_history']);
 
 
-Route::get('/login', function () {
-    // return UserAuth::login($request);
-    return Inertia::render('Auth/Login');
-})->name('login'); 
+// Route::get('/login', function () {
+//     return Inertia::render('Auth/Login');
+// })->name('login'); 
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
