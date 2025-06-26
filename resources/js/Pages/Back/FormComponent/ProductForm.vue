@@ -9,6 +9,10 @@
                 <el-input v-model="formData.title" />
             </el-form-item>
 
+            <el-form-item label="售價" :label-position="labelPosition" prop="title">
+                <el-input v-model="formData.price" />
+            </el-form-item>
+
             <el-form-item v-if="mode == 'add'" label="類別" :label-position="labelPosition" prop="category_id">
                 <el-select v-model="formData.category_id" :teleported="false"
                     @change="categoryChange(formData.category_id)">
@@ -281,6 +285,7 @@ const resetFormData = () => {
     props.formData.id = '';
     props.formData.name = '';
     props.formData.title = '';
+    props.formData.price = '';
     props.formData.subcategory_id = '';
     props.formData.published_status = '';
     props.formData.color_codes = [];
@@ -296,6 +301,7 @@ const setFormData = (row) => {
     props.formData.name = row.name;
     props.formData.subcategories = row.subcategories;
     props.formData.title = row.title;
+    props.formData.price = row.price;
     props.formData.subcategory_id = parseInt(row.subcategory_id);
     props.formData.published_status = parseInt(row.published_status);
     props.formData.color_codes = row.color_codes;

@@ -22,6 +22,10 @@
                     <el-input v-model="product.title" style="max-width: 300px;" />
                 </el-form-item>
 
+                <el-form-item label="價格" :label-position="labelPosition" prop="title">
+                    <el-input v-model="product.price" style="max-width: 300px;" />
+                </el-form-item>
+
 
                 <el-form-item label="子類別" :label-position="labelPosition" prop="subcategory_id">
                     <el-select v-model.number="product.subcategory_id" :teleported="false" style="max-width: 300px;">
@@ -169,10 +173,13 @@ const formRules = reactive({
         { required: true, message: "產品名稱必填項", trigger: "blur" },
     ],
     title: [
-        { required: true, message: "產品title為必選項", trigger: "submit" },
+        { required: true, message: "產品title為必填項", trigger: "submit" },
+    ],
+    price: [
+        { required: true, message: "售價必填項", trigger: "submit" },
     ],
     subcategory_id: [
-        { required: true, message: "子類別為必選項", trigger: "blur" },
+        { required: true, message: "子類別為必填項", trigger: "blur" },
     ],
     'published_status': [
         { required: true, message: "請選擇顯示或隱藏", trigger: "submit" }
@@ -249,6 +256,7 @@ const formBeforSubmit = () => {
 
     formData.append('name', product.name);
     formData.append('title', product.title);
+    formData.append('price', product.price);
     formData.append('subcategory_id', product.subcategory_id); //待修正
     formData.append('published_status', product.published_status);
     // formData.append('color_codes', product.color_codes);

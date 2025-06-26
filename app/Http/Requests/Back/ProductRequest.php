@@ -40,4 +40,14 @@ class ProductRequest extends FormRequest
             // 'product_options' => 'nullable|array' //放productOptionsRequest那
         ];
     }
+
+    protected function prepareForValidation()
+    {
+        // logger()->info('Before:', $this->all());
+        //把傳來的'null' 改成null
+        $this->merge([
+            'special_start_at' => $this->special_start_at == 'null' ? null : $this->special_start_at,
+            'special_end_at' => $this->special_end_at == 'null' ? null : $this->special_end_at,
+        ]);
+    }
 }

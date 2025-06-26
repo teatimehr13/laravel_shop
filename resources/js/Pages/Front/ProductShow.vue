@@ -136,6 +136,8 @@ console.log(props.product);
 console.log(props.category);
 console.log(props.subcategory);
 
+console.log(props.productOptions);
+
 
 
 
@@ -154,7 +156,7 @@ const selectedProductOptionId = ref(null);
 
 //初次載入時拿所有縮圖
 const allThumbnails = computed(() => {
-    return productOptions.value.flatMap(option => option.product_images);
+    return props.productOptions.flatMap(option => option.product_images);
 });
 
 

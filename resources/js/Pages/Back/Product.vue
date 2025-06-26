@@ -224,8 +224,8 @@ const popForm = reactive({
     categories: categories.value,
     description: '',
     special_message: '',
-    special_start_at: '',
-    special_end_at: ''
+    special_start_at: null,
+    special_end_at: null
 })
 
 // 初始數據
@@ -475,14 +475,15 @@ const formBeforSubmit = () => {
 
     formData.append('name', popForm.name);
     formData.append('title', popForm.title);
+    formData.append('price', popForm.price);
     formData.append('subcategory_id', popForm.subcategory_id); //待修正
     formData.append('published_status', popForm.published_status);
     formData.append('color_codes', popForm.color_codes);
     formData.append('description', safeDescription);
 
     formData.append('special_message', safeSpecialMsg);
-    formData.append('special_start_at', formatDate(popForm.special_start_at));
-    formData.append('special_end_at', formatDate(popForm.special_end_at));
+    formData.append('special_start_at', !popForm.special_start_at ? popForm.special_start_at : formatDate(popForm.special_start_at));
+    formData.append('special_end_at', !popForm.special_end_at ? popForm.special_end_at : formatDate(popForm.special_end_at));
 
     for (const [key, value] of formData.entries()) {
         console.log(`${key}:`, value);
@@ -564,6 +565,8 @@ const onSubmitEdit = async (id) => {
 //新增
 const onSubmitAdd = async () => {
     try {
+        console.log(12222222);
+        
         await formValidated("add");
         await formBeforSubmit();
         const response = await axios.post('/back/products', formData, {
@@ -787,7 +790,7 @@ const toggleAdd = async () => {
     // console.log(newCoRowData.value);
     // console.log(fileListAdd_co.value);
     // console.log(productId.value);
-
+    
     await newCoFormRef.value.colorAddFormValidate();
     await colorAddFormBeforSubmit();
     await addCo();

@@ -97,10 +97,10 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
-
+        // Log::info(22222);
+        // return;
         try {
             $validate_data = $request->validated();
-            Log::info($validate_data);
             // return;
             // return response()->json($validate_data);
 
