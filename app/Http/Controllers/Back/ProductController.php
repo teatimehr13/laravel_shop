@@ -111,7 +111,7 @@ class ProductController extends Controller
 
                 $name = time() . '_' . $request->file('image')->getClientOriginalName(); //避免檔名重複
                 $path = '/storage/' . $request->file('image')->storeAs(
-                   'products/' . $product->id,
+                    'products/' . $product->id,
                     $name,
                     'public'
                 );
@@ -427,7 +427,6 @@ class ProductController extends Controller
                 'subcategory_id' => $subcategory_id,
             ],
         ];
-        
     }
 
 
@@ -541,7 +540,10 @@ class ProductController extends Controller
     public function images($id, Request $request)
     {
         // 根據 productOptionId 獲取相應的產品選項數據
-        $productImages = ProductOption::with('productImages')->where('product_id', $id)->get();
+        // $productImages = ProductOption::with('productImages')->where('product_id', $id)->get();
+        $productImages = ProductOption::with(['productImages' => function ($query) {
+            $query->orderBy('order', 'asc');
+        }])->where('product_id', $id)->get();
 
         // 返回數據給前端
         // return response()->json($productImages);
@@ -649,5 +651,28 @@ class ProductController extends Controller
         } catch (QueryException $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+    }
+
+     public function reorderProductImgs(Request $request)
+    {
+        $data = $request->input();
+        // Log::info($data);
+        // return;
+
+        DB::transaction(function () use ($data) {
+            // 將被影響的記錄的 `order_index` 設為臨時值
+            foreach ($data as $item) {
+                ProductImage::where('id', $item['id'])->update([
+                    'order' => $item['order'] + 1000,
+                ]);
+            }
+
+            // 重新設置正確的 `order_index`
+            foreach ($data as $item) {
+                ProductImage::where('id', $item['id'])->update([
+                    'order' => $item['order'],
+                ]);
+            }
+        });
     }
 }

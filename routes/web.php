@@ -91,6 +91,8 @@ Route::middleware('auth')->group(function () {
         // Route::post('/product_options/{product_option_id}', [BackProductController::class, 'delProdCo']);
         Route::get('/products/{id}/images', [BackProductController:: class, 'images'])->name('images.show');
         Route::post('/products/updateProductImages', [BackProductController::class, 'updateProductImages'])->name('updateProductImages');
+        Route::post('/products/reorderProductImgs', [BackProductController::class, 'reorderProductImgs'])->name('reorderProductImgs');
+
 
 
         Route::resource('product_options', BackProductOptionController::class)->only('destroy', 'store', 'update');

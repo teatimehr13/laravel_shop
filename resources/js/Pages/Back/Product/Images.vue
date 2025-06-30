@@ -12,42 +12,47 @@
                 <hr style="margin-top: 8px;">
             </p>
 
-            <div v-if="productImages.length" v-for="(val, key) in sort_product_options" :key="val.id" class="images-outside">
+            <div v-if="productImages.length" v-for="(val, key) in sort_product_options" :key="val.id"
+                class="images-outside">
                 <h1>{{ val.color_name }}</h1>
                 <div class="scroll-wrapper" style="position: relative">
                     <el-scrollbar class="scroll-container" :ref="el => scrollbarRefs[val.id] = el"
                         @scroll="checkScrollEnd(val.id)">
                         <div class="scrollbar-flex-content images">
-                            <div v-for="(img_val, img_key) in val.product_images" :key="img_val.uid || img_val.id"
-                                class="image-wrapper">
-                                <div class="image-container" :class="{ 'image-deleted': img_val._delete }">
-                                    <div class="demo-image__preview">
-                                        <el-image v-if="val.product_images.length" style="width: 100px; height: 100px"
-                                            :src="img_val.image" :preview-src-list="getPreviewList(val.product_images)"
-                                            show-progress fit="cover" :initial-index="img_key" />
+                            <VueDraggable v-model="val.product_images" :animation="150" ghostClass="ghost" class="flex"
+                                @end="(evt) => onDragEnd(evt, val.product_images)">
+                                <div v-for="(img_val, img_key) in val.product_images" :key="img_val.uid || img_val.id"
+                                    class="image-wrapper">
+                                    <div class="image-container" :class="{ 'image-deleted': img_val._delete }">
+                                        <div class="demo-image__preview">
+                                            <el-image v-if="val.product_images.length"
+                                                style="width: 100px; height: 100px" :src="img_val.image"
+                                                :preview-src-list="getPreviewList(val.product_images)" show-progress
+                                                fit="cover" :initial-index="img_key" />
+                                        </div>
+                                        <!-- 浮水印，只有當 `_delete: true` 才顯示 -->
+                                        <div v-if="img_val._delete" class="watermark">
+                                            <span>刪除</span>
+                                        </div>
                                     </div>
-                                    <!-- 浮水印，只有當 `_delete: true` 才顯示 -->
-                                    <div v-if="img_val._delete" class="watermark">
-                                        <span>刪除</span>
+
+                                    <el-input v-model="img_val.alt_text"
+                                        @change="img_val.alt_text = normalizeText(img_val.alt_text)"
+                                        style="width: 200px" placeholder="Alt Text" />
+
+                                    <!-- 刪除 & 還原按鈕 -->
+                                    <div class="toggle_btn">
+                                        <el-button v-if="img_val.id === null" class="upload-delete-btn"
+                                            @click="removeImage(val.id, null, img_val.uid)">
+                                            <span class="default-text">待上傳</span>
+                                            <span class="hover-text">刪除</span></el-button>
+                                        <el-button v-else-if="!img_val._delete"
+                                            @click="removeImage(val.id, img_val.id)">標記刪除</el-button>
+                                        <el-button v-else @click="restoreImage(val.id, img_val.id)" type="danger" plain
+                                            class="del_btn">還原</el-button>
                                     </div>
                                 </div>
-
-                                <el-input v-model="img_val.alt_text"
-                                    @change="img_val.alt_text = normalizeText(img_val.alt_text)" style="width: 200px"
-                                    placeholder="Alt Text" />
-
-                                <!-- 刪除 & 還原按鈕 -->
-                                <div class="toggle_btn">
-                                    <el-button v-if="img_val.id === null" class="upload-delete-btn"
-                                        @click="removeImage(val.id, null, img_val.uid)">
-                                        <span class="default-text">待上傳</span>
-                                        <span class="hover-text">刪除</span></el-button>
-                                    <el-button v-else-if="!img_val._delete"
-                                        @click="removeImage(val.id, img_val.id)">標記刪除</el-button>
-                                    <el-button v-else @click="restoreImage(val.id, img_val.id)" type="danger" plain
-                                        class="del_btn">還原</el-button>
-                                </div>
-                            </div>
+                            </VueDraggable>
 
 
                             <input type="file" multiple class="hidden-input" :ref="el => fileInputs[val.id] = el"
@@ -81,7 +86,8 @@
             </div>
 
             <div>
-                <el-button type="danger" v-if="productImages.length" @click="submitData" class="submit-button">更新</el-button>
+                <el-button type="danger" v-if="productImages.length" @click="submitData"
+                    class="submit-button">更新</el-button>
             </div>
         </div>
     </main>
@@ -91,6 +97,7 @@
 import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue';
 import Header from '@/Components/Back/Header.vue';
 import { router } from '@inertiajs/vue3';
+import { VueDraggable } from 'vue-draggable-plus'
 
 const props = defineProps({
     productImages: Array,
@@ -286,6 +293,40 @@ const submitData = () => {
     //     }
     // });
 
+}
+
+
+const onDragEnd = (evt, data) => {
+    const startIndex = evt.oldIndex;
+    const endIndex = evt.newIndex;
+
+    // 計算影響範圍的數據（startIndex 到 endIndex 之間）
+    const minIndex = Math.min(startIndex, endIndex);
+    const maxIndex = Math.max(startIndex, endIndex);
+
+
+    // 更新範圍內的數據順序
+    const affectedRows = data.slice(minIndex, maxIndex + 1);
+    // console.log(affectedRows);
+
+    affectedRows.forEach((item, index) => {
+        item.order = minIndex + index + 1;
+    });
+
+    console.log(affectedRows);
+
+    reorder(affectedRows);
+};
+
+const reorder = async (affectedRows) => {
+    console.log(123123);
+    
+    try {
+        const response = await axios.post('/back/products/reorderProductImgs', affectedRows, {
+        });
+    } catch (error) {
+        console.error("更新排序失敗", error);
+    }
 }
 
 
@@ -535,5 +576,11 @@ h1 {
     padding: 1.25rem;
     display: flex;
     margin: auto;
+}
+
+.ghost {
+    opacity: 0.5;
+    background: #f1f2f3;
+    display: flex;
 }
 </style>

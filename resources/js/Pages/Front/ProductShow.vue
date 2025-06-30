@@ -135,7 +135,6 @@ const props = defineProps({
 console.log(props.product);
 console.log(props.category);
 console.log(props.subcategory);
-
 console.log(props.productOptions);
 
 

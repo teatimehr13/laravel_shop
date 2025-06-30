@@ -42,7 +42,7 @@ class ProductOptionController extends Controller
             $validated = $request->validated();
             $validated['published_status'] = 1;
             $validated['quantity'] = 10; 
-            $product_option = ProductOption::create($validated);
+            
 
             if ($validated['color_name'] === '組合色') {
                 $existingCombination = ProductOption::where('product_id', $validated['product_id'])
@@ -56,6 +56,8 @@ class ProductOptionController extends Controller
                     ], 422);
                 }
             }
+
+            $product_option = ProductOption::create($validated);
 
 
             if ($request->hasFile('image')) {

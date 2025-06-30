@@ -98,6 +98,7 @@ import { onMounted, reactive, ref } from 'vue';
 import Header from '@/Components/Back/Header.vue';
 import { genFileId } from 'element-plus';
 import DOMPurify from 'dompurify';
+import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
     product: Object,
@@ -386,7 +387,8 @@ const showMessage = (type, title) => {
 };
 
 function goBack() {
-    window.history.back();
+    // window.history.back();
+    router.visit('/back/products');
 }
 
 </script>

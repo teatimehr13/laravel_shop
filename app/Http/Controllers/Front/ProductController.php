@@ -90,8 +90,13 @@ class ProductController extends Controller
         // $productOptions = ProductOption::where('product_id', $productId)->get();
         // $productImages = ProductOption::with('productImages')->where('product_id', $productId)->get();
         // $productImages = ProductImage::where('product_id', $productId)->get();
-        $productOptions = ProductOption::with('productImages')->where('product_id', $productId)->get();
+        // $productOptions = ProductOption::with('productImages')->where('product_id', $productId)->orderBy('order', 'asc') ->get();
 
+        $productOptions = ProductOption::with(['productImages' => function ($query) {
+            $query->orderBy('order', 'asc'); // 對關聯模型排序
+        }])
+            ->where('product_id', $productId)
+            ->get();
         return Inertia::render('Front/ProductShow', [
             'product' => $product,
             'productOptions' => $productOptions,
