@@ -6,40 +6,51 @@
             <section>
                 <div class="page-container">
                     <div class="col-span-12 lg:col-span-6 md:col-span-12">
-                        <div class="prodcut-main-img">
-                            <!-- 主要圖片 -->
-                            <el-image :src="selectedImage" style="width: 400px; height: 400px;" />
-                        </div>
-
-                        <!-- 縮圖列表 -->
-                        <!-- <div class="gap-2.5 grid grid-cols-7">
-                            <img v-for="(image, index) in filteredThumbnails" :key="index" :src="image.image"
-                                class="thumbnail" @click="selectedImage = image.image"
-                                :class="{ active: selectedImage === image.image }">
-                        </div> -->
-                        <div class="relative">
-                            <!-- 左箭頭 -->
-                            <button @click="scrollLeft" :disabled="atStart"
-                                class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 shadow"
-                                :class="{ 'opacity-50 cursor-not-allowed': atStart }">
-                                ‹
-                            </button>
-
-                            <!-- 可滾動的圖片列 -->
-                            <div ref="slider" class="flex overflow-x-hidden gap-2.5 scroll-smooth mx-7">
-                                <img v-for="(image, index) in filteredThumbnails" :key="index" :src="image.image"
-                                    class="thumbnail w-16 sm:w-20 md:w-24 lg:w-20 aspect-square object-cover flex-shrink-0 cursor-pointer"
-                                    @click="selectedImage = image.image"
-                                    :class="{ active: selectedImage === image.image }" />
+                        <div class="p-2">
+                            <div class="prodcut-main-img w-full">
+                                <swiper :modules="modules" :spaceBetween="10" :lazy="true" class="mySwiper"
+                                    :thumbs="{ swiper: thumbsSwiper }" :key="selectedColor">
+                                    <swiper-slide v-for="img in filteredThumbnails" :key="img.id">
+                                        <div class="slide-box">
+                                            <img :src="img.image" alt="" />
+                                        </div>
+                                    </swiper-slide>
+                                </swiper>
                             </div>
 
-                            <!-- 右箭頭 -->
-                            <button @click="scrollRight" :disabled="atEnd"
-                                class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 shadow"
-                                :class="{ 'opacity-50 cursor-not-allowed': atEnd }">
-                                ›
-                            </button>
+                            <div class="flex items-center">
+                                <div>
+                                    <button class="thumb-prev mr-1">
+                                        <el-icon>
+                                            <ArrowLeft />
+                                        </el-icon>
+                                    </button>
+                                </div>
+                                <swiper @swiper="setThumbsSwiper" :spaceBetween="10" :slidesPerView="6" :freeMode="true"
+                                    :watchSlidesProgress="true" :modules="modules" class="mySwiper" :navigation="{
+                                        nextEl: '.thumb-next',
+                                        prevEl: '.thumb-prev'
+                                    }" :watchOverflow="true" watch-slides-progress :key="selectedColor + '-thumbs'">
+
+                                    <swiper-slide v-for="(img, idx) in filteredThumbnails" :key="img.id">
+                                        <div class="thumb-box">
+                                            <img :src="img.image" class="w-full h-full object-contain" />
+                                        </div>
+                                    </swiper-slide>
+                                </swiper>
+
+                                <div>
+                                    <button class="thumb-next ml-1">
+                                        <el-icon>
+                                            <ArrowRight />
+                                        </el-icon>
+                                    </button>
+                                </div>
+                            </div>
+
                         </div>
+
+
                     </div>
 
                     <div class="product-details-con col-span-12 lg:col-span-6 md:col-span-12 lg:px-12">
@@ -51,7 +62,8 @@
                             </h1>
 
                             <div v-if="isInEventPeriod(product.special_start_at, product.special_end_at)">
-                                <div v-html="product.special_message" class="special_msg product-describe leading-relaxed"></div>
+                                <div v-html="product.special_message"
+                                    class="special_msg product-describe leading-relaxed"></div>
                             </div>
 
                             <div>
@@ -92,8 +104,7 @@
                                 <el-button size="large" class="w-full" @click="addTOCart">
                                     加入購物車
                                 </el-button>
-                                <el-button color="#626aef" size="large" class="w-full"
-                                    @click="goChekcOut">
+                                <el-button color="#626aef" size="large" class="w-full" @click="goChekcOut">
                                     立即結帳
                                 </el-button>
                             </div>
@@ -103,6 +114,7 @@
 
                 </div>
             </section>
+
         </template>
     </FrontendLayout>
 </template>
@@ -110,10 +122,24 @@
 
 <script setup>
 import FrontendLayout from '@/Layouts/FrontendLayout.vue';
-import { computed, ref, onMounted, reactive } from 'vue';
+import { computed, ref, onMounted, reactive, watch, nextTick } from 'vue';
 import Breadcrumb from './Component/Breadcrumb.vue';
 import axios from 'axios';
 import { router } from '@inertiajs/vue3';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import 'swiper/css';
+import 'swiper/css/free-mode';
+import 'swiper/css/navigation';
+import 'swiper/css/thumbs';
+import { FreeMode, Navigation, Thumbs, Scrollbar } from 'swiper/modules';
+
+
+const thumbsSwiper = ref(null);
+const mainSwiper = ref(null)      // 主圖 Swiper
+const setThumbsSwiper = (swiper) => {
+    thumbsSwiper.value = swiper;
+};
+const modules = [FreeMode, Navigation, Thumbs, Scrollbar]
 
 const props = defineProps({
     product: {
@@ -136,7 +162,6 @@ console.log(props.product);
 console.log(props.category);
 console.log(props.subcategory);
 console.log(props.productOptions);
-
 
 
 
@@ -170,30 +195,6 @@ const filteredThumbnails = computed(() => {
     return colorOption ? colorOption.product_images : [];
 });
 
-const slider = ref(null)
-const atStart = ref(null)
-const atEnd = ref(null)
-
-const updateScrollState = () => {
-    const el = slider.value
-    atStart.value = el.scrollLeft === 0
-    atEnd.value = el.scrollLeft + el.clientWidth >= el.scrollWidth - 5
-}
-
-const scrollLeft = () => {
-    slider.value.scrollLeft -= 200
-    setTimeout(updateScrollState, 100)
-}
-
-const scrollRight = () => {
-    slider.value.scrollLeft += 200
-    setTimeout(updateScrollState, 100)
-}
-
-onMounted(() => {
-    updateScrollState()
-})
-
 
 // **切換顏色時**
 const changeColor = (color) => {
@@ -206,7 +207,6 @@ const changeColor = (color) => {
     selectedColorName.value = color.color_name;
     selectedProductOptionId.value = color.id;
     // console.log(selectedProductOptionId.value);
-
 };
 
 const changeBigImage = (color) => {
@@ -266,19 +266,6 @@ const goChekcOut = async () => {
     }
 }
 
-const testCart = async () => {
-    try {
-        console.log(123);
-        // const response = await axios.get('/cart/getCartFromCookie');
-        const response = await axios.get('/cart');
-
-        console.log(response.data);
-        // await msg_feedback(response.data.msg, 'success')
-
-    } catch {
-
-    }
-}
 
 const msg_feedback = (msg, type) => {
     ElMessage({
@@ -342,7 +329,7 @@ const msg_feedback = (msg, type) => {
 
 
 .prodcut-main-img {
-    border: 1px solid #e4e7ec;
+    outline: 1px solid #e4e7ec;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     cursor: pointer;
@@ -420,5 +407,44 @@ const msg_feedback = (msg, type) => {
     color: #bd0000;
 }
 
+.slide-box {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+}
 
+.slide-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.thumb-box {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border: 1px solid #e4e7ec;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.thumb-box:hover {
+    cursor: pointer;
+    border: 1px solid #5977fa;
+}
+
+.swiper-slide-thumb-active .thumb-box {
+    border: 1px solid #5977fa;
+}
+
+.mySwiper {
+    width: 100%;
+    /* flex: 1 1 0%;  */
+}
+
+.thumb-prev.swiper-button-disabled,
+.thumb-next.swiper-button-disabled {
+    opacity: 0.2;
+}
 </style>

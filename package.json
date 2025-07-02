@@ -38,6 +38,7 @@
         "el-table-infinite-scroll": "^3.0.6",
         "element-plus": "^2.9.1",
         "lodash.debounce": "^4.0.8",
+        "swiper": "^11.2.10",
         "vue-click-outside": "^1.1.0",
         "vue-draggable-plus": "^0.6.0",
         "vue-router": "^4.4.5",
