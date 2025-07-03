@@ -408,7 +408,6 @@ const msg_feedback = (msg, type) => {
 }
 
 .slide-box {
-    position: relative;
     width: 100%;
     aspect-ratio: 4 / 3;
     overflow: hidden;

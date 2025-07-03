@@ -145,11 +145,15 @@ const props = defineProps({
     },
     auth: {
         type: Object
+    },
+    selectedItem:{
+        type: Array
     }
 })
 
 // console.log(props.cartItems.value);
 // console.log(props.endPrice);
+console.log(props.selectedItem);
 
 
 const isLoggedIn = computed(() => !!props.auth.user)
@@ -167,21 +171,9 @@ const logout = () => {
 };
 
 async function checkout() {
-    // try {
-    //     // http://127.0.0.1:8000/api
-    //     await api.get('/cart/checkout', {
-
-    //     });
-    // } catch (error) {
-    //     console.error('fail to checkout')
-    // }
-
     if (isLoggedIn.value) {
-        router.visit('/checkout', {
-            method: 'get',
-            data: {
-                selected_ids: selectedIds.value
-            }
+        router.post(route('checkout.store'), {
+            selected_ids: selectedIds.value
         })
     } else {
         router.visit('/login?redirect=checkout')
@@ -239,6 +231,10 @@ function toCurrency(num) {
 }
 
 const selectedIds = ref([])
+if(props.selectedItem.length){
+    // selectedIds.value[0] = props.selectedItem[0]
+    selectedIds.value = [...props.selectedItem]
+}
 
 const selectedItems = computed(() =>
     cartItems.value.filter(item =>

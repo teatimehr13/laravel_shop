@@ -89,7 +89,7 @@ Route::middleware('auth')->group(function () {
         // Route::post('/product_options/{product_option_id}/updateProdCo', [BackProductController::class, 'updateProdCo']);
         // Route::post('/product_options/addProdCo', [BackProductController::class, 'addProdCo']);
         // Route::post('/product_options/{product_option_id}', [BackProductController::class, 'delProdCo']);
-        Route::get('/products/{id}/images', [BackProductController:: class, 'images'])->name('images.show');
+        Route::get('/products/{id}/images', [BackProductController::class, 'images'])->name('images.show');
         Route::post('/products/updateProductImages', [BackProductController::class, 'updateProductImages'])->name('updateProductImages');
         Route::post('/products/reorderProductImgs', [BackProductController::class, 'reorderProductImgs'])->name('reorderProductImgs');
 
@@ -117,7 +117,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('news', BackNewsController::class);
         Route::post('/news/update_news', [BackNewsController::class, 'update_news'])->name('news.update_news');
         Route::post('/news/delete_news', [BackNewsController::class, 'delete_news'])->name('news.delete_news');
-    
+
         Route::resource('backorder', BackOrderController::class)->only(['index', 'show']);
         Route::put('/backorder/{order}/status', [BackOrderController::class, 'changeOrderStatus']);
     });
@@ -138,7 +138,8 @@ Route::prefix('cart')->name('cart.')->group(function () {
 });
 
 
-Route::get('/checkout', [CheckoutController::class, 'index']);
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::post('/checkout/placeOrder', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
 Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 Route::get('/order/{order}', [OrderController::class, 'show'])->name('order.show');

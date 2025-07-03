@@ -116,7 +116,7 @@
                 </div>
                 <div class="payment-sel">
                     <div class="payment-options">
-                        <label class="payment-btn " :class="{ active: paymentMethod === 'cash' }">
+                        <label class="payment-btn " :class="{ active: paymentMethod === 'cash' }" style="display: none;">
                             <input type="radio" name="payment" value="cash" v-model="paymentMethod" />
                             <span>貨到付款</span>
                             <i v-show="paymentMethod === 'cash'" class="checkmark">
@@ -136,11 +136,11 @@
                 </div>
             </div>
 
-            <div class="checkout-con-layout" v-show="paymentMethod === 'credit_card'">
+            <div class="checkout-con-layout" style="display: none;">
                 <div class="payment-acc">
                     <span>選擇付款帳戶</span>
                 </div>
-                <div class="payment-acc-info-con">
+                <div class="payment-acc-info-con ">
                     <div>
                         <div class="payment-acc-info">
                             <img src="https://spm.susercontent.com/api/v4/50092786/shopee_logo_bucket/static/images/credit_card_icon_visa@3x.png"
@@ -245,7 +245,7 @@ function toCurrency(num) {
     return `NT$${Number(num).toLocaleString("en-US")}`; // 確保是數字再轉換
 }
 
-const paymentMethod = ref('cash');
+const paymentMethod = ref('credit_card');
 const editing = ref(false);
 
 const mapToOrderStatus = {

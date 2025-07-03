@@ -20,7 +20,8 @@ class CartController extends Controller
     public function index(Request $request)
     {
         // Log::info($request->user());
-        // Log::info($request);
+        $selected = session('cart.selected', []);
+        Log::info($selected);
 
         $cartItems = $this->getCartItems($request);
         $endPrice = $this->getEndPrice($request);
@@ -33,7 +34,8 @@ class CartController extends Controller
 
         return Inertia::render('Front/Cart', [
             'cartItems' => $cartItems,
-            'endPrice' => $endPrice
+            'endPrice' => $endPrice,
+            'selectedItem' => $selected,
         ]);
 
         // $filteredCartItems = array_map(function ($item) {
@@ -109,10 +111,13 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
             'id' => 'required|integer|'
         ]);
+        // Log::info($productOptions);
 
         //如果驗證 $key和product_option有關，加進購物車
         $quantity = intval($productOptions['quantity']); //integer
         $productOptionId = intval($productOptions['id']);
+
+        session()->flash('cart.selected', [$productOptionId]);
 
         if ($quantity <= 0 || $productOptionId <= 0) {
             return response()->json(['msg' => '商品規格不符'], 400);
@@ -176,6 +181,8 @@ class CartController extends Controller
 
         $quantity = intval($productOptions['quantity']); //integer
         $productOptionId = intval($productOptions['id']);
+
+        session()->flash('cart.selected', [$productOptionId]);
 
         if ($quantity <= 0 || $productOptionId <= 0) {
             return response()->json(['msg' => '商品規格不符'], 400);

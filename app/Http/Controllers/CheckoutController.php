@@ -19,8 +19,13 @@ class CheckoutController extends Controller
      */
     public function index(Request $request)
     {
+        $selectedIds = session('checkout.selected_ids', []);
+        abort_if(empty($selectedIds), 404);
+        // Log::info($selectedIds);
+        // return;
+
         $user = $request->user();
-        $selectedIds = $request->input('selected_ids');
+        // $selectedIds = $request->input('selected_ids');
         $checkoutItems = $this->getCheckoutItems($user, $selectedIds);
         $shippingFee = $this->calculateShippingFee($checkoutItems->sum('subtotal'));
         $checkoutTotal = $checkoutItems->sum('subtotal') + $shippingFee;
@@ -55,7 +60,17 @@ class CheckoutController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $selectedIds = $request->validate([
+            'selected_ids' => 'required|array',
+            'selected_ids.*' => 'integer|exists:cart_items,product_option_id',
+        ])['selected_ids'];
+
+        // Log::info($selectedIds);
+        // return;
+
+        session()->put('checkout.selected_ids', $selectedIds);
+        return redirect()->route('checkout.index');
+        // return Inertia::location(route('checkout.index'));
     }
 
     /**
@@ -188,9 +203,10 @@ class CheckoutController extends Controller
         }
 
         // 購物車變成訂單後，刪除
-        $cart->cartItems()->whereIn('product_option_id',$validated['selected_ids'])->delete();
+        $cart->cartItems()->whereIn('product_option_id', $validated['selected_ids'])->delete();
+        session()->forget('checkout.selected_ids'); //刪掉選中的購物車商品
 
-        
+
         session()->flash('latest_order_number', $order->order_number);
         // return redirect()->route('order.show', ['order' => $order_number]);
         //把參數導到paymentcontroller 
