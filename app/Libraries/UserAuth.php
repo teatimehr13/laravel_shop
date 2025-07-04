@@ -78,15 +78,15 @@ class UserAuth
             // }
 
   
-            // $redirect = $request->input('redirect');
-            // if ($redirect === 'cart') {
-            //     return Inertia::location(route('cart.cart'));
-            // }
+            $redirect = $request->input('redirect');
+            if ($redirect === 'cart') {
+                return Inertia::location(route('cart.cart'));
+            }
 
-            // return Inertia::location(route('categories.index'));
+            return Inertia::location(route('categories.front.index'));
 
-            $redirect = $request->input('redirect', 'categories');
-            return redirect()->intended("/$redirect");
+            // $redirect = $request->input('redirect', 'categories');
+            // return redirect()->intended("/$redirect");
 
 
         }

@@ -31,7 +31,7 @@ Route::middleware('guest')->group(function () {
     // })->name('login');
     Route::get('/login', function (LaravelRequest $request) {
         return Inertia::render('Auth/Login', [
-            'redirect' => $request->query('redirect') ?? null,
+            'redirect' => $request->query('redirect') ?? 'categories',
         ]);
     })->name('login');
 
