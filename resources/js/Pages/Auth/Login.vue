@@ -4,13 +4,14 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import HelloAnimation from '@/Components/HelloAnimation.vue';
 
 
-defineProps({
+const props = defineProps({
     canResetPassword: {
         type: Boolean,
     },
     status: {
         type: String,
     },
+    redirect: String,
 });
 
 const form = useForm({
@@ -18,7 +19,8 @@ const form = useForm({
     password: '',
     remember: false,
     submitted: false,
-    errors: { email: '' }
+    errors: { email: '' },
+    redirect: props.redirect || null
 });
 
 

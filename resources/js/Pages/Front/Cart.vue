@@ -176,7 +176,7 @@ async function checkout() {
             selected_ids: selectedIds.value
         })
     } else {
-        router.visit('/login?redirect=checkout')
+        router.visit('/login?redirect=cart')
     }
 }
 

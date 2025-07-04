@@ -68,8 +68,26 @@ class UserAuth
 
             // Log::info('Session Data:', session()->all());
             // return response()->json(['message' => 'Logged in!'], 200);
-            return redirect()->intended('/categories');
-            // return Inertia::location('/back/categories'); 
+
+            // $redirect = $request->input('redirect', $request->query('redirect'));
+
+            // Log::info($redirect);
+            // // 依參數決定跳去哪裡
+            // if ($redirect === 'cart') {
+            //     return redirect()->route('cart.index');         // /cart
+            // }
+
+  
+            // $redirect = $request->input('redirect');
+            // if ($redirect === 'cart') {
+            //     return Inertia::location(route('cart.cart'));
+            // }
+
+            // return Inertia::location(route('categories.index'));
+
+            $redirect = $request->input('redirect', 'categories');
+            return redirect()->intended("/$redirect");
+
 
         }
 

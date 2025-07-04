@@ -10,6 +10,8 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use Ecpay\Sdk\Request\Request;
+use Illuminate\Http\Request as LaravelRequest;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -24,9 +26,15 @@ Route::middleware('guest')->group(function () {
     //             ->name('login');
 
     // Route::post('login', [AuthenticatedSessionController::class, 'store']);
-    Route::get('/login', function () {
-        return Inertia::render('Auth/Login');
+    // Route::get('/login', function () {
+    //     return Inertia::render('Auth/Login');
+    // })->name('login');
+    Route::get('/login', function (LaravelRequest $request) {
+        return Inertia::render('Auth/Login', [
+            'redirect' => $request->query('redirect') ?? null,
+        ]);
     })->name('login');
+
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
