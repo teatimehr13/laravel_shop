@@ -4,7 +4,7 @@
         <template #switch>
             <!-- <el-pagination v-model:current-page="page" :page-size="10" :total="props.orders.total"
                 @current-change="changePage" /> -->
-            <div>
+            <div class="min-h-full">
                 <div class="filters">
 
                     <el-input v-model="filters.order_number" placeholder="輸入訂單編號" style="width: 240px"

@@ -88,7 +88,7 @@ class OrderController extends Controller
             $query->orderBy($sort_by, $sort_dir);
         }
 
-        $orders = $query->latest()->paginate(2)->withQueryString(); // 加上 eager loading 與分頁（可自訂
+        $orders = $query->latest()->paginate(10)->withQueryString(); // 加上 eager loading 與分頁（可自訂
 
         $orders->through(function ($order) use ($paymentMethodOptions) {
             // getCollection()->transform // through可替代成getCollection()->transform (ver8.0以下)

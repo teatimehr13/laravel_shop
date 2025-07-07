@@ -128,7 +128,7 @@ class CategoryController extends Controller
         }
 
 
-        return $query->paginate(20)->through(fn($category) => [
+        return $query->paginate(10)->through(fn($category) => [
             'id' => $category->id,
             'name' => $category->name,
             'search_key' => $category->search_key,

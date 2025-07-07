@@ -1,13 +1,13 @@
 <template>
     <BackendLayout>
         <template #switch>
-            <div>
+            <div class="min-h-full">
                 <div style="margin: 10px 0 15px;">
-                    <el-button  @click="addCgToggle">添加類別</el-button>
-                    <el-tooltip class="box-item" effect="dark" :content="isCgDraggable === false ? '進行拖曳表格調整' : '結束拖曳表格調整'"
-                        placement="top-start">
-                        <el-button v-show="!NewSubRowButton"
-                            @click="toggleDraggable(TypeEnum.CATEGORY)" :type="isCgDraggable === false ? '' : 'primary'">
+                    <el-button @click="addCgToggle">添加類別</el-button>
+                    <el-tooltip class="box-item" effect="dark"
+                        :content="isCgDraggable === false ? '進行拖曳表格調整' : '結束拖曳表格調整'" placement="top-start">
+                        <el-button v-show="!NewSubRowButton" @click="toggleDraggable(TypeEnum.CATEGORY)"
+                            :type="isCgDraggable === false ? '' : 'primary'">
                             {{ isCgDraggable === false ? "調整順序" : "退出調整" }}
                         </el-button>
                     </el-tooltip>
@@ -16,9 +16,7 @@
                 <VueDraggable v-model="categories.data" target="tbody" @end="(evt) => onDragEnd(evt, TypeEnum.CATEGORY)"
                     :animation="150" ghostClass="ghost" :disabled="!isCgDraggable">
                     <el-form :model="tempCgRow" :rules="rules" ref="cgFormRef">
-                        <el-table :data="categories.data" style="width: 100%;" v-el-table-infinite-scroll="loadMore"
-                            v-loading="loading" :infinite-scroll-disabled="loading" element-loading-text="加載中..."
-                            border>
+                        <el-table :data="categories.data" style="width: 100%;"  border>
 
                             <el-table-column width="220" :fixed="isFixedStore ? 'left' : false" prop="name">
                                 <!-- <template #header>
@@ -116,8 +114,13 @@
                             </el-table-column>
                         </el-table>
                     </el-form>
-
                 </VueDraggable>
+
+                <div class="example-pagination-block">
+                    <div class="example-demonstration"></div>
+                    <el-pagination layout="prev, pager, next" :total="categories.total" :page-size="categories.per_page"
+                        v-model:current-page="categories.current_page" @current-change="goToPage" background />
+                </div>
 
             </div>
 
@@ -299,19 +302,29 @@ import BackendLayout from '@/Layouts/BackendLayout.vue';
 // import CategoryForm from "./FormComponent/CategoryForm.vue";
 import debounce from "lodash.debounce";
 import { genFileId } from 'element-plus';
-import { VueDraggable } from 'vue-draggable-plus'
+import { VueDraggable } from 'vue-draggable-plus';
+import { Link, router, usePage } from '@inertiajs/vue3';
+
+const props = defineProps({
+    category: Object
+});
+
+console.log(props.category);
+
+const categories = reactive({ ...props.category })
+
 
 // 初始化加載
-onMounted(() => {
-    loadMore();
-})
+// onMounted(() => {
+//     loadMore();
+// })
 
 // 初始數據
-const categories = reactive({
-    data: [],
-    current_page: 1,
-    last_page: null,
-});
+// const categories = reactive({
+//     data: [],
+//     current_page: 1,
+//     last_page: null,
+// });
 
 const loading = ref(false);
 const noMoreData = ref(false);
@@ -319,44 +332,44 @@ const isFixed = ref(false); // 默認不固定
 const isFixedStore = ref(false); // 默認不固定
 
 // 加載更多數據
-const loadMore = debounce(async () => {
-    if (loading.value || noMoreData.value) return;
-    loading.value = true;
+// const loadMore = debounce(async () => {
+//     if (loading.value || noMoreData.value) return;
+//     loading.value = true;
 
-    try {
-        const response = await axios.get("/back/categories", {
-            params: {
-                page: categories.current_page,
-                // store_type: storeType.value || null,
-                // search_key: addressFilter.value || null,
-            },
-        });
+//     try {
+//         const response = await axios.get("/back/categories", {
+//             params: {
+//                 page: categories.current_page,
+//                 // store_type: storeType.value || null,
+//                 // search_key: addressFilter.value || null,
+//             },
+//         });
 
-        console.log(response.data);
+//         console.log(response.data);
 
-        const newData = response.data.data; // 新數據 
-        const lastPage = response.data.last_page; // 總頁數 ex:11
+//         const newData = response.data.data; // 新數據 
+//         const lastPage = response.data.last_page; // 總頁數 ex:11
 
-        // 如果有數據，追加到 stores.data
-        if (newData.length > 0) {
-            categories.data.push(...newData);
-            categories.current_page += 1; // 頁碼 +1
-            categories.last_page = lastPage;
+//         // 如果有數據，追加到 stores.data
+//         if (newData.length > 0) {
+//             categories.data.push(...newData);
+//             categories.current_page += 1; // 頁碼 +1
+//             categories.last_page = lastPage;
 
-            // 如果當前頁碼超過最後一頁，標記沒有更多數據
-            if (categories.current_page > categories.last_page) {
-                noMoreData.value = true;
-            }
-        } else {
-            noMoreData.value = true;
-        }
+//             // 如果當前頁碼超過最後一頁，標記沒有更多數據
+//             if (categories.current_page > categories.last_page) {
+//                 noMoreData.value = true;
+//             }
+//         } else {
+//             noMoreData.value = true;
+//         }
 
-    } catch (error) {
-        console.error("Error loading more data:", error);
-    } finally {
-        loading.value = false;
-    }
-}, 300);
+//     } catch (error) {
+//         console.error("Error loading more data:", error);
+//     } finally {
+//         loading.value = false;
+//     }
+// }, 300);
 
 
 const TypeEnum = {
@@ -395,6 +408,8 @@ const toggleDraggable = (type) => {
 
 const onDragEnd = (evt, type) => {
     let data = type === TypeEnum.SUBCATEGORY ? subcategory.value : categories.data;
+    console.log(data);
+    
 
     const startIndex = evt.oldIndex;
     const endIndex = evt.newIndex;
@@ -795,6 +810,14 @@ const formValidate = (forRef) => {
     });
 };
 
+
+function goToPage(p) {
+    p = data.current_page;
+    router.get('/back/categories', {
+        page: p
+    });
+}
+
 </script>
 
 <style scoped>
@@ -853,5 +876,22 @@ const formValidate = (forRef) => {
     margin-bottom: 4px;
     color: #172b4d;
     width: auto !important;
+}
+
+::v-deep(.el-scrollbar .el-scrollbar__wrap) {
+    height: auto !important;
+}
+
+.example-pagination-block+.example-pagination-block {
+    margin-top: 10px;
+}
+
+.example-pagination-block .example-demonstration {
+    margin-bottom: 16px;
+}
+
+.el-pagination {
+    justify-content: center;
+    padding-top: 10px;
 }
 </style>

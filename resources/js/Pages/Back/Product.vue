@@ -29,16 +29,16 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="title" label="產品title" width="120" />
+                    <el-table-column prop="title" label="產品title"  />
 
-                    <el-table-column label="圖片" width="120">
+                    <el-table-column label="圖片" >
                         <template #default="scope">
                             <img v-if="scope.row.image" :src="scope.row.image" alt="店面圖片"
                                 style="max-width: 75px; border-radius: 4px" />
                         </template>
                     </el-table-column>
-                    <el-table-column prop="subcategory.name" label="類別" width="120" />
-                    <el-table-column prop="published_status" label="狀態" width="100">
+                    <el-table-column prop="subcategory.name" label="類別" />
+                    <el-table-column prop="published_status" label="狀態" width="120">
                         <template #default="scope">
                             <span>
                                 {{ scope.row.published_status == 1 ? '上架' : '下架' }}
@@ -46,7 +46,7 @@
                         </template>
                     </el-table-column>
 
-                    <el-table-column prop="color_codes" label="顏色" width="200">
+                    <el-table-column prop="color_codes" label="顏色" >
                         <template #default="scope">
                             <span v-for="(color_name, index) in scope.row.color_codes" :key="index">
                                 {{ color_name }}<span v-if="index < scope.row.color_codes.length - 1">、 </span>
