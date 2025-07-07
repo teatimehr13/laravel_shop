@@ -78,7 +78,8 @@ console.log(props.order.order_items);
 // console.log(props.showMessage);
 
 const emit = defineEmits([
-    'get-order-num'
+    'get-order-num',
+    'change-step'
 ])
 
 const returnRef = ref('');
@@ -215,7 +216,8 @@ const submitToReturn = async () => {
     try {
         await formValidate();
         await submit_return();
-        await emit('get-order-num', props.order.order_number)
+        await emit('get-order-num', props.order.order_number);
+        await emit('change-step', -2, '0%');
     } catch (error) {
 
     }

@@ -4,7 +4,7 @@
         <div class="list">
             <div class="line">
                 <div class="line-background"></div>
-                <div class="line-foreground" :style="{ width: progressWidth }"></div>
+                <div v-if="currentStep > 0" class="line-foreground" :style="{ width: progressWidth }"></div>
             </div>
             <!-- <ul class="list-con">
                 <li v-for="(step, index) in steps" :key="index" :class="{ active: index <= currentStep }">
@@ -111,9 +111,10 @@
 
     <el-dialog v-model="dialogReturn" title="" class="return-dialog" align-center>
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
+            <!-- currentStep -->
             <el-tab-pane label="退貨申請" name="first">
                 <ReturnForm ref="returnRef" :order="state.order" :return_reasons="return_reasons"
-                    :to-currency="toCurrency" @get-order-num="getOrderNum" />
+                    :to-currency="toCurrency" @get-order-num="getOrderNum" @change-step="changeStep" />
             </el-tab-pane>
             <el-tab-pane label="退貨紀錄" name="second" v-loading="loading">
                 <ReturnHistory ref="historyRef" :history-data="historyData" :formate-date="formateDate"
@@ -192,8 +193,8 @@ const steps = [
     { title: '已送達', icon: Checked },
 ]
 
-const currentStep = state.order.step_index;
-console.log(currentStep);
+const currentStep = ref(state.order.step_index);
+console.log(currentStep.value);
 
 const cancelStep = 0;
 const returnStep = 2;
@@ -215,7 +216,7 @@ const returnSteps = [
 // 計算進度百分比
 const progressWidth = computed(() => {
     if (steps.length <= 1) return '0%'
-    const percent = (currentStep / (steps.length - 1)) * ((1000 - 140) / 1000 * 100);  //左右各70px
+    const percent = (currentStep.value / (steps.length - 1)) * ((1000 - 140) / 1000 * 100);  //左右各70px
     return `${percent}%`
 })
 
@@ -336,6 +337,13 @@ const canCancel = computed(() =>
 const canReturn = computed(() =>
     ['delivered'].includes(state.order.fulfilment_status)
 )
+
+const changeStep = (step, progress) => {
+    // console.log(step);
+    // console.log(progress);    
+    currentStep.value = step;
+    progressWidth.value = progress;
+}
 
 // const handleBeforeLeave = async(tab) => {
 //     console.log(tab);

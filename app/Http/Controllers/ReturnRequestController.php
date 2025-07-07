@@ -46,7 +46,7 @@ class ReturnRequestController extends Controller
             'payment_status' => 'refunded'
         ]);
 
-        return;
+        // return;
         $totalSubtotal = 0;
         $totalDeduct = 0;
         $totalFinalRefund = 0;
