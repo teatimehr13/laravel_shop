@@ -67,7 +67,7 @@ const emits = defineEmits(["update:file-list", "update:form-data", "submit", "up
 
 //不可以直接修改
 const uploadList = toRef(props, 'uploadList');
-const localUploadList = ref();
+const localUploadList = ref([]);
 const upload = ref([]);
 const labelPosition = ref('top');
 const toggleUpload = ref(false);
@@ -118,8 +118,8 @@ const formRules = reactive({
     image: [
         {
             validator: (rule, value, callback) => {
+                console.log(localUploadList.value);
                 if (localUploadList.value.length === 0) {
-                    console.log(localUploadList.value);
                     callback();
                 } else {
                     const file = localUploadList.value[0].raw;

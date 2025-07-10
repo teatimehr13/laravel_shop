@@ -1,5 +1,5 @@
 <template>
-  <div class="header">
+  <div class="header px-4">
     <el-row>
       <el-col :span="12" style="margin: auto;">
         <div class="left-title">

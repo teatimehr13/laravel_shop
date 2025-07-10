@@ -1,16 +1,16 @@
 <template>
     <Header />
     <!-- 回訂單列表 -->
-    <main style="margin: 32px auto;">
-        <div class="order-layout">
-            <p style="margin-bottom: 32px;">
+    <main>
+        <div class="max-w-[1440px] mx-auto px-4 bg-white">
+            <p class="py-8">
                 <el-button link @click="goBack">
                     <el-icon>
                         <ArrowLeft />
                     </el-icon>
                     回上一頁
                 </el-button>
-                <hr style="margin-top: 8px;">
+                <!-- <hr style="margin-top: 8px;"> -->
             </p>
 
             <el-descriptions class="margin-top" title="訂單列表" :column="3" size="default" border>
@@ -33,26 +33,6 @@
                     </template>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         {{ order_items.payment_status_label }}
-                        <!-- <el-button link type='r' ref="buttonRef">
-                            <el-icon size="20px">
-                                <Edit />
-                            </el-icon>
-                        </el-button> -->
-
-                        <!-- <el-popover ref="popoverRef" :virtual-ref="buttonRef" trigger="click" title="更改訂單狀態"
-                            v-model:visible="popoverVisible" virtual-triggering width>
-                            <div style="margin-top: 20px">
-                                <el-radio-group v-model="order_items.order_status" class="radio-wrap">
-                                    <el-radio-button v-for="(val, key) in order_status_select" :key="Number(key)"
-                                        :value="Number(key)" @dblclick="handleDoubleClick(Number(key))">
-                                        {{ val }}
-                                    </el-radio-button>
-                                </el-radio-group>
-                            </div>
-                            <div style="margin-top: 4px;">
-                                <el-text class="m-2" size="small" type="info">點兩下按鈕進行更新</el-text>
-                            </div>
-                        </el-popover> -->
                     </div>
                 </el-descriptions-item>
                 <el-descriptions-item >
@@ -234,10 +214,10 @@ const handleDoubleClick = (selectedValue) => {
 </script>
 
 <style scoped>
-.order-layout {
+/* .order-layout {
     max-width: 1000px;
     margin: auto;
-}
+} */
 
 .order-list-layout {
     display: flex;

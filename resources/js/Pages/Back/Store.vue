@@ -21,7 +21,7 @@
                         v-el-table-infinite-scroll="loadMore" v-loading="loading" :infinite-scroll-disabled="loading"
                         element-loading-text="加載中..." :row-class-name="getRowClass" border>
 
-                        <el-table-column width="220" :fixed="isFixedStore ? 'left' : false" prop="store_name">
+                        <el-table-column :fixed="isFixedStore ? 'left' : false" prop="store_name">
                             <template #header>
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <span>門市名稱</span>
@@ -32,22 +32,22 @@
                             </template>
                         </el-table-column>
 
-                        <el-table-column label="圖片" width="120">
+                        <el-table-column label="圖片">
                             <template #default="scope">
                                 <img v-if="scope.row.image" :src="scope.row.image" alt="店面圖片"
                                     style="max-width: 75px; border-radius: 4px" />
                             </template>
                         </el-table-column>
-                        <el-table-column prop="store_type_name" label="類型" width="120" />
-                        <el-table-column prop="address" label="地址" width="300" />
-                        <el-table-column prop="contact_number" label="聯絡電話" width="150" />
-                        <el-table-column prop="opening_hours" label="營業時間" width="200">
+                        <el-table-column prop="store_type_name" label="類型" />
+                        <el-table-column prop="address" label="地址" />
+                        <el-table-column prop="contact_number" label="聯絡電話" />
+                        <el-table-column prop="opening_hours" label="營業時間">
                             <template #default="scope">
                                 <div v-html="formattedOpeningHours[scope.$index]"></div>
                             </template>
                         </el-table-column>
 
-                        <el-table-column width="140" :fixed="isFixed ? 'right' : false">
+                        <el-table-column :fixed="isFixed ? 'right' : false">
                             <template #header>
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <span>操作</span>

@@ -252,7 +252,7 @@ function formateDate(rawTime) {
     line-height: 1.1;
     padding-bottom: 2px;
     text-align: center;
-    margin-bottom: 2rem;
+    margin: 2rem;
 }
 
 .order-intro-line {

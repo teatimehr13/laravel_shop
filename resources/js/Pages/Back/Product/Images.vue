@@ -1,7 +1,7 @@
 <template>
     <Header />
     <main>
-        <div class="containers max-w-[1440px] mx-auto px-4">
+        <div class="max-w-[1440px] mx-auto px-4">
             <p class="my-8">
                 <el-button link @click="goBack" class="hover:underline px-2 py-1">
                     <el-icon>
@@ -402,9 +402,6 @@ function goBack() {
 </script>
 
 <style scoped>
-.containers {
-    /* padding: 2rem 2.75rem; */
-}
 
 .images-outside {
     border-bottom: 1px solid #ededed;

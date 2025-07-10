@@ -1,19 +1,11 @@
 <template>
     <FrontendLayout />
-    <div class="container">
+    <div class="container mx-auto px-4 sm:py-8 max-w-[1680px] md:px-12 lg:px-16 xl:px-20 2xl:px-24">
         <div class="list">
             <div class="line">
                 <div class="line-background"></div>
                 <div v-if="currentStep > 0" class="line-foreground" :style="{ width: progressWidth }"></div>
             </div>
-            <!-- <ul class="list-con">
-                <li v-for="(step, index) in steps" :key="index" :class="{ active: index <= currentStep }">
-                    <el-icon>
-                        <component :is="step.icon" />
-                    </el-icon>
-                    <div>{{ step.title }}</div>
-                </li>
-            </ul> -->
 
             <ul class="list-con" v-if="currentStep >= 0">
                 <li v-for="(step, index) in steps" :key="index" :class="{ active: index <= currentStep }">
@@ -385,8 +377,8 @@ function formateDate(rawTime) {
 
 <style>
 .container {
-    margin: auto;
-    max-width: 1000px;
+    /* margin: auto;
+    max-width: 1000px; */
 }
 
 
@@ -399,9 +391,6 @@ function formateDate(rawTime) {
     border-bottom: 1px dashed #e8e7e7;
 }
 
-.order-item-lists>div {
-    /* width: 100%; */
-}
 
 .item-details {
     flex: 2;
@@ -429,8 +418,6 @@ function formateDate(rawTime) {
 }
 
 .grid-header {
-    /* background-color: #3d3d3d; */
-    /* color: white; */
     color: #909399;
     font-weight: bold;
     padding: 8px;
@@ -460,8 +447,6 @@ function formateDate(rawTime) {
     top: 50%;
     left: 0;
     right: 0;
-    /* left: 70px;
-    right: 70px; */
     height: 4px;
     z-index: 0;
 }
@@ -498,8 +483,8 @@ function formateDate(rawTime) {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     border: 4px solid #3bc371;
     border-radius: 50%;
     justify-content: center;

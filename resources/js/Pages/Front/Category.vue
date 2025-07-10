@@ -3,7 +3,7 @@
         <template #switch>
             <Breadcrumb :category="category" />
             <section>
-                <div class="category-container max-w-screen-xl mx-auto px-4">
+                <div class="category-container mx-auto px-4 sm:py-8 max-w-[1680px] md:px-12 lg:px-16 xl:px-20 2xl:px-24">
                     <div v-for="(category, idx) in categories" :key="category.id" class="mb-8">
                         <!-- 分類名稱 -->
                         <div class="border-b border-gray-200 mb-6 pb-4">
@@ -17,7 +17,7 @@
                             <div v-for="subcategory in category.subcategories" :key="subcategory.id"
                                 class="flex flex-col items-center mb-2">
                                 <!-- 圖片區塊 -->
-                                <div class="border border-gray-200 p-2 mb-2 aspect-square w-full overflow-hidden">
+                                <div class="border border-gray-200 p-2 mb-2 aspect-[4/3] w-full overflow-hidden">
                                     <a :href="`/product/list/${subcategory.search_key}`">
                                         <el-image :src="subcategory.image" fit="contain" class="w-full h-full transition duration-300 ease-in-out hover:scale-110" />
                                     </a>
