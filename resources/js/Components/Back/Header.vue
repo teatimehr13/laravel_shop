@@ -1,8 +1,8 @@
 <template>
-  <div class="header">
+  <div class="header px-4">
     <el-row>
       <el-col :span="4">
-        <div class="left-title">後台管理</div>
+        <div class="left-title ms-6">後台管理</div>
       </el-col>
       <el-col :span="4">
         <div></div>
@@ -17,7 +17,7 @@
         <div></div>
       </el-col>
       <el-col :span="4" class="right-content">
-        <el-dropdown trigger="click" >
+        <el-dropdown trigger="click">
           <div class="el-dropdown-link right-text" style="display: flex; align-items: center;">
             <div class="right-text-content">
               <div class="right-text">
@@ -65,11 +65,11 @@ function logout() {
   color: #333;
   text-align: center;
   line-height: 60px;
+  border-bottom: 1px solid #f3f3f3;
 }
 
 .left-title {
   text-align: left;
-  padding-left: 25px;
   font-weight: bold;
   font-size: 20px;
   color: #55595c;
@@ -90,8 +90,8 @@ function logout() {
 }
 
 .right-content {
-  display: flex; 
-  justify-content: end; 
+  display: flex;
+  justify-content: end;
   padding-right: 10px;
 }
 </style>

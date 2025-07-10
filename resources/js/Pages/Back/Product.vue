@@ -81,25 +81,6 @@
                             </el-button>
                             </Link>
 
-                            <!-- <el-popover :placement="popoverPlacement" trigger="click" :width="700" transition="none"
-                                v-model:visible="popoverVisible[scope.row.id]" popper-class="custom-scrollbar"
-                                @show="handlePopoverShow(scope.row.id)" :show-after="100" :hide-after="0"
-                                :popper-style="popoverStyle" @before-leave="enableScroll" :offset="offSet"
-                                ref="popoverRef" @before-enter="openEditPopover(scope.row)">
-                                <template #reference>
-                                    <el-button size="small" :ref="el => (triggerRefs[scope.row.id] = el)"
-                                        :class="{ activeButton: activeRow === scope.row.id }">編輯</el-button>
-                                </template>
-
-    <ProductForm v-model:file-list="fileList" v-model:form-data="popForm" v-model:uploadList="uploadList"
-        @submit="onSubmitEdit" @uploadList="emitUploadList" ref="formRef2" />
-
-    <el-form-item>
-        <el-button type="primary" @click="onSubmitEdit(scope.row.id)">儲存</el-button>
-        <el-button @click="closePopover(scope.row.id)">關閉</el-button>
-    </el-form-item>
-    </el-popover> -->
-
                             <el-popconfirm title="確定移除此筆資料?" @confirm="onSubmitDel(scope.row.id)" :width="170"
                                 :hide-after="100" v-model:visible="popconfirmVisible[scope.row.id]" placement="left-end">
                                 <template #reference>
@@ -145,9 +126,6 @@
                     v-model:newCoRowVisible="newCoRowVisible" v-model:fileListAdd_co="fileListAdd_co"
                     :color_options_data="color_options_data" @toggle-add="toggleAdd" @toggle-add-btn="toggleAddBtn"
                     @remove-verify="removeVerify" />
-
-                <!-- <ProductCoAttPicForm :colorOptions="color_options_data" :productId="productId"
-                    v-model:dialogColorVisible="dialogColorVisible" /> -->
             </el-dialog>
         </template>
     </BackendLayout>
@@ -204,14 +182,6 @@ const emitUploadList = (data) => {
     uploadList.value = data;
 }
 
-// 篩選select
-const storeTypeArr = [
-    { name: "全部類型", value: "" },
-    { name: "直營", value: "0" },
-    { name: "特約展售", value: "1" },
-    { name: "授權經銷商", value: "2" },
-];
-
 // 表單數據
 const popForm = reactive({
     name: '',
@@ -235,77 +205,9 @@ const stores = reactive({
     last_page: null,
 });
 
-const loading = ref(false);
-const noMoreData = ref(false);
-const storeType = ref("");
-const addressFilter = ref("");
+
 const isFixed = ref(false); // 默認不固定
 const isFixedStore = ref(false); // 默認不固定
-
-// 加載更多數據
-const loadMore = debounce(async () => {
-    if (loading.value || noMoreData.value) return;
-    loading.value = true;
-
-    try {
-        const response = await axios.get("/back/stores", {
-            params: {
-                page: stores.current_page,
-                store_type: storeType.value || null,
-                address: addressFilter.value || null,
-            },
-        });
-
-        // console.log(response.data);
-
-        const newData = response.data.data; // 新數據 
-        const lastPage = response.data.last_page; // 總頁數 ex:11
-
-        // 如果有數據，追加到 stores.data
-        if (newData.length > 0) {
-            stores.data.push(...newData);
-            stores.current_page += 1; // 頁碼 +1
-            stores.last_page = lastPage;
-
-            // 如果當前頁碼超過最後一頁，標記沒有更多數據
-            if (stores.current_page > stores.last_page) {
-                noMoreData.value = true;
-            }
-        } else {
-            noMoreData.value = true;
-        }
-
-    } catch (error) {
-        console.error("Error loading more data:", error);
-    } finally {
-        loading.value = false;
-    }
-}, 300);
-
-// 篩選條件發生變化時重新加載
-const applyFilters = debounce(() => {
-    stores.data = [];
-    stores.current_page = 1;
-    noMoreData.value = false;
-    loadMore();
-}, 500);
-
-//格式化營業時間顯示
-const formattedOpeningHours = computed(() => {
-    if (stores.data) {
-        return stores.data.map((store) =>
-            store.opening_hours
-                ? store.opening_hours
-                    .split("\n") // 按 \n 分割
-                    .map((line) => line.trim()) // 去除多餘空白
-                    .filter((line) => line !== "") // 過濾空行
-                    .join("<br>") // 拼接成 HTML 的換行
-                : ''
-        );
-    }
-    return '';
-});
-
 
 const getRowClass = ({ row }) => {
     return activeRow.value === row.id ? "activeRowFocus" : "";
@@ -313,19 +215,6 @@ const getRowClass = ({ row }) => {
 
 //popover 
 const popoverVisible = reactive({});
-const popoverPlacement = ref('left-start');
-const popoverRef = ref(null);
-const triggerRefs = ref({});
-
-const size = ref('default');
-
-let offSet = ref(15);
-
-const popoverStyle = ref({
-    // height: "550px",
-    overflowX: "hidden",
-    overflowY: "auto"
-});
 
 
 const closePopover = (id) => {
@@ -333,71 +222,7 @@ const closePopover = (id) => {
 };
 
 const activeRow = ref(null);
-const openEditPopover = (row) => {
-    console.log(row);
-    nextTick(() => {
-        // setTimeout(() => {
-        formRef2.value.resetForm();
-        formRef2.value.setFormData(row); //popForm
 
-        fileList.value = row.image ? [
-            {
-                name: row.name,
-                url: row.image,
-                uid: genFileId(),
-            },
-        ] : [];
-
-        uploadList.value = [
-            {
-                delete_image: false
-            },
-        ]
-        // }, 100)
-    })
-
-};
-
-//顯示popover(更新)
-const handlePopoverShow = (id) => {
-    disableScroll();
-};
-
-const disableScroll = () => {
-    const scrollbarWrap = document.querySelector('.el-scrollbar__wrap');
-    if (scrollbarWrap) {
-        scrollbarWrap.style.overflowY = 'hidden';
-    }
-};
-
-const enableScroll = () => {
-    const scrollbarWrap = document.querySelector('.el-scrollbar__wrap');
-    if (scrollbarWrap) {
-        scrollbarWrap.style.overflowY = 'auto';
-    }
-};
-
-const scrollStyle = () => {
-    const style = document.createElement("style");
-    style.type = "text/css";
-    style.innerHTML = `
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #d3d3d3;
-      border-radius: 4px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #b3b3b3; /* 滾動條懸停顏色 */
-    }
-  `;
-    document.head.appendChild(style);
-}
-
-const popoverClass = ref("");
 
 //對話框
 const color_options_data = ref([]);
@@ -415,16 +240,6 @@ const dialogToggle = () => {
 //上傳upload
 const fileList = ref([]);
 let uploadList = ref([]);
-
-// const NewSubRow = ref(false);
-
-// // 儲存新增行的數據
-// const NewSubRowData = reactive({
-//     name: "",
-//     search_key: "",
-//     show_in_list: "",
-//     order_index: "",
-// });
 
 
 //通知

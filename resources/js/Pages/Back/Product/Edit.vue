@@ -1,92 +1,98 @@
 <template>
     <Header />
-    <main>
-        <div class="container">
-            <p style="margin-bottom: 32px;">
-                <el-button link @click="goBack">
+    <main class="">
+        <div class="max-w-[1440px] mx-auto px-4 bg-white">
+            <p class="py-8">
+                <el-button link @click="goBack" class="hover:underline px-2 py-1">
                     <el-icon>
                         <ArrowLeft />
                     </el-icon>
                     回上一頁
                 </el-button>
-                <hr style="margin-top: 8px;">
             </p>
+        </div>
 
-            <el-form :model="product" label-width="300px" class="demo-ruleForm" :rules="formRules"
-                ref="internalFormRef">
-                <el-form-item label="產品名稱" :label-position="labelPosition" prop="name">
-                    <el-input v-model="product.name" style="max-width: 300px;" />
-                </el-form-item>
+        <div class="max-w-[1440px] mx-auto px-4 bg-white">
+            <div class="mx-2.5">
+                <el-form :model="product" label-width="300px" class="demo-ruleForm" :rules="formRules"
+                    ref="internalFormRef">
+                    <el-form-item label="產品名稱" :label-position="labelPosition" prop="name">
+                        <el-input v-model="product.name" style="max-width: 300px;" />
+                    </el-form-item>
 
-                <el-form-item label="產品title" :label-position="labelPosition" prop="title">
-                    <el-input v-model="product.title" style="max-width: 300px;" />
-                </el-form-item>
+                    <el-form-item label="產品title" :label-position="labelPosition" prop="title">
+                        <el-input v-model="product.title" style="max-width: 300px;" />
+                    </el-form-item>
 
-                <el-form-item label="價格" :label-position="labelPosition" prop="title">
-                    <el-input v-model="product.price" style="max-width: 300px;" />
-                </el-form-item>
-
-
-                <el-form-item label="子類別" :label-position="labelPosition" prop="subcategory_id">
-                    <el-select v-model.number="product.subcategory_id" :teleported="false" style="max-width: 300px;">
-                        <el-option v-for="subcategory in props.subcategories" :key="subcategory.id"
-                            :label="subcategory.name" :value="subcategory.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-
-                <el-form-item label="操作" :label-position="labelPosition" prop="published_status">
-                    <el-radio-group v-model="product['published_status']">
-                        <el-radio :value="1">上架</el-radio>
-                        <el-radio :value="0">下架</el-radio>
-                    </el-radio-group>
-                </el-form-item>
-
-                <el-form-item label="圖片" :label-position="labelPosition" prop="image">
-                    <el-upload :file-list="fileList" class="upload-demo" action="" :on-preview="handlePreview"
-                        :on-remove="handleRemove" list-type="picture" :auto-upload="false" :limit="1"
-                        :on-exceed="handleExceed" ref="upload" popper-class="no-transition" :on-change="handleOnChange">
-                        <el-button type="">選擇檔案</el-button>
-                    </el-upload>
-
-                    <el-dialog v-model="dialogVisible">
-                        <img w-full :src="dialogImageUrl" alt="Preview Image" style="margin: auto;" />
-                    </el-dialog>
-                </el-form-item>
-                <el-form-item label="產品描述" :label-position="labelPosition" prop="description" class="quill-item">
-                    <QuillEditor v-model:content="product.description" content-type="html" theme="snow" ref="quillRef"
-                        style="min-height: 200px;" />
-                </el-form-item>
-
-                <hr style="margin: 10px auto;">
-
-                <!-- <div style="margin: 10px auto;">
-                    <span>特惠欄位</span>
-                    <el-tooltip effect="dark" :content="showSpecial ? '點擊隱藏欄位' : '點擊顯示欄位'" placement="top">
-                        <el-link @click="showSpecial = !showSpecial" type="primary" :underline="false">
-                            {{ showSpecial ? '[顯示]' : '[隱藏]' }}
-                        </el-link>
-                    </el-tooltip>
-                </div> -->
-
-                <el-form-item label="特惠訊息" :label-position="labelPosition" prop="special_message" class="quill-item">
-                    <QuillEditor v-model:content="product.special_message" content-type="html" theme="snow"
-                        ref="specialQuillRef" style="min-height: 200px;" />
-                </el-form-item>
-
-                <el-form-item label="特惠時間" :label-position="labelPosition" prop="special_start_at">
-                    <el-date-picker v-model="product.special_start_at" type="datetime" placeholder="開始時間"
-                        :teleported="false" style="margin-right:10px" />
-                </el-form-item>
-                <el-form-item label="" :label-position="labelPosition" prop="special_end_at">
-                    <el-date-picker v-model="product.special_end_at" type="datetime" placeholder="結束時間"
-                        :teleported="false" />
-                </el-form-item>
-
-            </el-form>
+                    <el-form-item label="價格" :label-position="labelPosition" prop="title">
+                        <el-input v-model="product.price" style="max-width: 300px;" />
+                    </el-form-item>
 
 
-            <el-button type="primary" @click="onSubmitEdit">
+                    <el-form-item label="子類別" :label-position="labelPosition" prop="subcategory_id">
+                        <el-select v-model.number="product.subcategory_id" :teleported="false"
+                            style="max-width: 300px;">
+                            <el-option v-for="subcategory in props.subcategories" :key="subcategory.id"
+                                :label="subcategory.name" :value="subcategory.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+
+                    <el-form-item label="操作" :label-position="labelPosition" prop="published_status">
+                        <el-radio-group v-model="product['published_status']">
+                            <el-radio :value="1">上架</el-radio>
+                            <el-radio :value="0">下架</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+
+                    <el-form-item label="圖片" :label-position="labelPosition" prop="image">
+                        <el-upload :file-list="fileList" class="upload-demo" action="" :on-preview="handlePreview"
+                            :on-remove="handleRemove" list-type="picture" :auto-upload="false" :limit="1"
+                            :on-exceed="handleExceed" ref="upload" popper-class="no-transition"
+                            :on-change="handleOnChange">
+                            <el-button type="">選擇檔案</el-button>
+                        </el-upload>
+
+                        <el-dialog v-model="dialogVisible">
+                            <img w-full :src="dialogImageUrl" alt="Preview Image" style="margin: auto;" />
+                        </el-dialog>
+                    </el-form-item>
+                    <el-form-item label="產品描述" :label-position="labelPosition" prop="description" class="quill-item">
+                        <QuillEditor v-model:content="product.description" content-type="html" theme="snow"
+                            ref="quillRef" style="min-height: 200px;" />
+                    </el-form-item>
+
+                    <hr style="margin: 10px auto;">
+
+                    <!-- <div style="margin: 10px auto;">
+                            <span>特惠欄位</span>
+                            <el-tooltip effect="dark" :content="showSpecial ? '點擊隱藏欄位' : '點擊顯示欄位'" placement="top">
+                                <el-link @click="showSpecial = !showSpecial" type="primary" :underline="false">
+                                    {{ showSpecial ? '[顯示]' : '[隱藏]' }}
+                                </el-link>
+                            </el-tooltip>
+                        </div> -->
+
+                    <el-form-item label="特惠訊息" :label-position="labelPosition" prop="special_message"
+                        class="quill-item">
+                        <QuillEditor v-model:content="product.special_message" content-type="html" theme="snow"
+                            ref="specialQuillRef" style="min-height: 200px;" />
+                    </el-form-item>
+
+                    <el-form-item label="特惠時間" :label-position="labelPosition" prop="special_start_at">
+                        <el-date-picker v-model="product.special_start_at" type="datetime" placeholder="開始時間"
+                            :teleported="false" style="margin-right:10px" />
+                    </el-form-item>
+                    <el-form-item label="" :label-position="labelPosition" prop="special_end_at">
+                        <el-date-picker v-model="product.special_end_at" type="datetime" placeholder="結束時間"
+                            :teleported="false" />
+                    </el-form-item>
+
+                </el-form>
+            </div>
+
+
+            <el-button class="mx-2.5 mb-4" type="primary" @click="onSubmitEdit">
                 提交
             </el-button>
         </div>
@@ -395,9 +401,7 @@ function goBack() {
 
 <style scoped>
 .container {
-    padding: 2rem 1.5rem;
-    max-width: 1000px;
-    margin: auto;
+    background-color: rgb(238, 241, 248);
 }
 
 ::v-deep(.quill-item .el-form-item__content) {

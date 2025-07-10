@@ -27,27 +27,6 @@ import Aside from '@/Components/Back/Aside.vue';
 </script>
 
 <style>
-/* .layout {
-    display: flex;
-    flex-direction: row;
-}
-
-header {
-    width: 100%;
-    height: 60px;
-    background-color: #333;
-    color: white;
-}
-
-aside {
-    width: 250px;
-    background-color: #f8f9fa;
-}
-
-main {
-    flex-grow: 1;
-    padding: 20px;
-} */
 
 .el-header {
     background-color: #ffffff;
@@ -59,17 +38,9 @@ main {
     left: 0;
     right: 0;
     height: 60px;
-    /* 根據實際高度調整 */
     z-index: 1000;
+    --el-header-padding: 0px;
 }
-
-/* .el-aside {
-    background-color: #ffffff;
-    color: #333;
-    text-align: center;
-    line-height: 200px;
-    border-top: 1px solid #f3f3f3;
-} */
 
 .el-main {
     background-color: rgb(238, 241, 248);
@@ -98,7 +69,6 @@ main {
     bottom: 0;
     overflow-y: auto;
     top: 0;
-    border-top: 1px solid #f3f3f3;
 }
 
 .el-menu {
@@ -109,12 +79,4 @@ body>.el-container {
     margin-bottom: 40px;
 }
 
-/* .el-container:nth-child(5) .el-aside,
-.el-container:nth-child(6) .el-aside {
-    line-height: 260px;
-}
-
-.el-container:nth-child(7) .el-aside {
-    line-height: 320px;
-} */
 </style>

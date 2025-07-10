@@ -1,15 +1,15 @@
 <template>
     <Header />
     <main>
-        <div class="containers">
-            <p style="margin-bottom: 32px;">
-                <el-button link @click="goBack">
+        <div class="containers max-w-[1440px] mx-auto px-4">
+            <p class="my-8">
+                <el-button link @click="goBack" class="hover:underline px-2 py-1">
                     <el-icon>
                         <ArrowLeft />
                     </el-icon>
                     回上一頁
                 </el-button>
-                <hr style="margin-top: 8px;">
+                <!-- <hr style="margin-top: 8px;"> -->
             </p>
 
             <div v-if="productImages.length" v-for="(val, key) in sort_product_options" :key="val.id"
@@ -403,7 +403,7 @@ function goBack() {
 
 <style scoped>
 .containers {
-    padding: 2rem 1.5rem;
+    /* padding: 2rem 2.75rem; */
 }
 
 .images-outside {
