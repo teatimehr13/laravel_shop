@@ -21,7 +21,7 @@
                 </aside>
 
 
-                <main class="col-span-12 md:col-span-9 xl:col-span-10">
+                <main class="col-span-12 md:col-span-9 xl:col-span-10 mb-4">
                     <div class="shows-text">
                         <div style="align-content: center;">
                             共

@@ -50,7 +50,8 @@ class Order extends Model
         'user_id',
         'payment_method',
         'payment_status',
-        'fulfilment_status'
+        'fulfilment_status',
+        'payment_token'
     ];
 
     //初始化模型事件，當Order被new時，自動做這些事

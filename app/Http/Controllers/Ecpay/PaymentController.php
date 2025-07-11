@@ -45,7 +45,8 @@ class PaymentController extends Controller
             // 'NotifyURL'      => config('services.ecpay.notify_url'),
 
             // === 付款選項 ===
-            'ChoosePayment'  => 'ALL',   // 讓使用者在綠界頁面自行挑
+            'ChoosePayment' => 'Credit',
+            // 'ChoosePayment'  => 'ALL',   // 讓使用者在綠界頁面自行挑
             'EncryptType'    => 1,
             // 'BuyerEmail' => $request->email,
         ];
@@ -79,11 +80,15 @@ class PaymentController extends Controller
         $data = $checkoutResponse->get($req->all());
         Log::info('綠界付款成功資料驗證完成', $data);
 
-        $order = Order::where('order_number', $data['MerchantTradeNo'])->first();
+        $order = Order::where('payment_token', $data['MerchantTradeNo'])
+            ->orWhere('order_number', $data['MerchantTradeNo'])
+            ->first();
+
         $order->update([
             'order_status' => 2,
             'payment_method' => $data['PaymentType'] == 'Credit_CreditCard' ? 'credit_card' : $data['PaymentType'],
-            'payment_order_number' => $data['TradeNo']
+            'payment_order_number' => $data['TradeNo'],
+            'payment_status' => 'paid',
             // 'paid_at' => now(),
             // 'transaction_id' => $data['TradeNo'],
         ]);
@@ -125,7 +130,12 @@ class PaymentController extends Controller
     {
         Log::info('OrderResult 回傳內容', $req->all());
         $merchantTradeNo = $req->input('MerchantTradeNo');
-        return redirect()->route('order.show', ['order' => $merchantTradeNo])->with('success', '付款完成！訂單已成立');
+        $order = Order::where('order_number', $merchantTradeNo)
+            ->orWhere('payment_token', $merchantTradeNo)
+            ->firstOrFail();
+
+        // return redirect()->route('order.show', ['order' => $merchantTradeNo])->with('success', '付款完成！訂單已成立');
+        return redirect()->route('order.show', ['order' => $order->order_number])->with('success', '付款完成！訂單已成立');
     }
 
     //v5版本不需要
@@ -152,5 +162,30 @@ class PaymentController extends Controller
         }
 
         return response('1|OK');
+    }
+
+    public function retry(Order $order)
+    {
+        // Log::info($order);
+        // 確認是該使用者的訂單
+        // if ($order->user_id !== auth()->id()) {
+        //     abort(403);
+        // }
+
+
+        if ($order->payment_status === 'paid') {
+            return redirect()->route('order.show', ['order' => $order->order_number])
+                ->with('error', '此訂單無需補繳');
+        }
+
+
+        // $paymentToken = $order->order_number . '-R' . now()->format('His'); //超過20字元
+        $paymentToken = 'RE' . $order->id . now()->format('His');
+        $order->update(['payment_token' => $paymentToken]);
+
+        return $this->checkout(new Request([
+            'order_number' => $paymentToken,
+            'amount' => $order->amount
+        ]));
     }
 }

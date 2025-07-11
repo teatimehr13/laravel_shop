@@ -187,7 +187,9 @@ class CheckoutController extends Controller
             'note' => $validated['note'],
             'order_number' => $order_number,
             'order_status' => $validated['order_status'], //變數
-            'payment_method' => $validated['payment_method']
+            'payment_method' => $validated['payment_method'],
+            'payment_status' => 'pending',
+            'fulfilment_status' => 'pending',
         ]);
 
         // 建立 order_items

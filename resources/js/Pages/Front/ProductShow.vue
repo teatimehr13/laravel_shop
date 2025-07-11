@@ -4,7 +4,7 @@
             <Breadcrumb :category="category" :subcategory="subcategory" :product="product" />
 
             <section>
-                <div class="page-container">
+                <div class="page-container mb-4">
                     <div class="col-span-12 lg:col-span-6 md:col-span-12">
                         <div class="p-2">
                             <div class="prodcut-main-img w-full">

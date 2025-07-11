@@ -131,8 +131,9 @@
             <p class="mt-2">
                 信用卡繳費金額: <span class="text-lg text-purple-600">{{ toCurrency(order.amount) }}</span>
             </p>
-            <div class="grid mt-6" v-if="!isExpired">
-                <el-button size="large">前往支付</el-button>
+            <!-- v-if="!isExpired" -->
+            <div class="grid mt-6" v-if="!isExpired && currentStep >= 0">
+                <el-button size="large" @click="retryPayment(state.order.order_number)">前往支付</el-button>
             </div>
         </span>
     </el-dialog>
@@ -335,6 +336,11 @@ const changeStep = (step, progress) => {
     // console.log(progress);    
     currentStep.value = step;
     progressWidth.value = progress;
+}
+
+
+function retryPayment(orderNumber) {
+  window.location.href = `/payment/retry/${orderNumber}`
 }
 
 // const handleBeforeLeave = async(tab) => {
