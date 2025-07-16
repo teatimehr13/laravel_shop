@@ -469,7 +469,6 @@ const dialogColorToggle = async (product) => {
 let formDataForCo = new FormData();
 
 const toggleEdit = async (row) => {
-    // const isEditing = type === TypeEnum.CATEGORY ? editingCgRow.value === row.id : editingRow.value === row.id;
     const isEditing = editingRow.value === row.id ? editingRow.value : null;
 
     if (isEditing) {
@@ -601,11 +600,7 @@ const toggleAddBtn = () => {
     fileListAdd_co.value = [];
 }
 
-const toggleAdd = async () => {
-    // console.log(newCoRowData.value);
-    // console.log(fileListAdd_co.value);
-    // console.log(productId.value);
-    
+const toggleAdd = async () => {   
     await newCoFormRef.value.colorAddFormValidate();
     await colorAddFormBeforSubmit();
     await addCo();
@@ -770,21 +765,11 @@ watch(
 );
 
 
-const changePage = (p = 1) => {
-
-    // console.log(filters.value);
+const changePage = () => {
     console.log(filters);
 
     const cleanFilters = Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== '' && v !== null));
     console.log(cleanFilters);
-    // router.get(route('backorder.index'),
-    //     ...cleanFilters,
-    //     // page: p
-    //  {
-    //     preserveState: true,
-    //     preserveScroll: true
-    // });
-    // router.get(route('backorder.index'), { order_number: filters.value.order_number })
     router.get(route('products.index'), cleanFilters);
 };
 
@@ -929,13 +914,7 @@ function formatDate(input) {
     margin-bottom: 16px;
 }
 
-/* ::v-deep(.productForm-dialog) {
-  max-height: 100vh;
-  overflow: hidden;
-} */
-
 .main-container {
-    /* height: 100%; */
     overflow-y: auto;
 }
 

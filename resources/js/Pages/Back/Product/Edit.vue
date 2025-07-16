@@ -63,16 +63,6 @@
                     </el-form-item>
 
                     <hr style="margin: 10px auto;">
-
-                    <!-- <div style="margin: 10px auto;">
-                            <span>特惠欄位</span>
-                            <el-tooltip effect="dark" :content="showSpecial ? '點擊隱藏欄位' : '點擊顯示欄位'" placement="top">
-                                <el-link @click="showSpecial = !showSpecial" type="primary" :underline="false">
-                                    {{ showSpecial ? '[顯示]' : '[隱藏]' }}
-                                </el-link>
-                            </el-tooltip>
-                        </div> -->
-
                     <el-form-item label="特惠訊息" :label-position="labelPosition" prop="special_message"
                         class="quill-item">
                         <QuillEditor v-model:content="product.special_message" content-type="html" theme="snow"

@@ -60,9 +60,6 @@ watch(() => form.password, (newVal) => {
     <div class="bg-base h-full flex flex-col min-h-screen">
         <div class="flex-1">
             <nav class="mt-10 mb-6  flex items-center justify-center">
-                <!-- <h1 class="text-2xl text-slate-700">
-                    hello
-                </h1> -->
                     <HelloAnimation />
             </nav>
             <main>
@@ -81,17 +78,7 @@ watch(() => form.password, (newVal) => {
                                         <p class="mt-2">
                                             {{ form.email }}
                                         </p>
-                                        <!-- <div class="relative">
-                                            <input type="hidden" v-model="form.email" class="input-style"
-                                                placeholder="yourEmail@example.com"                                                 :class="{ 'input-invalid': form.submitted && !form.email }" />
-                                            <el-icon v-if="form.submitted && !form.email" class="input-invalid-mark"
-                                                size="large">
-                                                <WarnTriangleFilled />
-                                            </el-icon>
-                                        </div>
-                                        <p v-if="form.submitted && !form.email" class="mt-2 text-red-600 text-sm">
-                                            請輸入正確的Email
-                                        </p> -->
+
                                     </label>
                                 </div>
 

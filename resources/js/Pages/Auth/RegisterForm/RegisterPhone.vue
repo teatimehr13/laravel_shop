@@ -42,11 +42,7 @@
                                 </div>
                             </label>
 
-                            <!-- <p v-if="form.errors.phone || form.errors.verify_num" class="back-error">
-                                {{ form.errors.phone || form.errors.verify_num }}
-                            </p> -->
-
-                        </div>
+                           </div>
                     </el-form>
 
                     <button type="button" @click="nextStep"
@@ -122,12 +118,6 @@ const submit = () => {
 }
 
 const getSmsCode = async () => {
-    // if (!form.phone) {
-    //     send_sms_status.value = false;
-    //     send_sms_msg.value = '未填寫手機號碼';
-    //     return
-    // }
-
      const valid = await formValidate();
     if (!valid) return;
     return await axios.post(route('register.sendSmsCode'), { phone: form.phone })
@@ -135,11 +125,9 @@ const getSmsCode = async () => {
             if (res.data.success) {
                 send_sms_status.value = true;
                 send_sms_msg.value = `秒後可再次獲取驗證碼`;
-                // msg('驗證碼寄送成功', 'success');
                 let sms = res.data.sms;
                 msg(`您獲取得驗證碼為: ${sms}`, 'success');
                 startCountdown();
-                // alert(`您獲取得驗證碼為: ${sms}`)
             } else if (res.data.error) {
                 console.log(res.data.error);
                 send_sms_status.value = false;

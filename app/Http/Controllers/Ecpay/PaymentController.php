@@ -53,11 +53,6 @@ class PaymentController extends Controller
 
         $action = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5';
         $html = $autoSubmitFormService->generate($params, $action);
-        // if (str_starts_with($html, '<!DOCTYPE')) {
-        //     // 找 action
-        //     preg_match('/action="([^"]+)"/', $html, $m);
-        //     Log::info('Form action 用的 URL', ['action' => $m[1] ?? 'N/A']);
-        // }
         return response($html);
     }
 
@@ -93,34 +88,7 @@ class PaymentController extends Controller
             // 'transaction_id' => $data['TradeNo'],
         ]);
 
-        // return redirect()->route('order.show', ['order' => $data['MerchantTradeNo']]);
-
-        // $data = $req->all();
-        // if (!$checker->validate($data)) {     // 驗證失敗
-        //     logger()->warning('ECPay callback MAC invalid', $data);
-        //     return response('0|FAIL', 200);
-        // }
-
-        // //成功後開始進行資料表的處理
-        // $order = Order::where('order_no', $data['MerchantTradeNo'])->first();
-
-        // if ($order && $data['RtnCode'] == 1 && $order->amount == $data['TradeAmt']) {
-        //     $order->update([
-        //         'status' => 'PAID',
-        //         'paid_at' => now(),
-        //         'ecpay_trade_no' => $data['TradeNo'],
-        //     ]);
-
-        //     // //呼叫「自己後台」的 API 儲存 log
-        //     // Http::post(route('order.notify'), [
-        //     //     'order_id' => $order->id,
-        //     //     'event'    => 'payment_success',
-        //     //     'from'     => 'ecpay',
-        //     //     'data'     => $data,
-        //     // ]);
-        // }
-
-        return response('1|OK', 200);
+       return response('1|OK', 200);
     }
 
 
@@ -134,35 +102,9 @@ class PaymentController extends Controller
             ->orWhere('payment_token', $merchantTradeNo)
             ->firstOrFail();
 
-        // return redirect()->route('order.show', ['order' => $merchantTradeNo])->with('success', '付款完成！訂單已成立');
         return redirect()->route('order.show', ['order' => $order->order_number])->with('success', '付款完成！訂單已成立');
     }
 
-    //v5版本不需要
-    public function notifyUrl(Request $req)
-    {
-        Log::info('收到 NotifyURL 回傳', $req->all());
-
-        $factory = new Factory([
-            'hashKey'    => config('services.ecpay.hash_key'),
-            'hashIv'     => config('services.ecpay.hash_iv'),
-            'merchantId' => config('services.ecpay.merchant_id'),
-        ]);
-
-        $verified = $factory->create(VerifiedArrayResponse::class)->get($req->all());
-
-        $order = Order::where('order_number', $verified['MerchantTradeNo'])->first();
-
-        if ($order && $verified['RtnCode'] == '1') {
-            $order->update([
-                'order_status' => 2,
-                'payment_method' => $verified['PaymentType'],
-                'payment_order_number' => $verified['TradeNo'],
-            ]);
-        }
-
-        return response('1|OK');
-    }
 
     public function retry(Order $order)
     {

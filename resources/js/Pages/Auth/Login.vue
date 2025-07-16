@@ -58,17 +58,6 @@ const validateAccount = (rule, value, callback) => {
     } else {
         callback(new Error('請輸入正確的 Email 或手機號碼'));
     }
-
-    // const isEmail = /^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(value);
-    // const isPhoneLocal = /^09\d{8}$/.test(value);
-    // const isPhoneIntl = /^\+8869\d{8}$/.test(value);
-
-    // // ➜ 只要三種格式「全部都不符合」才報錯
-    // if (!isEmail && !isPhoneLocal && !isPhoneIntl) {
-    //     callback(new Error('請輸入正確的 Email 或手機號碼'));
-    // } else {
-    //     callback();
-    // }
 };
 
 

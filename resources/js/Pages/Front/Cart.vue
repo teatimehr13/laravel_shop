@@ -150,14 +150,10 @@ const props = defineProps({
         type: Array
     }
 })
-
-// console.log(props.cartItems.value);
-// console.log(props.endPrice);
 console.log(props.selectedItem);
 
 
 const isLoggedIn = computed(() => !!props.auth.user)
-// console.log(isLoggedIn);
 
 
 let cartItems = ref([...props.cartItems]);

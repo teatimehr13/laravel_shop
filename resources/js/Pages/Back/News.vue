@@ -9,32 +9,6 @@
                         <option value="1">公告</option>
                     </select>
                 </div>
-
-                <!-- <table>
-            <thead>
-                <tr>
-                    <th>標題</th>
-                    <th>日期</th>
-                    <th>內文</th>
-                    <th>圖片</th>
-                    <th>顯示</th>
-                    <th>類型</th>
-                    <th>營業時間</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="store in stores.data" :key="store.id">
-                    <td>{{ store.store_name }}</td>
-                    <td>
-                        <img :src=" store.image" alt="" style="max-width: 75px;">
-                    </td>
-                    <td>{{ store.store_type_name }}</td>
-                    <td>{{ store.address }}</td>
-                    <td>{{ store.contact_number }}</td>
-                    <td>{{ store.opening_hours }}</td>
-                </tr>
-            </tbody>
-        </table> -->
             </div>
         </template>
     </BackendLayout>

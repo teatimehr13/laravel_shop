@@ -26,18 +26,8 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import web from '@/web/web';
 import api from '@/api/api';
 
-// let productOptions = ref({
-//     '28': 1,
-//     '29': 1
-// });
-
-// let productOptions = ref({
-//     '28': {'quantity':5},
-//     '29': {'quantity':6}
-// });
 
 const updateCartTotal = (cartItems) => {
     const total = cartItems.value.reduce((sum,item) =>

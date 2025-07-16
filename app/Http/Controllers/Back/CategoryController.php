@@ -18,22 +18,12 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        //返回多個模型要用collection
-        // $categories = Category::with('subcategories')->orderBy('order_index', 'ASC')->get();
-        // // $categories = Category::category_asc()->get();
-        // // $categories = Category::orderBy('order_index', 'ASC')->get();
-        // return CategoryResource::collection($categories);
-
-        //只會返回一個模型
-        // return new CategoryResource($categories);
-
         $categories = $this->fetchData($request);
 
         // // 判斷是否為 API 請求
         if ($request->wantsJson()) {
             return response()->json($categories);
         }
-        // Log::info($categories);
 
         return Inertia::render('Back/Category', [
             'category' => $categories
@@ -85,8 +75,6 @@ class CategoryController extends Controller
     //因為有傳入Product實例會自動解析id，故更新無需傳id進來
     public function update($id, CategoryRequest $request)
     {
-        // Log::info($id);
-        // Log::info($request->validated());
         $category = Category::findOrFail($id);
         $category->update($request->validated());
         return new CategoryResource($category);
@@ -116,9 +104,6 @@ class CategoryController extends Controller
     private function fetchData(Request $request)
     {
         $name = $request->input('name');
-
-        // $query = Store::where('is_enabled', 1);
-        // $query = Category::whereIn('show_in_list', [0, 1]);
         $query = Category::with('subcategories') // 加入 Eager Loading
             ->whereIn('show_in_list', [0, 1])
             ->orderBy('order_index');

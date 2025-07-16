@@ -42,12 +42,6 @@ import { usePage, useForm, Link, router } from '@inertiajs/vue3'
 import RegisterLayout from './RegisterLayout.vue';
 const register = usePage().props.register || {};
 
-// const props = defineProps({
-//     form: Object,
-//     step: Number
-// })
-
-
 
 const form = useForm({
     name: register.name || '',

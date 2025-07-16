@@ -15,14 +15,7 @@ class MemberController extends Controller
 
     public function store(Request $request)
     {
-        // if ($request->password === $request->password_confirmation) {
-        //     $member = Member::create([
-        //         'email' => $request->email,
-        //         'password' => $request->password
-        //     ]);
-        // }
-
-        $errorMessage = MemberAuth::signUp(
+         $errorMessage = MemberAuth::signUp(
             $request->email,
             $request->password,
             $request->password_confirmation

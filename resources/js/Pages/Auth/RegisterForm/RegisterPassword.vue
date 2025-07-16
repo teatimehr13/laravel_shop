@@ -31,10 +31,6 @@
                                     </el-icon>
                                 </el-form-item>
                             </label>
-
-                            <!-- <p v-if="form.errors.password" class="back-error">
-                                {{ form.errors.password }}
-                            </p> -->
                         </div>
                     </el-form>
 

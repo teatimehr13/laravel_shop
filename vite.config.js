@@ -15,14 +15,17 @@ export default defineConfig({
         vue(), // 添加 Vue 插件
         AutoImport({
             resolvers: [ElementPlusResolver()],
-          }),
-          Components({
+        }),
+        Components({
             resolvers: [ElementPlusResolver()],
-          }),
+        }),
     ],
     resolve: {
         alias: {
             'vue': 'vue/dist/vue.esm-bundler.js' // 使用包含編譯器的 Vue 版本
         },
     },
+    esbuild: {
+        drop: ['console', 'debugger'],
+    }
 });

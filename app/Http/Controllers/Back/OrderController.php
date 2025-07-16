@@ -108,17 +108,11 @@ class OrderController extends Controller
     {
         $order = Order::findOrFail($id);
         $validated = $request->validate([
-            // 'order_status' => ['required', Rule::in(Order::statusKeys())],
             'order_status' => ['required', 'integer', Rule::in(array_keys(Order::statusKeys()))],
         ]);
 
         $order->order_status = $validated['order_status'];
         $order->save();
 
-        // return back()->with('success', '訂單狀態更新成功');
-
-        // return Inertia::render('Back/Orders/Show', [
-        //     'order' => $order,
-        // ]);
     }
 }

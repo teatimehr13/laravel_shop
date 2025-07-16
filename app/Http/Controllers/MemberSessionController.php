@@ -28,14 +28,6 @@ class MemberSessionController extends Controller
 
     public function store(Request $request)
     {
-        // $member = Member::where([
-        //     'email' => $request->email,
-        //     'password' => $request->password
-        // ])->first();
-
-        // if (!empty($member)) {
-        //     session(['memberId' => $member->id]);
-        // }
 
         //在app中新增Libraries資料夾及MemberAuth的檔案自訂funvtion MemberAuth
         MemberAuth::logIn(
@@ -44,9 +36,6 @@ class MemberSessionController extends Controller
         );
 
         return redirect(MemberAuth::HOME);
-        // return redirect('/');
-        // var_dump($member);
-        // return redirect()->route('members.session.create');
     }
 
     public function delete(Request $request)

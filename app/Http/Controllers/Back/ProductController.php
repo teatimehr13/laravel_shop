@@ -27,56 +27,6 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        // $products = Product::with([
-        //     'subcategory.category.subcategories' => function ($query) {
-        //         $query->orderBy('order_index', 'asc');
-        //     },
-        //     'product_options',
-        // ])->get();
-
-        // $categories = Category::where('show_in_list', 1)->get(['id', 'name']);
-
-        // $formattedProducts = $products->map(function ($product) use ($categories) {
-        //     $productArray = $product->toArray();
-        //     // Log::info($productArray);
-
-        //     // 提取產品選項的顏色
-        //     $productArray['color_codes'] = $product->product_options->pluck('color_name');
-        //     $productArray['subcategory'] = $product->subcategory
-        //         ? [
-        //             'id' => $product->subcategory->id,
-        //             'name' => $product->subcategory->name,
-        //         ]
-        //         : null;
-
-        //     // 如果有子類別，加入子類別的詳細資料
-        //     if ($product->subcategory && $product->subcategory->category) {
-        //         $productArray['subcategories'] = $product->subcategory->category->subcategories->map(function ($sub) {
-        //             return [
-        //                 'id' => $sub->id,
-        //                 'name' => $sub->name,
-        //                 // 'category' => $sub->category
-        //                 // 'order_index' => $sub->order_index,
-        //                 // 'show_in_list' => $sub->show_in_list,
-        //             ];
-        //         });
-        //     } else {
-        //         $productArray['subcategories'] = [];
-        //     }
-
-
-        //     unset($productArray['product_options']);
-        //     return $productArray;
-        // });
-
-        // return Inertia::render('Back/Product', [
-        //     'products' => $formattedProducts,
-        //     'categories' => $categories
-        // ]);
-        // $products
-        // $categories
-        // 'filters'
-
         ['products' => $products, 'categories' => $categories, 'filters' => $filters, 'subcategories' => $subcategories] = $this->fetchData($request);
 
         return Inertia::render('Back/Product', [
@@ -97,13 +47,8 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
-        // Log::info(22222);
-        // return;
         try {
             $validate_data = $request->validated();
-            // return;
-            // return response()->json($validate_data);
-
             $product = Product::create($validate_data);
 
             if ($request->hasFile('image')) {
@@ -115,13 +60,12 @@ class ProductController extends Controller
                     $name,
                     'public'
                 );
-                // $validate_data["image"] = $path;
+
                 $product->update([
                     'image' => $path
                 ]);
             }
 
-            // $product = Product::create($validate_data);
             return response()->json($product, 201); // 回傳成功創建的產品資料
         } catch (QueryException $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -133,15 +77,11 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-
-        // $product = Product::with(['product_options'])->find($id);
-        // Product::with(['subcategory:id,name', 'product_options'])->get();
         $product = Product::find($id);
         if (!$product) {
             return response()->json(['error' => 'Product not found'], 404);
         }
         return new ProductResource($product);
-        // return response()->json($this->updateProductOptions($product));
     }
 
     /**
@@ -166,9 +106,6 @@ class ProductController extends Controller
         try {
             $product = Product::find($id);
             $validated = $request->validated();
-
-            // Log::info($product);
-            // Log::info($validate_data);
 
             //收到delete_image為true時刪掉，為false時不刪 (例如有某照片誤傳，但又沒有適合的圖時)
             if ($request->has('delete_image') && $request->input('delete_image') == true) {
@@ -273,99 +210,6 @@ class ProductController extends Controller
         }
 
         return response()->json(null, 403);
-    }
-
-    private function updateProductOptions($product, $validate_data)
-    {
-        // Log::info($product);
-        //拿到該product所關聯的所有product_options的id
-        //將collection轉成php array
-        $productOptionsIdsShouldBeRemove = $product->product_options->map(function ($product_option) {
-            return $product_option->id;
-        })->toArray();
-        // return $productOptionsIds;
-        // Log::info($productOptionsIdsShouldBeRemove);
-
-        //$validate_data['product_options']會拿到 product_options[1][name]...等 
-        // Log::info($validate_data['product_options']);
-        if (isset($validate_data['product_options'])) {
-            $product_options_data = $validate_data['product_options'];
-            $new_product_options = [];
-            // Log::info('151', $product_options_data);
-
-            foreach ($product_options_data as $id => $product_option_data) {
-                $validator = Validator::make($product_option_data, [
-                    'name' => 'required|string|max:255',
-                    'price' => 'required|integer|min:0',
-                    'enable' => 'nullable',
-                    'image' => 'nullable|image',
-                    'description' => 'nullable|string',
-                    'published_status' => 'integer'
-                ]);
-
-
-                if (!$validator->fails()) {
-
-                    //驗證沒問題時先檢查圖片
-                    if (isset($product_option_data['image'])) {
-                        //隨機數字
-                        $name = mt_rand() . '_' . $product_option_data['image']->getClientOriginalName();
-
-                        //這個地方沒有用$request 所以使用Storage::disk()的寫法
-                        $path = '/storage/' . Storage::disk('public')->putFileAs(
-                            'product_options',
-                            $product_option_data['image'],
-                            $name
-                        );
-                        $product_option_data['image'] = $path;
-                    }
-
-                    //新的dom走if，原本存在的走else
-                    //product_options[new_1][name]
-                    if (strpos($id, 'new_') !== false) {
-                        // Log::info(123);
-                        // Log::info($product_option_data);
-                        //必需將$product_option_data實例化才能使用eloquent模型的功能
-                        array_push($new_product_options, new ProductOption($product_option_data));
-                    } else {
-                        // $currentProductOption = ProductOption::where(
-                        //     [
-                        //         ['id', $id],
-                        //         ['product_id', $product->id],
-                        //     ]
-                        // )->first();
-                        $currentProductOption = ProductOption::where('id', $id)->where('product_id', $product->id)->first();
-
-                        if ($currentProductOption) {
-                            //更新圖片
-                            if (isset($product_option_data['image'])) {
-                                Storage::disk('public')->delete(
-                                    '/storage/',
-                                    '',
-                                    $currentProductOption->image
-                                );
-                            }
-
-                            //更新現有的資料
-                            $currentProductOption->update($product_option_data);
-
-                            //拿到資料庫但沒有被更新的id = 在畫面上被X的id
-                            $productOptionsIdsShouldBeRemove = array_diff(
-                                $productOptionsIdsShouldBeRemove, //原本資料庫中的options id
-                                [$currentProductOption->id]  //dom節點拿到的 id (被更新的)
-                            );
-                        }
-                    }
-                }
-            }
-
-            //新增新的product_options
-            Log::info($new_product_options);
-            // Log::info($product->product_options()->saveMany($new_product_options));
-            // Log::info('123',$product->product_options()->saveMany($new_product_options));
-            $product->product_options()->saveMany($new_product_options);
-        }
-        DB::table('product_options')->whereIn('id', $productOptionsIdsShouldBeRemove)->delete();
     }
 
     private function fetchData(Request $request)
@@ -540,13 +384,11 @@ class ProductController extends Controller
     public function images($id, Request $request)
     {
         // 根據 productOptionId 獲取相應的產品選項數據
-        // $productImages = ProductOption::with('productImages')->where('product_id', $id)->get();
         $productImages = ProductOption::with(['productImages' => function ($query) {
             $query->orderBy('order', 'asc');
         }])->where('product_id', $id)->get();
 
         // 返回數據給前端
-        // return response()->json($productImages);
         return Inertia::render('Back/Product/Images', [
             'productImages' => $productImages,
             'productId' => $id
@@ -571,19 +413,6 @@ class ProductController extends Controller
             ]);
 
             $productId = $validated['product_id'];
-            // $validated = [
-            //     'product_options' => [
-            //         'po_id' => '',
-            //         'product_images' => [
-            //             'id' => '',
-            //             'alt_text' => '',
-            //             'is_combination' => ''
-            //         ]
-            //     ],
-            // ];
-            // Log::info($validated);
-
-            // return;
 
             foreach ($validated['product_options'] as $productOptionData) {
                 // 找到對應的 Product Option
@@ -641,13 +470,6 @@ class ProductController extends Controller
 
             ]);
 
-
-            // return Inertia::render('Back/Product/Images', [
-            //     'productImages' => ProductOption::with('productImages')->where('product_id', $productId)->get(),
-            //     'productId' => $productId,
-            // ]);
-
-            // return response()->noContent(); // 204 No Content
         } catch (QueryException $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -656,8 +478,6 @@ class ProductController extends Controller
      public function reorderProductImgs(Request $request)
     {
         $data = $request->input();
-        // Log::info($data);
-        // return;
 
         DB::transaction(function () use ($data) {
             // 將被影響的記錄的 `order_index` 設為臨時值

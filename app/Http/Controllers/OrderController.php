@@ -17,9 +17,6 @@ class OrderController extends Controller
      */
     public function index()
     {
-        // Order::all();
-        // return Inertia::render('Front/Order');
-
         return Inertia::render('Front/OrderList', $this->getOrderLists());
     }
 

@@ -30,12 +30,6 @@ class CheckoutController extends Controller
         $shippingFee = $this->calculateShippingFee($checkoutItems->sum('subtotal'));
         $checkoutTotal = $checkoutItems->sum('subtotal') + $shippingFee;
 
-        // 拿不到數量
-        // $productOptions = ProductOption::with('product')->whereIn('id', $selectedIds)->get();
-
-        // $total = $request->user()->getPurchaseCartOrCreate()->total;
-        // $checkoutInfo = 
-
         return Inertia::render('Front/Checkout', [
             'checkoutItems' => $checkoutItems,
             'user' => $user,
@@ -64,9 +58,6 @@ class CheckoutController extends Controller
             'selected_ids' => 'required|array',
             'selected_ids.*' => 'integer|exists:cart_items,product_option_id',
         ])['selected_ids'];
-
-        // Log::info($selectedIds);
-        // return;
 
         session()->put('checkout.selected_ids', $selectedIds);
         return redirect()->route('checkout.index');
@@ -111,44 +102,6 @@ class CheckoutController extends Controller
         return $this->createOrderByCart($request);
     }
 
-    //生成訂單
-    // private function createOrderByCart(Request $request)
-    // {
-    //     $order_data = $request->validate([
-    //         'address' => 'required|string',
-    //         'phone' => 'required|string',
-    //         'note' => 'nullable|string',
-    //         'name' => 'nullable|string',
-    //         // 'id' => 'required|integer'
-    //     ]);
-
-    //     Log::info($order_data);
-    //     return;
-    //     $user_status = $request->user();
-    //     // Log::info($user_status);
-    //     $cart = $user_status->getPurchaseCartOrCreate();
-    //     $amount = $this->getEndPrice($request);
-
-    //     $order = Order::create([
-    //         'amount' => $amount,
-    //         'address' => 'testing...address',
-    //         'user_id' => $user_status->id
-    //     ]);
-
-    //     //利用order找到order items去存儲資料
-    //     $order->orderItems()->saveMany($cart->cartItems->map(function ($cartItem) {
-    //         return new OrderItem([
-    //             'name' => $cartItem->productOption->name,
-    //             'price' => $cartItem->productOption->price,
-    //             'quantity' => $cartItem->quantity,
-    //             'product_option_id' => $cartItem->product_option_id
-    //         ]);
-    //     }));
-
-    //     //購物車變成訂單後，刪除
-    //     // $cart->cartItems()->delete();
-    // }
-
     private function createOrderByCart(Request $request)
     {
         $validated = $request->validate([
@@ -165,11 +118,6 @@ class CheckoutController extends Controller
         $checkoutItems = $this->getCheckoutItems($user, $validated['selected_ids']);
 
         $cart = $user->getPurchaseCartOrCreate();
-        // dd($cart->cartItems()->whereIn('product_option_id',$validated['selected_ids']));
-        //刪掉productOption 裡的id
-
-        // return dd($checkoutItems);
-
 
         // 總金額（商品總額 + 運費）
         $subtotal = $checkoutItems->sum('subtotal');
