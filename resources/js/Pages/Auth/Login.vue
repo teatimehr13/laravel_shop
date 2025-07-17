@@ -86,6 +86,11 @@ const submit = async () => {
     });
 };
 
+const loginWith3Party = ($path) => {
+    window.location.href = route($path)
+}
+
+
 
 </script>
 
@@ -151,21 +156,20 @@ const submit = async () => {
 
                             <div class="mb-2">
                                 <button
-                                    class="bg-transparent inline-flex h-9 w-full justify-center items-center rounded-md border border-gray-300 text-sm  font-bold bg-form-hover hover:border-neutral-400">
-
-                                    <span
-                                        class="inline-flex items-center gap-1.5 focus-within:outline-none focus-visible:outline-none">
-                                        <img alt="Google"
-                                            class="object-contain object-center leading-none shrink-0 size-5"
-                                            src="/storage/app/public/svg_icon/0df9a2ae114efbe63df9.svg">
-                                        使用google帳號登入
-                                    </span>
+                                    class="bg-transparent inline-flex h-9 w-full justify-center items-center rounded-md border border-gray-300 text-sm  font-bold bg-form-hover hover:border-neutral-400" @click="loginWith3Party('auth.google')">
+                                        <span
+                                            class="inline-flex items-center gap-1.5 focus-within:outline-none focus-visible:outline-none">
+                                            <img alt="Google"
+                                                class="object-contain object-center leading-none shrink-0 size-5"
+                                                src="/storage/app/public/svg_icon/0df9a2ae114efbe63df9.svg">
+                                            使用google帳號登入
+                                        </span>
                                 </button>
                             </div>
 
                             <div class="mb-2">
                                 <button
-                                    class="bg-transparent inline-flex h-9 w-full justify-center items-center rounded-md border border-gray-300 text-sm  font-bold bg-form-hover hover:border-neutral-400">
+                                    class="bg-transparent inline-flex h-9 w-full justify-center items-center rounded-md border border-gray-300 text-sm  font-bold bg-form-hover hover:border-neutral-400" @click="loginWith3Party('auth.facebook')">
                                     <span
                                         class="inline-flex items-center gap-1.5 focus-within:outline-none focus-visible:outline-none">
                                         <img alt="Google"

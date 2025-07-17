@@ -165,10 +165,10 @@ use Laravel\Socialite\Facades\Socialite;
 // Route::post('/login', [AuthController::class, 'login']);
 // Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle']);
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
-Route::get('/auth/facebook', [FaceBookController::class, 'redirectToFacebook']);
+Route::get('/auth/facebook', [FaceBookController::class, 'redirectToFacebook'])->name('auth.facebook');
 Route::get('/auth/facebook/callback', [FaceBookController::class, 'handleFacebookCallback']);
 
 
