@@ -1,1 +1,0 @@
-import{z as e}from"./app-rUP0WFHc.js";const a=e.create({baseURL:"http://127.0.0.1:8000/api",headers:{"X-Requested-With":"XMLHttpRequest","X-CSRF-TOKEN":document.querySelector("meta[name='csrf-token']").content},withCredentials:!0});export{a};
