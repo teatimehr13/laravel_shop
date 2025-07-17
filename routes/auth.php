@@ -30,7 +30,7 @@ Route::middleware('guest')->group(function () {
     // Route::get('/login', function () {
     //     return Inertia::render('Auth/Login');
     // })->name('login');
-    
+
     Route::get('/login', function (LaravelRequest $request) {
         return Inertia::render('Auth/Login', [
             'redirect' => $request->query('redirect') ?? 'categories',
@@ -38,7 +38,7 @@ Route::middleware('guest')->group(function () {
     })->name('login');
 
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
@@ -53,6 +53,8 @@ Route::middleware('guest')->group(function () {
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
 });
+
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
 Route::middleware(['register.step', 'guest'])->group(function () {
