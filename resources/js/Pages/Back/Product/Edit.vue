@@ -323,6 +323,7 @@ const onSubmitEdit = async () => {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
+            validateStatus: status => status < 400
         });
 
         // console.log('stores.data', stores.data);
@@ -349,7 +350,12 @@ const onSubmitEdit = async () => {
 
     } catch (error) {
         console.error('提交失败:', error);
-        showMessage("error", "保存失敗");
+        if (error.response && error.response.status === 403) {
+            const msg = error.response.data?.message || "保存失敗";
+            showMessage("warning", msg);
+            return;
+        }
+        // showMessage("error", "保存失敗");
     }
 };
 

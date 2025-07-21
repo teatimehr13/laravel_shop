@@ -29,9 +29,9 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="title" label="產品title"  />
+                    <el-table-column prop="title" label="產品title" />
 
-                    <el-table-column label="圖片" >
+                    <el-table-column label="圖片">
                         <template #default="scope">
                             <img v-if="scope.row.image" :src="scope.row.image" alt="店面圖片"
                                 style="max-width: 75px; border-radius: 4px" />
@@ -46,7 +46,7 @@
                         </template>
                     </el-table-column>
 
-                    <el-table-column prop="color_codes" label="顏色" >
+                    <el-table-column prop="color_codes" label="顏色">
                         <template #default="scope">
                             <span v-for="(color_name, index) in scope.row.color_codes" :key="index">
                                 {{ color_name }}<span v-if="index < scope.row.color_codes.length - 1">、 </span>
@@ -82,7 +82,8 @@
                             </Link>
 
                             <el-popconfirm title="確定移除此筆資料?" @confirm="onSubmitDel(scope.row.id)" :width="170"
-                                :hide-after="100" v-model:visible="popconfirmVisible[scope.row.id]" placement="left-end">
+                                :hide-after="100" v-model:visible="popconfirmVisible[scope.row.id]"
+                                placement="left-end">
                                 <template #reference>
                                     <el-button size="small" type="danger">移除</el-button>
                                 </template>
@@ -381,13 +382,14 @@ const onSubmitEdit = async (id) => {
 const onSubmitAdd = async () => {
     try {
         console.log(12222222);
-        
+
         await formValidated("add");
         await formBeforSubmit();
         const response = await axios.post('/back/products', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
+            validateStatus: status => status < 400
         });
 
         // console.log('stores.data', stores.data);
@@ -395,19 +397,23 @@ const onSubmitAdd = async () => {
 
         // 從後端獲取更新後的數據
         const updatedProduct = response.data;
+
         if (updatedProduct) {
             dialogFormToggle.value = !dialogFormToggle.value;
             products.value.push(updatedProduct);
             showMessage("success", "新增成功");
-            return
         }
-
-        //上傳失敗提示
-        showMessage("error", "新增失敗");
+        // return
 
     } catch (error) {
-        console.error('提交失败:', error);
-        showMessage("error", "保存失敗");
+        if (error.response && error.response.status === 403) {
+            const msg = error.response.data?.message || "保存失敗";
+            showMessage("warning", msg);
+            return;
+        }
+
+        // console.error('提交失败:', error);
+        // showMessage("error", "保存失敗");
     }
 }
 
@@ -423,6 +429,7 @@ const onSubmitDel = async (id) => {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
+            validateStatus: status => status < 400
         });
 
         // console.log('stores.data', stores.data);
@@ -441,6 +448,11 @@ const onSubmitDel = async (id) => {
 
     } catch (error) {
         console.error('提交失败:', error);
+        if (error.response && error.response.status === 403) {
+            const msg = error.response.data?.message || "移除失敗";
+            showMessage("warning", msg);
+            return
+        }
     }
 }
 
@@ -549,6 +561,7 @@ const updateCo = async (product_option_id) => {
                 'Content-Type': 'multipart/form-data',
                 // '_method': 'patch'
             },
+            validateStatus: status => status < 400
         });
 
         // console.log(response.data);
@@ -569,6 +582,11 @@ const updateCo = async (product_option_id) => {
         }
 
     } catch (error) {
+        if (error.response && error.response.status === 403) {
+            const msg = error.response.data?.message || "保存失敗";
+            showMessage("warning", msg);
+            return;
+        }
         console.error('提交失败:', error);
         showMessage("error", "保存失敗");
     }
@@ -605,7 +623,7 @@ const toggleAdd = async () => {
     // console.log(newCoRowData.value);
     // console.log(fileListAdd_co.value);
     // console.log(productId.value);
-    
+
     await newCoFormRef.value.colorAddFormValidate();
     await colorAddFormBeforSubmit();
     await addCo();
@@ -653,6 +671,7 @@ const addCo = async () => {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
+            validateStatus: status => status < 400
         });
 
         console.log(response.data);
@@ -676,6 +695,13 @@ const addCo = async () => {
             showMessage("error", error.response.data['message']);
             return
         }
+
+        if (error.response && error.response.status === 403) {
+            const msg = error.response.data?.message || "新增失敗";
+            showMessage("warning", msg);
+            return;
+        }
+
         console.error('提交失败:', error);
         showMessage("error", "新增失敗");
         // console.log(error.response.data['message']);
@@ -696,7 +722,13 @@ const delCo = async (id) => {
             return
         }
 
-    } catch {
+    } catch(error) {
+        if (error.response && error.response.status === 403) {
+            const msg = error.response.data?.message || "刪除失敗";
+            showMessage("warning", msg);
+            return;
+        }
+
         showMessage('error', '刪除失敗');
     }
 }

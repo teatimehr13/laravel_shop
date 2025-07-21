@@ -392,9 +392,9 @@ const open3 = () => {
     })
 }
 
-const open4 = () => {
+const open4 = (msg = '操作失敗') => {
     ElNotification({
-        title: '操作失敗',
+        title: msg,
         type: 'error',
         position: 'bottom-left',
     })
@@ -485,6 +485,7 @@ const onSubmitEdit = async () => {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
+            validateStatus: status => status < 400
         });
 
         // console.log('stores.data', stores.data);
@@ -513,7 +514,12 @@ const onSubmitEdit = async () => {
         open4();
 
     } catch (error) {
-        console.error('提交失败:', error);
+        if (error.response && error.response.status === 403) {
+            const msg = error.response.data?.message || "提交失敗";
+            showMessage("warning", msg);
+            return;
+        }
+        console.error('提交失敗:', error);
     }
 };
 
@@ -526,6 +532,7 @@ const onSubmitAdd = async () => {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
+            validateStatus: status => status < 400
         });
 
         // console.log('stores.data', stores.data);
@@ -543,7 +550,13 @@ const onSubmitAdd = async () => {
         open4();
 
     } catch (error) {
-        console.error('提交失败:', error);
+        if (error.response && error.response.status === 403) {
+            const msg = error.response.data?.message || "提交失敗";
+            showMessage("warning", msg);
+            return;
+        }
+
+        console.error('提交失敗:', error);
         open4();
     }
 }
@@ -578,7 +591,12 @@ const onSubmitDel = async (id) => {
         open4();
 
     } catch (error) {
-        console.error('提交失败:', error);
+        if (error.response && error.response.status === 403) {
+            const msg = error.response.data?.message || "提交失敗";
+            showMessage("warning", msg);
+            return;
+        }
+        console.error('提交失敗:', error);
     }
 }
 
@@ -613,6 +631,16 @@ watch(
     },
     { deep: true } // 深度監聽，確保監聽對象的嵌套值變化
 );
+
+
+//通知
+const showMessage = (type, title) => {
+    ElNotification({
+        type, // "success" 或 "error"
+        title,
+        position: 'bottom-left',
+    });
+};
 
 </script>
 
@@ -683,7 +711,7 @@ watch(
     --el-table-tr-bg-color: var(--el-table-row-hover-bg-color);
 }
 
-::v-deep(.el-form-item__content .el-dialog){
+::v-deep(.el-form-item__content .el-dialog) {
     width: max-content;
 }
 </style>
