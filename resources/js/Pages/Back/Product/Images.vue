@@ -219,7 +219,7 @@ const getUpdatedProductOptions = () => {
 
 
 //上傳試測
-const submitData = () => {
+const submitData = async () => {
     const formData = new FormData();
     // console.log(product_options);
     // console.log(props.productId);
@@ -229,10 +229,6 @@ const submitData = () => {
     console.log(updatedOptions);
 
     let product_id = props.productId;
-    // console.log(product_id);
-
-    // return
-    // return
 
     updatedOptions.forEach((option, optionIndex) => {
         formData.append(`product_options[${optionIndex}][po_id]`, option.po_id);
@@ -253,7 +249,6 @@ const submitData = () => {
         console.log(`${key}:`, value);
     }
 
-    // return
 
     //檢查formData有沒有東西，沒有的話不上傳
     if (formData.entries().next().done) {
@@ -263,10 +258,12 @@ const submitData = () => {
     formData.append("product_id", product_id);
     // loading_status.value = true;
 
-    // ajax 的方法
-    axios.post("/back/products/updateProductImages", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-    }).then(response => {
+    try {
+        // ajax 的方法
+        const response = await axios.post("/back/products/updateProductImages", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+            validateStatus: status => status < 400
+        })
         console.log(response.data);
         // Object.assign(productImages.value, response.data.updated_product_options || []);
         productImages.value = response.data.updated_product_options || [];
@@ -275,23 +272,13 @@ const submitData = () => {
             showMessage('success', '更新成功');
         }
         // loading_status.value = false;
-    });
-
-
-    // router.post(`/back/products/updateProductImages`, formData, {
-    //     preserveScroll: true, // 保持捲動位置
-    //     preserveState: true,  // 不重新 reload 畫面，保留當前頁面資料
-    //     replace: true,        // 不新增一條新的歷史紀錄
-    //     onSuccess: () => {
-    //         router.visit(`/back/products/${product_id}/images`, {
-    //             preserveScroll: true
-    //         });
-    //         showMessage('success', '更新成功')
-    //     },
-    //     onError: (errors) => {
-    //         console.log('新失敗', errors)
-    //     }
-    // });
+    } catch (error) {
+        if (error.response && error.response.status === 403) {
+            const msg = error.response.data?.message || "操作失敗";
+            showMessage("warning", msg);
+            return;
+        }
+    }
 
 }
 
@@ -320,7 +307,7 @@ const onDragEnd = (evt, data) => {
 
 const reorder = async (affectedRows) => {
     console.log(123123);
-    
+
     try {
         const response = await axios.post('/back/products/reorderProductImgs', affectedRows, {
         });
@@ -402,7 +389,6 @@ function goBack() {
 </script>
 
 <style scoped>
-
 .images-outside {
     border-bottom: 1px solid #ededed;
     padding-bottom: 5px;

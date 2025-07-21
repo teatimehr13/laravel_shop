@@ -16,7 +16,7 @@
                 <VueDraggable v-model="categories.data" target="tbody" @end="(evt) => onDragEnd(evt, TypeEnum.CATEGORY)"
                     :animation="150" ghostClass="ghost" :disabled="!isCgDraggable">
                     <el-form :model="tempCgRow" :rules="rules" ref="cgFormRef">
-                        <el-table :data="categories.data" style="width: 100%;"  border>
+                        <el-table :data="categories.data" style="width: 100%;" border>
 
                             <el-table-column width="220" :fixed="isFixedStore ? 'left' : false" prop="name">
                                 <!-- <template #header>
@@ -312,8 +312,65 @@ const props = defineProps({
 console.log(props.category);
 
 const categories = reactive({ ...props.category })
+
+
+// 初始化加載
+// onMounted(() => {
+//     loadMore();
+// })
+
+// 初始數據
+// const categories = reactive({
+//     data: [],
+//     current_page: 1,
+//     last_page: null,
+// });
+
+const loading = ref(false);
+const noMoreData = ref(false);
 const isFixed = ref(false); // 默認不固定
 const isFixedStore = ref(false); // 默認不固定
+
+// 加載更多數據
+// const loadMore = debounce(async () => {
+//     if (loading.value || noMoreData.value) return;
+//     loading.value = true;
+
+//     try {
+//         const response = await axios.get("/back/categories", {
+//             params: {
+//                 page: categories.current_page,
+//                 // store_type: storeType.value || null,
+//                 // search_key: addressFilter.value || null,
+//             },
+//         });
+
+//         console.log(response.data);
+
+//         const newData = response.data.data; // 新數據 
+//         const lastPage = response.data.last_page; // 總頁數 ex:11
+
+//         // 如果有數據，追加到 stores.data
+//         if (newData.length > 0) {
+//             categories.data.push(...newData);
+//             categories.current_page += 1; // 頁碼 +1
+//             categories.last_page = lastPage;
+
+//             // 如果當前頁碼超過最後一頁，標記沒有更多數據
+//             if (categories.current_page > categories.last_page) {
+//                 noMoreData.value = true;
+//             }
+//         } else {
+//             noMoreData.value = true;
+//         }
+
+//     } catch (error) {
+//         console.error("Error loading more data:", error);
+//     } finally {
+//         loading.value = false;
+//     }
+// }, 300);
+
 
 const TypeEnum = {
     CATEGORY: "cat",
@@ -352,7 +409,7 @@ const toggleDraggable = (type) => {
 const onDragEnd = (evt, type) => {
     let data = type === TypeEnum.SUBCATEGORY ? subcategory.value : categories.data;
     console.log(data);
-    
+
 
     const startIndex = evt.oldIndex;
     const endIndex = evt.newIndex;
@@ -471,7 +528,9 @@ const saveRow = async (tempRow, originalRow, type) => {
                 let category_id = tempRow.id;
 
                 console.log(formData);
-                const response = await axios.patch(`/back/categories/${category_id}`, formData);
+                const response = await axios.patch(`/back/categories/${category_id}`, formData, {
+                    validateStatus: status => status < 400
+                });
 
                 if (response.data) {
                     Object.assign(originalRow, tempRow); // 更新原始數據
@@ -484,6 +543,12 @@ const saveRow = async (tempRow, originalRow, type) => {
                 }
 
             } catch (error) {
+                if (error.response && error.response.status === 403) {
+                    const msg = error.response.data?.message || "保存失敗";
+                    showMessage("warning", msg);
+                    return;
+                }
+
                 console.error("保存失敗", error);
                 showMessage("error", "保存失敗");
             }
@@ -510,7 +575,10 @@ const saveRow = async (tempRow, originalRow, type) => {
                     order_index: tempRow.order_index
                 }
 
-                const response = await axios.post(`/back/subcategories/${subcategory_id}/update_sub`, formData);
+                const response = await axios.post(`/back/subcategories/${subcategory_id}/update_sub`, formData, {
+                    validateStatus: status => status < 400
+                });
+
                 if (response.data) {
                     Object.assign(originalRow, tempRow); // 更新原始數據
                     editingRow.value = null; // 退出編輯模式
@@ -522,6 +590,11 @@ const saveRow = async (tempRow, originalRow, type) => {
                 }
 
             } catch (error) {
+                if (error.response && error.response.status === 403) {
+                    const msg = error.response.data?.message || "保存失敗";
+                    showMessage("warning", msg);
+                    return;
+                }
                 console.error("保存失敗", error);
                 showMessage("error", "保存失敗");
             }
@@ -545,6 +618,12 @@ const deleteItem = async (id, type) => {
             showMessage("error", "刪除失敗");
         }
     } catch (error) {
+        if (error.response && error.response.status === 403) {
+            const msg = error.response.data?.message || "刪除失敗";
+            showMessage("warning", msg);
+            return;
+        }
+
         console.error("刪除失敗", error);
         showMessage("error", "刪除失敗");
     }
@@ -654,7 +733,9 @@ const insertNewItem = async (type) => {
         await formValidate(formRef);
 
         // 發送 POST 請求
-        const response = await axios.post(url, formData);
+        const response = await axios.post(url, formData, {
+            validateStatus: status => status < 400
+        });
 
         // 檢查返回數據
         const responseData = isCategory ? response.data : response.data.data;
@@ -674,6 +755,11 @@ const insertNewItem = async (type) => {
             showMessage("error", "新增失敗");
         }
     } catch (error) {
+        if (error.response && error.response.status === 403) {
+            const msg = error.response.data?.message || "新增失敗";
+            showMessage("warning", msg);
+            return;
+        }
         console.error("新增失敗", error);
         showMessage("error", "新增失敗");
     }

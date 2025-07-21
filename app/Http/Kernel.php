@@ -70,6 +70,7 @@ class Kernel extends HttpKernel
 
     protected $routeMiddleware = [
         'register.step' => \App\Http\Middleware\EnsureRegisterStepIsComplete::class,
+        'prevent.visitor' => \App\Http\Middleware\PreventVisitorsWrite::class,
     ];
 
     // protected $except = [
