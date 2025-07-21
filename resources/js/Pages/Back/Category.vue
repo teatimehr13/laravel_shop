@@ -313,64 +313,10 @@ console.log(props.category);
 
 const categories = reactive({ ...props.category })
 
-
-// 初始化加載
-// onMounted(() => {
-//     loadMore();
-// })
-
-// 初始數據
-// const categories = reactive({
-//     data: [],
-//     current_page: 1,
-//     last_page: null,
-// });
-
 const loading = ref(false);
 const noMoreData = ref(false);
 const isFixed = ref(false); // 默認不固定
 const isFixedStore = ref(false); // 默認不固定
-
-// 加載更多數據
-// const loadMore = debounce(async () => {
-//     if (loading.value || noMoreData.value) return;
-//     loading.value = true;
-
-//     try {
-//         const response = await axios.get("/back/categories", {
-//             params: {
-//                 page: categories.current_page,
-//                 // store_type: storeType.value || null,
-//                 // search_key: addressFilter.value || null,
-//             },
-//         });
-
-//         console.log(response.data);
-
-//         const newData = response.data.data; // 新數據 
-//         const lastPage = response.data.last_page; // 總頁數 ex:11
-
-//         // 如果有數據，追加到 stores.data
-//         if (newData.length > 0) {
-//             categories.data.push(...newData);
-//             categories.current_page += 1; // 頁碼 +1
-//             categories.last_page = lastPage;
-
-//             // 如果當前頁碼超過最後一頁，標記沒有更多數據
-//             if (categories.current_page > categories.last_page) {
-//                 noMoreData.value = true;
-//             }
-//         } else {
-//             noMoreData.value = true;
-//         }
-
-//     } catch (error) {
-//         console.error("Error loading more data:", error);
-//     } finally {
-//         loading.value = false;
-//     }
-// }, 300);
-
 
 const TypeEnum = {
     CATEGORY: "cat",
