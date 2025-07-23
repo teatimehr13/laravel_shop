@@ -18,6 +18,7 @@ return [
     'confirmed' => '欄位錯誤',
     'required' => '欄位錯誤',
     'email' => '欄位錯誤',
+    'email.unique' => '此帳號已被註冊',
     'min' => [
         'string' => '欄位錯誤',
     ],

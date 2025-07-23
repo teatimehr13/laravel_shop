@@ -1,5 +1,5 @@
 <template>
-      <RegisterLayout>
+    <RegisterLayout>
         <template #form>
             <div class="border-card border divide-y rounded-md">
                 <div class="px-6 py-3">
@@ -15,7 +15,7 @@
                                     <el-input v-model="form.name" placeholder="請輸入姓名" type="text" />
                                 </el-form-item>
                             </label>
-        
+
                             <label class="block">
                                 <el-form-item label="" prop="email" class="relative w-full">
                                     <el-input v-model="form.email" placeholder="請輸入email" type="email" />
@@ -23,7 +23,7 @@
                             </label>
                         </div>
                     </el-form>
-        
+
                     <div>
                         <button @click="nextStep"
                             class="text-white bg-indigo-400 inline-flex h-8 w-full justify-center items-center rounded-md border border-indigo-300 text-sm font-bold  hover:bg-indigo-500 hover:border-indigo-500">
@@ -61,9 +61,32 @@ const nextStep = async () => {
 }
 
 const submit = () => {
-  form.post(route('register.post.info'), {
-    onSuccess: () => router.visit(route('register.success'))
-  })
+    // form.post(route('register.post.info'), {
+    //     onSuccess: () => router.visit(route('register.success')),
+
+    //     // 422 驗證錯誤，errors 物件就是後端回來的錯誤欄位
+    //     onError: (errors) => {
+    //         console.log(errors.email);
+            
+    //         if (errors.email) {
+    //             showMessage('error', errors.email);
+    //         } else {
+    //             showMessage('error', '資料有誤，請再檢查一次');
+    //         }
+    //     },
+
+    //     // 無論成功或失敗都會呼叫
+    //     onFinish: (visit) => {
+    //         // Inertia v1 會把 visit 物件帶進來（router.post 才有）
+    //         const status = visit?.response?.status;
+    //         if (status === 403) {
+    //             const msg = visit.response?.data?.message ?? '此帳號無法操作';
+    //             showMessage('warning', msg);
+    //         }
+    //     },
+    // })
+
+    showMessage('warning', '尚無開放帳號註冊');
 }
 
 
@@ -95,6 +118,14 @@ const formValidate = async () => {
     }
 }
 
+//通知
+const showMessage = (type, title) => {
+    ElNotification({
+        type, // "success" 或 "error"
+        title,
+        position: 'bottom-left',
+    });
+};
 
 </script>
 

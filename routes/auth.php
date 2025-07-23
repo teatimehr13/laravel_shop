@@ -66,7 +66,7 @@ Route::middleware(['register.step', 'guest'])->group(function () {
     Route::post('/register/password', [RegisterController::class, 'passwordStep'])->name('register.post.password');
 
     Route::get('/register/info', fn() => Inertia::render('Auth/RegisterForm/RegisterInfo'))->name('register.info');
-    Route::post('/register/info', [RegisterController::class, 'infoStep'])->name('register.post.info');
+    Route::post('/register/info', [RegisterController::class, 'infoStep'])->middleware('prevent.visitor')->name('register.post.info');
 
     // Route::get('/register/success', fn() => Inertia::render('Auth/RegisterForm/RegisterSuccess'))->name('register.success');
     Route::get('/register/success', [RegisterController::class, 'showSuccess'])->name('register.success');
