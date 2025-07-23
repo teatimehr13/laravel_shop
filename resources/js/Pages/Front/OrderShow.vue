@@ -123,7 +123,7 @@
         <span>
             {{ state.order.payment_method_label + `支付繳費期限：` }}
             <span class="text-base">
-                {{ expireAt }}
+                {{ expireTime }}
             </span>
             <p class="text-red-500 text-sm">
                 (若超過繳費期費，仍未付款，訂單將自動取消)
@@ -147,6 +147,7 @@ import ReturnForm from './Component/ReturnForm.vue';
 import ReturnHistory from './Component/ReturnHistory.vue';
 import CancelForm from './Component/CancelForm.vue';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc'
 import { Memo, Money, Van, Checked } from '@element-plus/icons-vue';
 import { computed, ref, reactive, onMounted, watch, watchEffect } from 'vue';
 import axios from 'axios';
@@ -169,6 +170,7 @@ const props = defineProps({
 console.log(props.order);
 console.log(props.total_qty);
 console.log(props.return_reasons);
+
 
 const state = reactive({
     order: props.order,
@@ -310,11 +312,21 @@ const loading = ref(true);
 const paidDialogVisible = ref(false)
 console.log(state.order.created_at);
 
-const expireAt = dayjs(state.order.created_at.replace('Z', ''))
-    .add(4, 'hour')
-    .format('YYYY-MM-DD HH:mm:ss')
-
+// const expireAt = dayjs(state.order.created_at.replace('Z', ''))
+//     .add(4, 'hour')
+//     .format('YYYY-MM-DD HH:mm:ss')
+dayjs.extend(utc)
+// const now = dayjs();
+const expireAt = dayjs.utc(state.order.created_at).add(4, 'hour').local();
 const isExpired = dayjs().isAfter(expireAt);
+// console.log(now);
+console.log(expireAt);
+
+const expireTime = computed(() => {
+    return expireAt.format('YYYY-MM-DD HH:mm:ss');
+})
+
+
 
 const orderCanceled = () => {
     state.order.order_status = 6;
