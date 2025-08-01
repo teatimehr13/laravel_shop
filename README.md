@@ -43,8 +43,8 @@ https://dbdiagram.io/d/6889dd7ecca18e685c6a9cf9
 
 #### 1. **User 使用者**
 
-* `hasOne(Cart)`：一個用戶對應一個購物車
-* `hasMany(Order)`：一個用戶可能有多筆訂單
+* `hasOne(Cart)`
+* `hasMany(Order)`
 
 #### 2. **Cart 購物車**
 
