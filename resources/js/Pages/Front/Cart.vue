@@ -22,7 +22,7 @@
     <div class="page-container cart-container-basic">
         <div v-if="cartItems.length" class="grid grid-cols-1 md:grid-cols-3 gap-6 col-span-12">
             <!-- 左側：商品列表 -->
-            <div class="md:col-span-2 space-y-4">
+            <div class="md:col-span-2 space-y-4 mb-16 md:mb-4">
                 <div class="cart-con-layout">
                     <div style="grid-column: span 1; margin: auto;">
                         <el-checkbox :model-value="selectedIds.length === cartItems.length"
@@ -40,7 +40,7 @@
                     <div class="cart-img">
                         <img :src="item.productOption.image" class="w-24 h-24 object-cover rounded" />
                     </div>
-                    <div class="cart-info py-2 flex-1">
+                    <div class="cart-info ml-2 py-2 flex-1">
                         <div class="cart-info-con flex justify-between items-start">
                             <div>
                                 <!-- 商品標題 -->
@@ -49,7 +49,7 @@
                                 <!-- 顏色 -->
                                 <div class="text-base text-sm md:text-base text-gray-500">{{
                                     item.productOption.color_name
-                                }}</div>
+                                    }}</div>
                             </div>
                             <el-popconfirm title="確認要刪除這個商品嗎？" @confirm="deleteCartItem(item)" :width="200"
                                 :hide-after="100" v-model:visible="popconfirmVisible[item.productOption.id]">
@@ -67,14 +67,16 @@
                             </el-popconfirm>
                         </div>
 
-                        <div class="cart-info-bottom mt-2 flex justify-between items-end">
+                        <div class="cart-info-bottom mt-2 flex justify-between items-end flex-wrap">
                             <!-- 結帳小計 -->
-                            <div class="cart-price font-bold text-lg md:text-xl text-gray-800">
+                            <div class="cart-price font-bold text-lg md:text-xl text-gray-800 whitespace-nowrap">
                                 {{ toCurrency(parseInt(item.productOption.price) * parseInt(item.quantity)) }}
                             </div>
-                            <div class="cart-quantity">
-                                <el-input-number v-model="item.quantity" :min="1" :max="20"
-                                    @change="updateCartItem(item)" />
+                            <div class="cart-quantity w-full sm:w-auto sm:flex-none sm:mt-0 mt-1 flex justify-end">
+                                <div class="el-input-number w-[7.5rem] md:w-[8.5rem]">
+                                    <el-input-number v-model="item.quantity" :min="1" :max="20"
+                                        @change="updateCartItem(item)" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -146,7 +148,7 @@ const props = defineProps({
     auth: {
         type: Object
     },
-    selectedItem:{
+    selectedItem: {
         type: Array
     }
 })
@@ -227,7 +229,7 @@ function toCurrency(num) {
 }
 
 const selectedIds = ref([])
-if(props.selectedItem.length){
+if (props.selectedItem.length) {
     // selectedIds.value[0] = props.selectedItem[0]
     selectedIds.value = [...props.selectedItem]
 }
