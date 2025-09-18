@@ -2,6 +2,11 @@
 
 本作品為簡易電商系統，採 **Laravel 10 + Inertia.js + Vue 3** 開發，前後台獨立界面，整合金流、驗證、圖片管理等功能。
 
+網址: https://itsmehenry.com/categories
+
+後台: https://itsmehenry.com/back/stores  <br>
+(帳號: demo123@gmail.com; 密碼:demo123)
+
 ---
 
 #### 前台功能（Tailwind CSS + RWD）：
